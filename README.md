@@ -6,6 +6,7 @@ It is not production software and no plugin runs yet. Prichal's managed hosting 
 
 ## What is here
 
+- [docs/roadmap.md](docs/roadmap.md): milestones, issues and the order of work.
 - [docs/spec/hook-points.md](docs/spec/hook-points.md): draft 0 of the hook-point spec, with levels, hooks, a capability vocabulary and open questions.
 - `service/pirs/bridge.ts`: the code that attaches to the PDS. Today it adds `GET /_pirs/status` and counts events from the PDS's sequencer.
 - `service/pirs/smoke.ts`: boots a throwaway PDS with the bridge and checks that a sequenced event reaches it.
