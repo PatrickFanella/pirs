@@ -6,6 +6,9 @@
   "description": "Service entrypoint for atproto personal data server",
   "packageManager": "pnpm@10.34.1",
   "main": "index.ts",
+  "scripts": {
+    "smoke": "node pirs/smoke.ts"
+  },
   "license": "MIT",
   "dependencies": {
     "@atproto/lex": "^0.3.13",

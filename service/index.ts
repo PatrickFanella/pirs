@@ -2,13 +2,16 @@ import type { AtIdentifierString } from '@atproto/lex'
 import { PDS, httpLogger, readEnv } from '@atproto/pds'
 import pkg from '@atproto/pds/package.json' with { type: 'json' }
 import type { Request, Response } from 'express'
+import { attachEvents, attachRoutes } from './pirs/bridge.ts'
 
 // matches docker tag used in compose file, may deviate from @atproto/pds version.
 const DISTRO_VER = '0.4'
 
 void PDS.run({
   env: getEnv(),
+  onStarted: (pds) => attachEvents(pds),
   onCreated: (pds) => {
+    attachRoutes(pds)
     pds.app.get('/tls-check', async (req, res) => {
       try {
         const { domain } = req.query
