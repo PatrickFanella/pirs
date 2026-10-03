@@ -44,7 +44,7 @@ docker run --rm --network none --entrypoint node "$PIRS_IMAGE" --input-type=modu
 '
 
 cat > "$PIRS_ENV_FILE" <<EOF
-PDS_HOSTNAME=localhost
+PDS_HOSTNAME=pirs-container.invalid
 PDS_DATA_DIRECTORY=/data
 PDS_BLOBSTORE_DISK_LOCATION=/data/blocks
 PDS_JWT_SECRET=$(openssl rand -hex 32)
@@ -67,6 +67,10 @@ docker inspect --format '{{json .Mounts}}' "$container" |
 base="http://127.0.0.1:$PIRS_CONTAINER_PORT"
 ready=false
 for ((attempt = 0; attempt < 60; attempt++)); do
+  if [[ $(docker inspect --format '{{.State.Running}}' "$container") != true ]]; then
+    printf 'PDS container exited before becoming healthy\n' >&2
+    exit 1
+  fi
   if curl --silent --fail --max-time 2 "$base/xrpc/_health" > "$state/health.json"; then
     ready=true
     break
