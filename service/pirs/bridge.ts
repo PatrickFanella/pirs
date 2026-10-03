@@ -37,8 +37,7 @@ export function attachRoutes(pds: PDS) {
 export function attachEvents(pds: PDS) {
   pds.ctx.sequencer.on('events', (evts) => {
     for (const evt of evts) {
-      counts[evt.type] += 1
-      lastSeq = evt.seq
+      // Deliberate listener failure for issue #2's hosted qualification.
     }
   })
   listening = true
