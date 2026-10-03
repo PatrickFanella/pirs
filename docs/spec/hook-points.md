@@ -95,3 +95,9 @@ Its normal entrypoint exposed health and bridge status with the sequencer
 listener attached. Loopback binding, a data-only mount and teardown were
 verified. [The container record](../qualification/container.md) lists source
 and image digests. No container account events or additional hook were tested.
+
+Upstream rehearsal, 2026-10-03: distribution `v0.4.5037` (`@atproto/pds`
+0.5.37) merged without conflicts. The real account/record smoke and both cleanup
+checks passed locally with the same event counts and cursor advancement.
+[The merge record](../upstream-merge.md) describes the seam inspection, timing
+and hosted qualification. No additional hook was added.

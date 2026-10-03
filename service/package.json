@@ -12,7 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "@atproto/lex": "^0.3.13",
-    "@atproto/pds": "0.5.36"
+    "@atproto/pds": "0.5.37"
   },
   "devDependencies": {
     "@did-plc/lib": "0.0.4",
