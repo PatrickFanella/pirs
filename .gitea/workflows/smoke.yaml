@@ -22,3 +22,6 @@ jobs:
       - name: Smoke check
         working-directory: service
         run: pnpm smoke
+      - name: Qualify smoke cleanup
+        working-directory: service
+        run: node --test pirs/smoke.test.ts
