@@ -15,6 +15,9 @@ importers:
         specifier: 0.5.36
         version: 0.5.36
     devDependencies:
+      '@did-plc/lib':
+        specifier: 0.0.4
+        version: 0.0.4
       '@types/express':
         specifier: ^4.17.25
         version: 4.17.25

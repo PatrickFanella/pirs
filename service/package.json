@@ -15,6 +15,7 @@
     "@atproto/pds": "0.5.36"
   },
   "devDependencies": {
+    "@did-plc/lib": "0.0.4",
     "@types/express": "^4.17.25"
   },
   "pnpm": {
