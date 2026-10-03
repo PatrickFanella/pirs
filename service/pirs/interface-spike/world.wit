@@ -1,0 +1,15 @@
+package pirs:spike@0.1.0;
+
+interface host {
+  record event {
+    seq: u32,
+    payload: string,
+  }
+  emit: func(value: event) -> u32;
+}
+
+world plugin {
+  import host;
+  use host.{event};
+  export on-event: func(value: event) -> u32;
+}

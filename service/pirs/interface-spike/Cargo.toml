@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = ["rust-core", "rust-component", "host"]
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
