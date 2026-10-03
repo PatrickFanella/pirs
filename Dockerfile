@@ -1,3 +1,4 @@
+# Temporary issue #2 probe: this path matches upstream's pull_request filter.
 # NOTE there is an additional build stage below that should match
 FROM node:24.19-alpine3.23 AS build
 
