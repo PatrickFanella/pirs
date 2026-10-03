@@ -6,7 +6,7 @@ on:
 
 jobs:
   smoke:
-    runs-on: ubuntu-latest
+    runs-on: dozor
     container: node:24-bookworm
     timeout-minutes: 10
     steps:

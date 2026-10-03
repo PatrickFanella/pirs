@@ -95,9 +95,51 @@ afterWrite: 5
 cleanup tests: 2 passed, 0 failed
 ```
 
-Hosted qualification links are added after the release PR finishes its checks.
-Local checks do not prove a container image or deployed service at this new
-package version. No deployment or image publication is part of the rehearsal.
+After the container PR merged to `main`, this branch also merged that updated
+main in commit `1ef30c7d977d9f389a95fb624c143e5382c5a8b7`. Both branches had
+appended evidence to spec section 8, producing one documentation conflict.
+The resolution retains the container record followed by the upstream rehearsal
+record. It does not alter package code or rewrite either merge's ancestry.
+
+The post-resolution `pnpm smoke` passed. The container qualification script
+then built the original Dockerfile from committed revision `1ef30c7` and
+booted version `0.4.5037`. Health and bridge status answered, the listener was
+attached, the only published host IP was `127.0.0.1`, and `/data` was the only
+mount. The local image ID/index is
+`sha256:9654aad01ae76d4de73534cccd4a8db0aff30ad552581617c46fa6e274a1f849`;
+its linux/amd64 manifest is
+`sha256:b391d1c8dcf5981bba00eb767ab2f1c18da3c0c2f0e2e2d1908711a8831d3239`.
+The base remained the Node digest recorded in the
+[container qualification](qualification/container.md). Teardown left only
+`pirs-proof-68cb1b3f16d3_data`, which was removed by exact name afterward.
+
+The first container build at this revision failed in the production install
+step. The upstream Dockerfile suppresses that command's output, so the cause
+was not established. A diagnostic copy with the suppression removed passed;
+one retry of the original, unchanged Dockerfile then passed the full boot and
+teardown check. This is a recovered build failure, not proof of its cause.
+
+[The release PR #43](https://git.subcult.tv/subculture-collective/pirs/pulls/43)
+merged as `1a0e48c9056ce76b883f306e65bcfe36793a77a8`. An ancestry check on
+that main revision confirms both the original upstream release and the timed
+merge remain reachable.
+
+The shared `ubuntu-latest` runner had 170 queued jobs during qualification.
+Pirs's workflow was therefore routed to the existing idle `dozor` runner, with
+the same Node 24 container, installation, smoke and cleanup commands. No runner
+configuration or other repository's job was changed. Earlier runs on the shared
+queue had not started; they are not passing evidence.
+
+[Hosted push run 12499](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12499)
+passed on `ab99cfe0dd51b71eb4d3b7f5b53a75de3a9cfc0c`, a follow-up branch
+containing merged main and the runner/evidence changes. Its package and runtime
+code match the merged release. The Dozor job installed PDS 0.5.37, observed
+the same account/commit counts and cursor advancement, and passed both cleanup
+tests. The final follow-up PR's checks are recorded in its description.
+
+This local image and hosted smoke evidence does not prove a deployed service,
+arm64 build or registry artifact. No deployment or image publication is part
+of the rehearsal.
 
 ## Recovery
 
