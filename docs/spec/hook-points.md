@@ -86,5 +86,6 @@ Publishing and discovery are out of scope for this draft. The intent is to exten
 ## 8. What has been run
 
 - Level 0 and the `http.serve` seam, in process: `service/pirs/bridge.ts` attaches a status route in `onCreated` and a sequencer listener in `onStarted`. `pnpm smoke` boots a throwaway PDS and confirms that one sequenced identity event reaches the listener.
+- Gitea CI, 2026-10-03: the same smoke path passed on a hosted runner. A deliberately broken listener failed both push and PR jobs at the smoke assertion. [The qualification record](../qualification/ci-smoke.md) contains workflow-selection evidence and run links. This adds CI evidence for the existing seams, not another supported hook.
 
 Not yet run: any plugin, the host, WebAssembly loading, proxied XRPC to a host, and every level 2 and level 3 hook.
