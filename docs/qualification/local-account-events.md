@@ -1,6 +1,7 @@
 # Disposable account event qualification
 
 Issue: [#3](https://git.subcult.tv/subculture-collective/pirs/issues/3).
+PR: [#40](https://git.subcult.tv/subculture-collective/pirs/pulls/40).
 Observed locally on Kvant on 2026-10-03, Node 26.10.0, pnpm 10.34.1,
 `@atproto/pds` 0.5.36.
 
@@ -55,7 +56,9 @@ After both exits, the tests confirm:
 - Inherited public PLC, entryway and SMTP settings did not determine the run.
 
 The Gitea smoke workflow also runs these cleanup tests after `pnpm smoke`.
-Hosted run evidence is recorded in the PR after its checks finish.
+[Hosted push run 12151](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12151)
+passed on revision `93648d3a8495fd3d07fc7c28b03b9a8926004279`, including the
+account/record smoke and both cleanup tests, on the Kvant Node 24 runner.
 
 ## Proof boundary
 
