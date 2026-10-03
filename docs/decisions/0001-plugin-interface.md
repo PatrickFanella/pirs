@@ -128,6 +128,14 @@ required by Gitea's action runtime. The workflow now installs checksum-verified
 Node 24.19.0 before checkout. This failure did not execute the guest builds or
 measurement checks.
 
+Run [12532](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12532)
+then passed setup and checkout but found that Debian's Python 3.11.2 lacks the
+`tarfile` data-filter argument. Bootstrap now extracts only directories and
+regular files from checksum-verified archives, with an explicit path bound and
+link/device rejection. This removes the dependency on a newer Python patch
+release. No runner configuration change was needed for these image/setup
+failures.
+
 No production plugin host, PDS delivery path, manifest authorization, memory
 ceiling, deadline, fuel policy or response/log bound is qualified here. No
 additional hook level gains support from this result.

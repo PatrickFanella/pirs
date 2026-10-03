@@ -29,6 +29,26 @@ def verify(path):
         raise ValueError(f"checksum mismatch: {path.name}")
 
 
+def extract_tools(archive):
+    # Debian's Python 3.11.2 lacks tarfile's later data filter. Only the pinned
+    # archive's directories and regular files are needed; reject links/devices
+    # and traversal explicitly rather than using unrestricted extractall.
+    with tarfile.open(archive) as tar:
+        for member in tar.getmembers():
+            destination = (TOOLS / member.name).resolve()
+            if not destination.is_relative_to(TOOLS.resolve()):
+                raise ValueError(f"archive path escapes tools: {member.name}")
+            if member.isdir():
+                destination.mkdir(parents=True, exist_ok=True)
+            elif member.isfile():
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                with tar.extractfile(member) as source, destination.open("wb") as output:
+                    shutil.copyfileobj(source, output)
+                destination.chmod(member.mode & 0o777)
+            else:
+                raise ValueError(f"unsupported archive entry: {member.name}")
+
+
 def run(args, cwd=ROOT, env=None):
     print("+", " ".join(map(str, args)), flush=True)
     subprocess.run(list(map(str, args)), cwd=cwd, env=env, check=True)
@@ -43,8 +63,7 @@ def bootstrap():
             urllib.request.urlretrieve(
                 f"https://github.com/bytecodealliance/{name}/releases/download/v{version}/{filename}", archive)
         verify(archive)
-        with tarfile.open(archive) as tar:
-            tar.extractall(TOOLS, filter="data")
+        extract_tools(archive)
     adapter = TOOLS / "wasi_snapshot_preview1.reactor.wasm"
     if not adapter.exists():
         urllib.request.urlretrieve(
