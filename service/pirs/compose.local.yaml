@@ -1,0 +1,17 @@
+services:
+  pds:
+    image: ${PIRS_IMAGE:?Build a local Pirs image first}
+    pull_policy: never
+    env_file:
+      - ${PIRS_ENV_FILE:?Supply a disposable PDS environment file}
+    ports:
+      - "127.0.0.1:${PIRS_CONTAINER_PORT:-2598}:3000"
+    volumes:
+      - data:/data
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 128
+    restart: "no"
+    stop_grace_period: 15s
+volumes:
+  data:
