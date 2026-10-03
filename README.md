@@ -32,6 +32,16 @@ node --test pirs/smoke.test.ts
 
 The smoke check uses a temporary data directory and generated secrets. Its PLC fixture binds to loopback and stores one validated identity in memory; it creates no public identity. The PDS listens on `127.0.0.1:2597`; set `PIRS_SMOKE_PORT` to change the port. The cleanup tests check successful completion and a rejected record write after account creation. [Qualification evidence](docs/qualification/local-account-events.md) records the proof boundary.
 
+## Local container check
+
+After committing the intended source, run `bash service/pirs/container-smoke.sh`
+from the repository root. It builds a committed snapshot with the upstream
+Dockerfile, starts the PDS on loopback with generated secrets and disposable
+data, checks health and bridge status, and tears down the container and network.
+It prints the exact retained data-volume name and its removal command.
+[The qualification record](docs/qualification/container.md) contains image
+digests and the limits of this local check.
+
 ## Tracking upstream
 
 The `upstream` remote is `https://github.com/bluesky-social/pds.git`. Pirs code lives in `service/pirs/` and `docs/`, with small changes to `service/index.ts` and `service/package.json`, to keep merges small.
