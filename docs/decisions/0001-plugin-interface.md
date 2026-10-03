@@ -122,6 +122,12 @@ workflow rebuilds all four guests and reruns the callback/import checks; it
 does not use timing thresholds or promote hosted measurements over the local
 comparison.
 
+Initial hosted run [12526](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12526)
+failed before checkout because the Rust job image lacked the Node executable
+required by Gitea's action runtime. The workflow now installs checksum-verified
+Node 24.19.0 before checkout. This failure did not execute the guest builds or
+measurement checks.
+
 No production plugin host, PDS delivery path, manifest authorization, memory
 ceiling, deadline, fuel policy or response/log bound is qualified here. No
 additional hook level gains support from this result.
