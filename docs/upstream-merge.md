@@ -119,9 +119,27 @@ was not established. A diagnostic copy with the suppression removed passed;
 one retry of the original, unchanged Dockerfile then passed the full boot and
 teardown check. This is a recovered build failure, not proof of its cause.
 
-Hosted qualification links are added after the release PR finishes its checks.
-This local image check does not prove a deployed service, arm64 build or
-registry artifact. No deployment or image publication is part of the rehearsal.
+[The release PR #43](https://git.subcult.tv/subculture-collective/pirs/pulls/43)
+merged as `1a0e48c9056ce76b883f306e65bcfe36793a77a8`. An ancestry check on
+that main revision confirms both the original upstream release and the timed
+merge remain reachable.
+
+The shared `ubuntu-latest` runner had 170 queued jobs during qualification.
+Pirs's workflow was therefore routed to the existing idle `dozor` runner, with
+the same Node 24 container, installation, smoke and cleanup commands. No runner
+configuration or other repository's job was changed. Earlier runs on the shared
+queue had not started; they are not passing evidence.
+
+[Hosted push run 12499](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12499)
+passed on `ab99cfe0dd51b71eb4d3b7f5b53a75de3a9cfc0c`, a follow-up branch
+containing merged main and the runner/evidence changes. Its package and runtime
+code match the merged release. The Dozor job installed PDS 0.5.37, observed
+the same account/commit counts and cursor advancement, and passed both cleanup
+tests. The final follow-up PR's checks are recorded in its description.
+
+This local image and hosted smoke evidence does not prove a deployed service,
+arm64 build or registry artifact. No deployment or image publication is part
+of the rehearsal.
 
 ## Recovery
 
