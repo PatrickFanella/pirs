@@ -89,3 +89,9 @@ Publishing and discovery are out of scope for this draft. The intent is to exten
 - Gitea CI, 2026-10-03: the then-current identity-only smoke path passed on a hosted runner. A deliberately broken listener failed both push and PR jobs at the smoke assertion. [The qualification record](../qualification/ci-smoke.md) contains workflow-selection evidence and run links. This adds CI evidence for the existing seams, not another supported hook.
 
 Not yet run: any plugin, the host, WebAssembly loading, proxied XRPC to a host, and every level 2 and level 3 hook.
+
+Upstream rehearsal, 2026-10-03: distribution `v0.4.5037` (`@atproto/pds`
+0.5.37) merged without conflicts. The real account/record smoke and both cleanup
+checks passed locally with the same event counts and cursor advancement.
+[The merge record](../upstream-merge.md) describes the seam inspection, timing
+and hosted qualification. No additional hook was added.
