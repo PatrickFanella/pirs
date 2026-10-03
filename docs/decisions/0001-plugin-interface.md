@@ -117,10 +117,20 @@ in guest and host on every call. Instantiation includes Go initialization and
 fresh Store/WASI setup, and excludes separately measured compilation.
 
 The existing PDS account/record smoke and both cleanup checks passed locally.
-Hosted qualification will be recorded from actual completed runs. The new
-workflow rebuilds all four guests and reruns the callback/import checks; it
-does not use timing thresholds or promote hosted measurements over the local
-comparison.
+Revision `be2213ddb9934a1542322f0a383f4bbe0b6f0ccc` passed hosted
+[spike run 12535](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12535)
+and [PDS smoke run 12536](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12536).
+The fresh Dozor container built and validated all four guests, then verified
+153,000 callbacks per guest. The harness's optimized native build took 4m 49s.
+The PDS job passed the account/record smoke and both cleanup checks.
+
+The workflow rebuilds the guests and reruns callback/import checks without
+timing thresholds. Hosted timings are supplemental, on a different machine:
+Rust core/WIT call medians were 0.766/0.404 µs and Go core/WIT were
+4.048/1.405 µs. They show the same direction as the local comparison but are
+not interchangeable samples. Hosted artifact sizes/hashes can differ with
+build paths/environment; the table and raw file above describe the recorded
+local artifacts. Final PR checks qualify subsequent evidence-only commits.
 
 Initial hosted run [12526](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12526)
 failed before checkout because the Rust job image lacked the Node executable
