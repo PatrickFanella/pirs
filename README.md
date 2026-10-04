@@ -2,7 +2,7 @@
 
 Pirs is an experiment in making an AT Protocol PDS extensible. It has two parts: a draft specification of the hook points a PDS offers to plugins, and a PDS distribution that implements them.
 
-It is not production software and no plugin runs yet. Prichal's managed hosting stays on the unmodified upstream image; Pirs becomes an option there only if it qualifies.
+It is experimental software. A standalone Wasmtime host runs WIT sandbox components with enforced call limits; PDS-to-plugin delivery remains unimplemented. Prichal's managed hosting stays on the unmodified upstream image; Pirs becomes an option there only if it qualifies.
 
 ## What is here
 
@@ -10,6 +10,7 @@ It is not production software and no plugin runs yet. Prichal's managed hosting 
 - [docs/spec/hook-points.md](docs/spec/hook-points.md): draft 0 of the hook-point spec, with levels, hooks, a capability vocabulary and open questions.
 - `service/pirs/bridge.ts`: the code that attaches to the PDS. Today it adds `GET /_pirs/status` and counts events from the PDS's sequencer.
 - `service/pirs/smoke.ts`: boots a throwaway PDS and local PLC fixture, creates an account and writes a record through the public API, and checks that the bridge receives their events.
+- [service/pirs/host](service/pirs/host/README.md): a separate WIT host with hostile fixtures that check deadlines, memory, response/log limits and recovery.
 
 Everything else is the upstream Bluesky PDS distribution, kept so that upstream changes can be merged. Its original README is [UPSTREAM-README.md](UPSTREAM-README.md).
 
@@ -17,7 +18,7 @@ Everything else is the upstream Bluesky PDS distribution, kept so that upstream 
 
 Plugins run in a separate host process, not inside the PDS, and never receive signing keys. The PDS and the host talk through mechanisms atproto already has (the event stream, service proxying) wherever those are enough, so that other PDS implementations can adopt the same contract. Hooks that reject or rewrite a request need a change to the PDS and are specified separately as level 3.
 
-The host does not exist yet. The planned runtime is wasmtime in its own process.
+The standalone host uses Wasmtime in its own process. Its current WIT world provides a bounded diagnostic log and one test call. Event delivery and application capabilities belong to later roadmap issues.
 
 ## Run the check
 

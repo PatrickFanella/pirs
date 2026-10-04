@@ -1,6 +1,6 @@
 # Roadmap
 
-Status: planned on 2026-10-02. No milestone has started beyond the scaffold merged in pull request #1. Tracking issue: [#37](https://git.subcult.tv/subculture-collective/pirs/issues/37).
+Status: foundation demonstrations have run and the owner selected WIT components on 2026-10-03. A standalone host has passed local adversarial checks; section 8 of the spec and the qualification records describe the evidence. Tracking issue: [#37](https://git.subcult.tv/subculture-collective/pirs/issues/37).
 
 Pirs aims to define how a PDS is extended and to prove it with a working distribution. The milestones follow the levels in the [hook-point spec](spec/hook-points.md): observe, serve, act, decide. M1 to M4 each end with a plugin that could not have been built at the level before.
 
@@ -108,7 +108,7 @@ Milestone order is not a blocker by itself. Only the links in the tables are.
 
 | Issue | Decision |
 | --- | --- |
-| [#6](https://git.subcult.tv/subculture-collective/pirs/issues/6) | WIT components or a core-module ABI |
+| [#6](https://git.subcult.tv/subculture-collective/pirs/issues/6) | WIT components selected on 2026-10-03 after the measured spike |
 | [#18](https://git.subcult.tv/subculture-collective/pirs/issues/18) | Per-server or per-account installation, and the grant mechanism |
 | [#28](https://git.subcult.tv/subculture-collective/pirs/issues/28) | Whether to make the repository public, and the licence for the spec text |
 | [#32](https://git.subcult.tv/subculture-collective/pirs/issues/32) | The text posted to the community thread and the account it comes from |

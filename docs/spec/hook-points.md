@@ -50,9 +50,9 @@ Level 0 delivery is at least once, in sequence order, resumable from a cursor. A
 
 ## 5. Plugin interface
 
-Interface choice remains pending the owner decision in [issue #6](https://git.subcult.tv/subculture-collective/pirs/issues/6). The [measured comparison](../decisions/0001-plugin-interface.md) recommends WIT components: the tested Rust and Go guests produced smaller artifacts and lower call time than their core JSON-over-pointer counterparts. Go WIT requires more author tooling and conversion steps.
+The owner selected WIT components on 2026-10-03 in [issue #6](https://git.subcult.tv/subculture-collective/pirs/issues/6). The [measured comparison and decision](../decisions/0001-plugin-interface.md) records the evidence: the tested Rust and Go WIT guests produced smaller artifacts and lower call time than their core JSON-over-pointer counterparts. Go WIT requires more author tooling and conversion steps.
 
-Both interfaces exposed imports before instantiation. WIT also exposes the interface schema; a core import signature does not describe its JSON payload. The standalone spike verifies one synthetic event and host callback in each guest. It does not implement manifest grants or a production plugin host. Merging the measurement record does not select the interface.
+Both interfaces exposed imports before instantiation. WIT also exposes the interface schema; a core import signature does not describe its JSON payload. The standalone spike verifies one synthetic event and host callback in each guest. It does not implement manifest grants or PDS event delivery.
 
 Limits the host must enforce per plugin call: a memory ceiling, a wall-clock deadline, and bounds on response size and log volume. A fuel budget is optional; HappyView's source notes that fuel does not bound interpreters running inside a plugin, so a wall-clock deadline is required either way.
 
@@ -88,9 +88,18 @@ Publishing and discovery are out of scope for this draft. The intent is to exten
 - Level 0 and the `http.serve` seam, in process: `service/pirs/bridge.ts` attaches a status route in `onCreated` and a sequencer listener in `onStarted`. On 2026-10-03, `pnpm smoke` created an account and wrote a record through the public API against a loopback PLC creation/resolution fixture. The bridge observed account, identity, sync and commit events; the cursor advanced from 4 after account creation to 5 after the write. This replaces the synthetic identity-only check. [The account smoke qualification](../qualification/local-account-events.md) records commands and cleanup evidence.
 - Gitea CI, 2026-10-03: the then-current identity-only smoke path passed on a hosted runner. A deliberately broken listener failed both push and PR jobs at the smoke assertion. [The qualification record](../qualification/ci-smoke.md) contains workflow-selection evidence and run links. This adds CI evidence for the existing seams, not another supported hook.
 
-Standalone plugin interface spike, 2026-10-03: Rust and Go guests built and ran as both WIT components and core modules. Each guest made 153,000 verified synthetic event callbacks; imports were inspected before instantiation. The fresh hosted build and callback checks also passed in [run 12535](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12535). [The decision record](../decisions/0001-plugin-interface.md) contains sizes, timings, commands and the pending owner choice. This adds Wasm loading evidence in a separate executable, not PDS hook support.
+Standalone plugin interface spike, 2026-10-03: Rust and Go guests built and ran as both WIT components and core modules. Each guest made 153,000 verified synthetic event callbacks; imports were inspected before instantiation. The fresh hosted build and callback checks also passed in [run 12535](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12535). [The decision record](../decisions/0001-plugin-interface.md) contains sizes, timings, commands and the adopted WIT choice. This adds Wasm loading evidence in a separate executable, not PDS hook support.
 
 Not yet run: a production plugin host, PDS-to-plugin delivery, proxied XRPC to a host, and every level 2 and level 3 hook.
+
+Standalone WIT sandbox host, 2026-10-03: a separate Wasmtime process passed
+29 local calls covering traps, wall-clock interruption of an infinite loop and
+an interpreter loop, memory exhaustion, encoded response/log quotas and invalid
+input. Every failure was followed by a successful call in the same host PID.
+The serving environment was empty after re-exec; a component requesting WASI
+imports was rejected before readiness. [The host qualification](../qualification/plugin-host.md)
+records the commands, raw observations and limits. This adds bounded standalone
+call evidence; no PDS hook gains support.
 
 Distribution evidence, 2026-10-03: the existing Dockerfile built on linux/amd64.
 Its normal entrypoint exposed health and bridge status with the sequencer

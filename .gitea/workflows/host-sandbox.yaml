@@ -1,0 +1,43 @@
+name: WIT host sandbox
+
+on:
+  push:
+    paths:
+      - service/pirs/host/**
+      - docs/qualification/plugin-host.md
+      - .gitea/workflows/host-sandbox.yaml
+  pull_request:
+    paths:
+      - service/pirs/host/**
+      - docs/qualification/plugin-host.md
+      - .gitea/workflows/host-sandbox.yaml
+
+jobs:
+  qualify:
+    runs-on: dozor
+    container: rust:1.95.0-bookworm
+    timeout-minutes: 20
+    env:
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - name: Install action runtime and Python
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends python3 ca-certificates curl
+          curl --fail --location --output /tmp/pirs-host-node.tar.xz https://nodejs.org/dist/v24.19.0/node-v24.19.0-linux-x64.tar.xz
+          echo '14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647  /tmp/pirs-host-node.tar.xz' | sha256sum --check
+          tar -C /usr/local --strip-components=1 -xf /tmp/pirs-host-node.tar.xz
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build host and hostile WIT fixtures
+        working-directory: service/pirs/host
+        run: |
+          rustup target add wasm32-wasip2
+          rustup component add rustfmt
+          cargo fmt --all --check
+          python3 build.py
+      - name: Qualify limits, isolation and recovery
+        working-directory: service/pirs/host
+        run: python3 qualify.py

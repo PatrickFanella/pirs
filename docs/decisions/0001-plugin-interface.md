@@ -1,6 +1,6 @@
 # Plugin interface comparison
 
-Status: measured recommendation; owner decision pending. 2026-10-03.
+Status: adopted by the owner on 2026-10-03. Interface: WIT components.
 
 [Issue #6](https://git.subcult.tv/subculture-collective/pirs/issues/6) asks for
 the same event/callback guest in Rust and Go using WIT components and a core
@@ -18,10 +18,11 @@ interfaces support inspection before instantiation, so that property alone
 does not select WIT. Go component authoring needs more tooling and conversion
 steps, and the adapter compatibility failure below is a real maintenance cost.
 
-The owner still needs to choose WIT components or the core JSON ABI. Issue #6
-remains open and issue #7 remains dependent on that choice. Merging this
-measurement record does not approve an interface. After the decision, update
-this status and spec section 5 before building the production host.
+The owner approved WIT components after reviewing the measured comparison.
+The comparison merged in [PR #45](https://git.subcult.tv/subculture-collective/pirs/pulls/45).
+This resolves the interface choice in issue #6 and permits the host work in
+issue #7. The core JSON ABI remains a measured alternative, not the selected
+contract. The choice does not qualify event delivery or grant enforcement.
 
 ## Local measurements
 
@@ -82,8 +83,11 @@ also extracts the complete component schema without executing guest code.
 The raw results contain inventories for all four artifacts.
 
 Rust core requests only `pirs.emit`; its signature is two `i32` parameters and
-an `i32` result. Rust WIT requests only `pirs:spike/host@0.1.0`, with an `event`
-record and `emit(event) -> u32`. Go core adds WASI preview1 runtime imports;
+an `i32` result. Rust WIT requests `pirs:spike/host@0.1.0`, with an `event`
+record and `emit(event) -> u32`, plus WASI 0.2.6 runtime interfaces pulled in
+by assertion/panic support. This corrects the earlier prose claim that the
+final Rust component imported only the callback; the checked-in raw inventory
+already contained the complete imports. Go core adds WASI preview1 runtime imports;
 Go WIT adds WASI 0.2.12 interfaces through its adapter. The full lists are
 retained with the samples rather than reduced to the application callback.
 
