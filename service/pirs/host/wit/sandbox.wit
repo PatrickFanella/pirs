@@ -1,0 +1,10 @@
+package pirs:sandbox@0.1.0;
+
+interface diagnostics {
+  log: func(message: string);
+}
+
+world sandbox {
+  import diagnostics;
+  export run: func(input: string) -> string;
+}

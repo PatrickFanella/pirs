@@ -79,4 +79,4 @@ policy. Clocks/randomness and runtime imports need an explicit policy in a
 real host. Measured import visibility does not prove capability enforcement.
 
 See [the decision record](../../../docs/decisions/0001-plugin-interface.md)
-for the evidence and the owner decision still required before issue #7.
+for the evidence and the owner's selection of WIT components for issue #7.

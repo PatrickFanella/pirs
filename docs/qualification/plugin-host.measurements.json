@@ -1,0 +1,226 @@
+{
+  "interface": "pirs:sandbox@0.1.0",
+  "recorded_at": "2026-10-04T04:27:27.655816+00:00",
+  "platform": "Linux-7.2.5-4-omarchy-x86_64-with-glibc2.44",
+  "limits": {
+    "deadline_ms": 250,
+    "input_bytes": 512,
+    "log_bytes": 256,
+    "memory_bytes": 8388608,
+    "response_bytes": 1024
+  },
+  "artifact_sha256": {
+    "host": "2cc38ff02b917b2bc9cdcffaa2f7358eb1c232f26880093f060551825269f3ec",
+    "plugin": "020cd87731777c5e3ec0c3ba4fa7573b0f5b940f36d26f358deab3849fab5724",
+    "forbidden_plugin": "8fa4d53b0b3c8b667b12220334ada661aefed31719636913cfab92f94a3e0750"
+  },
+  "calls": 29,
+  "ungranted_wasi_rejected": true,
+  "environment_empty": true,
+  "operator_sentinel_unchanged": true,
+  "cases": [
+    {
+      "case": "echo:ready",
+      "error": null,
+      "elapsed_ms": 0.064,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "trap",
+      "error": "trap",
+      "elapsed_ms": 0.022,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-trap",
+      "error": null,
+      "elapsed_ms": 0.011,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "loop",
+      "error": "timeout",
+      "elapsed_ms": 254.972,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-loop",
+      "error": null,
+      "elapsed_ms": 0.079,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "allocate",
+      "error": "memory_limit",
+      "elapsed_ms": 1.113,
+      "peak_memory_bytes": 7864320,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-allocate",
+      "error": null,
+      "elapsed_ms": 0.026,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "interpreter",
+      "error": "timeout",
+      "elapsed_ms": 253.854,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-interpreter",
+      "error": null,
+      "elapsed_ms": 0.053,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "response-flood",
+      "error": "response_limit",
+      "elapsed_ms": 0.02,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-response-flood",
+      "error": null,
+      "elapsed_ms": 0.011,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "escaped-response",
+      "error": "response_limit",
+      "elapsed_ms": 0.012,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-escaped-response",
+      "error": null,
+      "elapsed_ms": 0.01,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "over-boundary-response",
+      "error": "response_limit",
+      "elapsed_ms": 0.011,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-over-boundary-response",
+      "error": null,
+      "elapsed_ms": 0.011,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "log-flood",
+      "error": "log_limit",
+      "elapsed_ms": 0.014,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 256
+    },
+    {
+      "case": "echo:recovered-after-log-flood",
+      "error": null,
+      "elapsed_ms": 0.011,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "empty-log-flood",
+      "error": "log_limit",
+      "elapsed_ms": 0.018,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 256
+    },
+    {
+      "case": "echo:recovered-after-empty-log-flood",
+      "error": null,
+      "elapsed_ms": 0.013,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "escaped-log",
+      "error": "log_limit",
+      "elapsed_ms": 0.011,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-escaped-log",
+      "error": null,
+      "elapsed_ms": 0.012,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "boundary-response",
+      "error": null,
+      "elapsed_ms": 0.011,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 2
+    },
+    {
+      "case": "unicode-\u96ea-\ud83e\udd80",
+      "error": null,
+      "elapsed_ms": 0.01,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "malformed-json",
+      "error": "invalid_request",
+      "elapsed_ms": 0.0,
+      "peak_memory_bytes": 0,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-malformed",
+      "error": null,
+      "elapsed_ms": 0.01,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "oversized-line",
+      "error": "invalid_request",
+      "elapsed_ms": 0.0,
+      "peak_memory_bytes": 0,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-oversized",
+      "error": null,
+      "elapsed_ms": 0.011,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    },
+    {
+      "case": "unknown-field",
+      "error": "invalid_request",
+      "elapsed_ms": 0.0,
+      "peak_memory_bytes": 0,
+      "log_bytes": 2
+    },
+    {
+      "case": "echo:recovered-after-unknown-field",
+      "error": null,
+      "elapsed_ms": 0.011,
+      "peak_memory_bytes": 1179648,
+      "log_bytes": 10
+    }
+  ]
+}
