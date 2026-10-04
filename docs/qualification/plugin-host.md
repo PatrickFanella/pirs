@@ -49,6 +49,11 @@ Rust 1.95.0 Debian container on Dozor, builds both fixtures, checks formatting
 and runs the same process qualification. Hosted run links are recorded in the PR
 after the checks finish. Local results do not establish hosted success.
 
+Initial hosted [run 12703](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12703)
+passed setup and checkout but stopped before compilation because the Rust
+container did not include `cargo-fmt`. The workflow now installs `rustfmt`
+explicitly. No runner configuration change was needed.
+
 ## Boundary
 
 This qualifies standalone component calls only. No PDS event is delivered to a
