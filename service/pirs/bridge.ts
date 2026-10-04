@@ -1,4 +1,5 @@
 import type { PDS } from '@atproto/pds'
+import { startEventBridge } from './events/bridge-server.ts'
 
 // Draft of the hook-point spec this build implements, see docs/spec/hook-points.md.
 export const SPEC_DRAFT = '0'
@@ -32,9 +33,9 @@ export function attachRoutes(pds: PDS) {
 // Subscribes to the PDS's local sequencer. Call from PDS.run's onStarted.
 //
 // Events arrive after they are persisted, so this is a post-commit observer and
-// cannot veto a write. There is no plugin host to deliver to yet; this counts
-// events so the seam can be verified end to end.
-export function attachEvents(pds: PDS) {
+// cannot veto a write. Optional host delivery reads persisted ranges on its
+// own private listener; this synchronous callback only updates counters.
+export async function attachEvents(pds: PDS) {
   pds.ctx.sequencer.on('events', (evts) => {
     for (const evt of evts) {
       counts[evt.type] += 1
@@ -42,4 +43,8 @@ export function attachEvents(pds: PDS) {
     }
   })
   listening = true
+  if (process.env.PIRS_EVENT_SOCKET) {
+    const bridge = await startEventBridge(pds.ctx.sequencer, process.env.PIRS_EVENT_SOCKET)
+    pds.ctx.sequencer.once('close', () => { void bridge.close() })
+  }
 }

@@ -90,7 +90,20 @@ Publishing and discovery are out of scope for this draft. The intent is to exten
 
 Standalone plugin interface spike, 2026-10-03: Rust and Go guests built and ran as both WIT components and core modules. Each guest made 153,000 verified synthetic event callbacks; imports were inspected before instantiation. The fresh hosted build and callback checks also passed in [run 12535](https://git.subcult.tv/subculture-collective/pirs/actions/runs/12535). [The decision record](../decisions/0001-plugin-interface.md) contains sizes, timings, commands and the adopted WIT choice. This adds Wasm loading evidence in a separate executable, not PDS hook support.
 
-Not yet run: a production plugin host, PDS-to-plugin delivery, proxied XRPC to a host, and every level 2 and level 3 hook.
+Resumable level 0 delivery, 2026-10-04: an opt-in private Unix-socket bridge
+served retained sequencer ranges to a separate consumer and WIT runtime.
+The disposable account/record harness verified all 166 sequences in order,
+host and PDS SIGKILL/restart recovery, bounded pages and request overload,
+stopped-host write latency, exclusive cursor ownership, and replay after a
+successful guest call interrupted before cursor persistence. Both public
+event paths returned 404; the runtime environment was empty and its Linux
+parent-death signal prevented an orphan after supervisor death.
+[The delivery record](../qualification/event-delivery.md) contains limits,
+commands and local measurements. This adds retained-event delivery evidence
+for `event.commit`, `event.sync`, `event.identity` and `event.account`, not
+manifest grants or production qualification.
+
+Not yet run: a production plugin host, proxied XRPC to a host, and every level 2 and level 3 hook.
 
 Standalone WIT sandbox host, 2026-10-03: a separate Wasmtime process passed
 29 local calls covering traps, wall-clock interruption of an infinite loop and

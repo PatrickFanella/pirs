@@ -2,7 +2,9 @@
 
 This is the standalone host for [issue #7](https://git.subcult.tv/subculture-collective/pirs/issues/7).
 It loads one WIT component in a separate process and serves bounded test calls.
-It has no PDS event connection, manifest grants or application capabilities.
+The separate [event consumer](../events/README.md) can deliver retained PDS
+events through this call contract. It has no manifest grants or application
+capabilities.
 
 ## Build and qualify
 
@@ -64,7 +66,8 @@ serial call contract with no persistent plugin state or delivery guarantee.
 | `--deadline-ms` | 100 | Wall-clock deadline covering instantiation and the guest call |
 | `--response-bytes` | 4096 | UTF-8 JSON encoding of the result string, including quotes and escapes |
 | `--log-bytes` | 1024 | UTF-8 JSON encoding of the entire log array, including punctuation |
-| `--input-bytes` | 16384 | Entire stdin request line, including newline |
+| `--input-bytes` | 16384 | Entire stdin request line, including newline; maximum 1 MiB |
+| `--parent-pid` | absent | Optional Linux supervisor PID; SIGKILL when that parent dies |
 
 Memory growth beyond the ceiling traps rather than returning a recoverable
 allocation failure that a guest could ignore. Tables are also bounded at 4096

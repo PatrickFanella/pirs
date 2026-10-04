@@ -7,7 +7,9 @@
   "packageManager": "pnpm@10.34.1",
   "main": "index.ts",
   "scripts": {
-    "smoke": "node pirs/smoke.ts"
+    "smoke": "node pirs/smoke.ts",
+    "check:events": "tsc -p pirs/events/tsconfig.json",
+    "qualify:events": "node --test pirs/events/bridge.test.ts && node pirs/events/qualify.ts"
   },
   "license": "MIT",
   "dependencies": {
@@ -16,7 +18,9 @@
   },
   "devDependencies": {
     "@did-plc/lib": "0.0.4",
-    "@types/express": "^4.17.25"
+    "@types/express": "^4.17.25",
+    "@types/node": "26.6.4",
+    "typescript": "5.9.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
