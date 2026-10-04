@@ -2,15 +2,16 @@
 
 Pirs is an experiment in making an AT Protocol PDS extensible. It has two parts: a draft specification of the hook points a PDS offers to plugins, and a PDS distribution that implements them.
 
-It is experimental software. A standalone Wasmtime host runs WIT sandbox components with enforced call limits; PDS-to-plugin delivery remains unimplemented. Prichal's managed hosting stays on the unmodified upstream image; Pirs becomes an option there only if it qualifies.
+It is experimental software. A separate Wasmtime host runs WIT sandbox components with enforced call limits. An opt-in private bridge delivers retained PDS events with a resumable cursor; its disposable restart qualification has passed locally. Prichal's managed hosting stays on the unmodified upstream image; Pirs becomes an option there only if it qualifies.
 
 ## What is here
 
 - [docs/roadmap.md](docs/roadmap.md): milestones, issues and the order of work.
 - [docs/spec/hook-points.md](docs/spec/hook-points.md): draft 0 of the hook-point spec, with levels, hooks, a capability vocabulary and open questions.
-- `service/pirs/bridge.ts`: the code that attaches to the PDS. Today it adds `GET /_pirs/status` and counts events from the PDS's sequencer.
+- `service/pirs/bridge.ts`: the code that attaches to the PDS. It adds `GET /_pirs/status`, counts sequencer events and optionally starts private range delivery.
 - `service/pirs/smoke.ts`: boots a throwaway PDS and local PLC fixture, creates an account and writes a record through the public API, and checks that the bridge receives their events.
 - [service/pirs/host](service/pirs/host/README.md): a separate WIT host with hostile fixtures that check deadlines, memory, response/log limits and recovery.
+- [service/pirs/events](service/pirs/events/README.md): private event transport, durable consumer cursor and process restart qualification.
 
 Everything else is the upstream Bluesky PDS distribution, kept so that upstream changes can be merged. Its original README is [UPSTREAM-README.md](UPSTREAM-README.md).
 
@@ -18,7 +19,7 @@ Everything else is the upstream Bluesky PDS distribution, kept so that upstream 
 
 Plugins run in a separate host process, not inside the PDS, and never receive signing keys. The PDS and the host talk through mechanisms atproto already has (the event stream, service proxying) wherever those are enough, so that other PDS implementations can adopt the same contract. Hooks that reject or rewrite a request need a change to the PDS and are specified separately as level 3.
 
-The standalone host uses Wasmtime in its own process. Its current WIT world provides a bounded diagnostic log and one test call. Event delivery and application capabilities belong to later roadmap issues.
+The host uses Wasmtime in its own process. Its current WIT world provides a bounded diagnostic log and one call receiving event JSON. Manifest grants and application capabilities belong to later roadmap issues.
 
 ## Run the check
 

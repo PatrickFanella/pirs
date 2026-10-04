@@ -36,8 +36,11 @@ struct Options {
     response_bytes: u32,
     #[arg(long, default_value_t = 1024, value_parser = clap::value_parser!(u32).range(2..=1_048_576))]
     log_bytes: u32,
-    #[arg(long, default_value_t = 16_384, value_parser = clap::value_parser!(u32).range(2..=65_536))]
+    #[arg(long, default_value_t = 16_384, value_parser = clap::value_parser!(u32).range(2..=1_048_576))]
     input_bytes: u32,
+    /// Kill this runtime if its supervising delivery process dies (Linux).
+    #[arg(long)]
+    parent_pid: Option<u32>,
 }
 
 #[derive(Clone, Serialize)]
@@ -384,6 +387,23 @@ fn main() -> Result<()> {
     #[cfg(not(unix))]
     bail!("the qualified host requires Unix environment replacement");
     let options = Options::parse();
+    if let Some(parent) = options.parent_pid {
+        #[cfg(target_os = "linux")]
+        {
+            // Establish the kernel death signal, then check for a parent death
+            // during startup. The supervisor supplies its own PID, never a key.
+            ensure!(
+                unsafe { libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGKILL) } == 0,
+                "could not establish parent death signal"
+            );
+            ensure!(
+                unsafe { libc::getppid() } as u32 == parent,
+                "supervisor is gone"
+            );
+        }
+        #[cfg(not(target_os = "linux"))]
+        bail!("supervised event delivery requires Linux (parent {parent})");
+    }
     let host = Host::new(options)
         .map_err(|_| anyhow::anyhow!("plugin load or sandbox contract check failed"))?;
     serve(host)

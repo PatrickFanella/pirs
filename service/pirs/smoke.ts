@@ -20,6 +20,7 @@ const base = `http://127.0.0.1:${port}`
 for (const key of Object.keys(process.env)) {
   if (key.startsWith('PDS_')) delete process.env[key]
 }
+delete process.env.PIRS_EVENT_SOCKET
 Object.assign(process.env, {
   PDS_HOSTNAME: 'localhost',
   PDS_DEV_MODE: 'true',
@@ -132,7 +133,7 @@ try {
       attachRoutes(pds)
     },
     onStarted: async (pds) => {
-      attachEvents(pds)
+      await attachEvents(pds)
       try {
         await check(pds)
         checked = true

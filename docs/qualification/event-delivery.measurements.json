@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-10-04T06:17:32.617Z",
+  "platform": "linux",
+  "node": "v26.10.0",
+  "artifact_sha256": {
+    "host": "2b7527d290e5c32711608165a17201532fdec54b21e57763e4759dbb2c08c296",
+    "plugin": "04264afcdc62b5b302799f2dffdcf831d587ad96c720a124c888c9c80726c423"
+  },
+  "first_backlog": 74,
+  "crash_cursor": 1,
+  "final_cursor": 166,
+  "replayed_after_success_before_cursor": 156,
+  "delivered": 166,
+  "unique_sequences": 166,
+  "page_events": 32,
+  "page_bytes": 262144,
+  "stopped_host": {
+    "samples": 40,
+    "median_ms": 2.758717999999817,
+    "p95_ms": 4.101578000000018,
+    "max_ms": 4.855277000000115
+  },
+  "running_host": {
+    "samples": 40,
+    "median_ms": 3.1132289999998193,
+    "p95_ms": 5.510496999999987,
+    "max_ms": 19.824779000000035
+  },
+  "checks": {
+    "guest_observed_all": true,
+    "ordered": true,
+    "host_sigkill_recovery": true,
+    "pds_sigkill_recovery": true,
+    "car_and_cid_encoding": true,
+    "orphan_runtime_killed": true,
+    "serving_environment_empty": true,
+    "public_transport_absent": true,
+    "runtime_failure_preserves_cursor": true,
+    "acknowledgement_crash_replayed": true,
+    "exclusive_cursor": true,
+    "stream_mismatch_rejected": true,
+    "operator_sentinel_unchanged": true
+  }
+}

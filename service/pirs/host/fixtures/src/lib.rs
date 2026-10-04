@@ -54,6 +54,25 @@ struct Fixture;
 
 impl Guest for Fixture {
     fn run(input: String) -> String {
+        if let Some(event) = input.strip_prefix("event:") {
+            // Qualification observer: confirm the sequenced envelope reached
+            // Wasm, without echoing its potentially large CAR body.
+            // Avoid a substring search that would require libc's memcmp in
+            // this no_std fixture. The envelope starts with its sequence.
+            let bytes = event.as_bytes();
+            let mut start = 0;
+            while start < bytes.len() && bytes[start] != b':' {
+                start += 1;
+            }
+            start = (start + 1).min(bytes.len());
+            let mut end = start;
+            while end < bytes.len() && bytes[end].is_ascii_digit() {
+                end += 1;
+            }
+            let seq = &event[start..end];
+            pirs::sandbox::diagnostics::log(&alloc::format!("seq:{seq}"));
+            return "observed".into();
+        }
         match input.as_str() {
             "trap" => panic!("qualification trap"),
             "loop" => loop {

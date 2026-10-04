@@ -4,12 +4,24 @@ on:
   push:
     paths:
       - service/pirs/host/**
+      - service/pirs/events/**
+      - service/pirs/bridge.ts
+      - service/index.ts
+      - service/package.json
+      - service/pnpm-lock.yaml
       - docs/qualification/plugin-host.md
+      - docs/qualification/event-delivery.md
       - .gitea/workflows/host-sandbox.yaml
   pull_request:
     paths:
       - service/pirs/host/**
+      - service/pirs/events/**
+      - service/pirs/bridge.ts
+      - service/index.ts
+      - service/package.json
+      - service/pnpm-lock.yaml
       - docs/qualification/plugin-host.md
+      - docs/qualification/event-delivery.md
       - .gitea/workflows/host-sandbox.yaml
 
 jobs:
@@ -41,3 +53,14 @@ jobs:
       - name: Qualify limits, isolation and recovery
         working-directory: service/pirs/host
         run: python3 qualify.py
+      - name: Install event qualification dependencies
+        working-directory: service
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+      - name: Check event delivery types
+        working-directory: service
+        run: pnpm check:events
+      - name: Qualify event delivery, restarts and stopped-host writes
+        working-directory: service
+        run: pnpm qualify:events

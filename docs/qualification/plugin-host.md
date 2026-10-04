@@ -56,8 +56,9 @@ explicitly. No runner configuration change was needed.
 
 ## Boundary
 
-This qualifies standalone component calls only. No PDS event is delivered to a
-plugin; no manifest grant, account capability, XRPC proxy, deployment, level 2
+This record qualifies standalone component calls only. At that gate no PDS
+event was delivered to a plugin; the later [event delivery qualification](event-delivery.md)
+records that boundary separately. No manifest grant, account capability, XRPC proxy, deployment, level 2
 hook or level 3 hook is qualified. The PDS does not launch the host or pass
 secrets to it. Guest linear-memory limits do not cap native compilation/RSS,
 and epoch deadlines have scheduling tolerance. OS user isolation and production

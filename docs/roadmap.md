@@ -1,6 +1,6 @@
 # Roadmap
 
-Status: foundation demonstrations have run and the owner selected WIT components on 2026-10-03. A standalone host has passed local adversarial checks; section 8 of the spec and the qualification records describe the evidence. Tracking issue: [#37](https://git.subcult.tv/subculture-collective/pirs/issues/37).
+Status: foundation demonstrations have run and the owner selected WIT components on 2026-10-03. The separate host passed adversarial checks, and retained PDS events passed local resumable delivery qualification on October 4. Section 8 of the spec and the qualification records describe the evidence. Tracking issue: [#37](https://git.subcult.tv/subculture-collective/pirs/issues/37).
 
 Pirs aims to define how a PDS is extended and to prove it with a working distribution. The milestones follow the levels in the [hook-point spec](spec/hook-points.md): observe, serve, act, decide. M1 to M4 each end with a plugin that could not have been built at the level before.
 
