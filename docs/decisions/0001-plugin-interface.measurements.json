@@ -1,0 +1,5519 @@
+{
+  "observed_at": "2026-10-03T22:38:15.571792+00:00",
+  "platform": "Linux-7.2.5-4-omarchy-x86_64-with-glibc2.44",
+  "machine": "x86_64",
+  "rust": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "go": "go version go1.27.1 linux/amd64",
+  "wasmtime": "39.0.1 (Cargo.lock)",
+  "warmup_calls": 1000,
+  "calls_per_batch": 10000,
+  "batches_per_process": 5,
+  "processes": 3,
+  "instantiations_per_process": 25,
+  "summary": {
+    "rust-core": {
+      "bytes": 61044,
+      "sha256": "b2847335dfe14337d6dedb2422fb9702dd47f2e6edd716d24369531f3c114fa8",
+      "compile_us_median": 34034.25,
+      "instantiate_us_median": 3.5300000000000002,
+      "call_us_median": 0.2719764,
+      "call_us_min": 0.2560674,
+      "call_us_max": 0.3585653,
+      "imports": [
+        {
+          "module": "pirs",
+          "name": "emit",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(0), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        }
+      ]
+    },
+    "rust-component": {
+      "bytes": 41715,
+      "sha256": "7c72cbc7f14326dd914a2c28463f101ec0572736fa7791ac1d780beee91eb68f",
+      "compile_us_median": 25290.397999999997,
+      "instantiate_us_median": 5.76,
+      "call_us_median": 0.1471507,
+      "call_us_min": 0.1395817,
+      "call_us_max": 0.1565156,
+      "imports": [
+        {
+          "name": "pirs:spike/host@0.1.0",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "event",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "emit",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "value",
+                      "type": "Record(Record(Handle { index: TypeRecordIndex(0) }))"
+                    }
+                  ],
+                  "results": [
+                    "U32"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:io/poll@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "pollable",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "[method]pollable.block",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(0) } })"
+                    }
+                  ],
+                  "results": []
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:io/error@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "error",
+                "type": {
+                  "kind": "resource"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:io/streams@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "input-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "output-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "error",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "stream-error",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "pollable",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "[method]output-stream.check-write",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(0) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]output-stream.write",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                    },
+                    {
+                      "name": "contents",
+                      "type": "List(List(Handle { index: TypeListIndex(0) }))"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]output-stream.blocking-flush",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]output-stream.subscribe",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                    }
+                  ],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(0) } })"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/environment@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "get-environment",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "List(List(Handle { index: TypeListIndex(1) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/exit@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "exit",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "status",
+                      "type": "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    }
+                  ],
+                  "results": []
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/stdin@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "input-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-stdin",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(2) } })"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/stdout@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "output-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-stdout",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/stderr@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "output-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-stderr",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-input@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-input",
+                "type": {
+                  "kind": "resource"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-output@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-output",
+                "type": {
+                  "kind": "resource"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-stdin@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-input",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-terminal-stdin",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Option(OptionType(Handle { index: TypeOptionIndex(0) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-stdout@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-output",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-terminal-stdout",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-stderr@0.2.6",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-output",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-terminal-stderr",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "go-core": {
+      "bytes": 4357070,
+      "sha256": "917d50ef0129e0c339c5a71bdbcdf279101670b61111f47b34c05d2de6b638f3",
+      "compile_us_median": 1866363.4789999998,
+      "instantiate_us_median": 127.69999999999999,
+      "call_us_median": 1.5276279000000001,
+      "call_us_min": 1.5022309,
+      "call_us_max": 1.5681287,
+      "imports": [
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "sched_yield",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(4), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "proc_exit",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(5), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32], non_i31_gc_ref_params_count: 0, returns: [], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "args_get",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "args_sizes_get",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "clock_time_get",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(7), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I64, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "environ_get",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "environ_sizes_get",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_write",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "random_get",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "poll_oneoff",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_close",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(12), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_read",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_write",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_fdstat_get",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_fdstat_set_flags",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_prestat_get",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_prestat_dir_name",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(9), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        },
+        {
+          "module": "pirs",
+          "name": "emit",
+          "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+        }
+      ]
+    },
+    "go-component": {
+      "bytes": 2481164,
+      "sha256": "afe0312cfe05e163a000a1ded467381e8668d47e823e1dd2eb49e71759389715",
+      "compile_us_median": 1007321.0040000001,
+      "instantiate_us_median": 143.05,
+      "call_us_median": 0.5956198,
+      "call_us_min": 0.5650649,
+      "call_us_max": 0.7759944000000001,
+      "imports": [
+        {
+          "name": "wasi:cli/environment@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "get-environment",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "List(List(Handle { index: TypeListIndex(0) }))"
+                  ]
+                }
+              },
+              {
+                "name": "get-arguments",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "List(List(Handle { index: TypeListIndex(1) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/exit@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "exit",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "status",
+                      "type": "Result(ResultType(Handle { index: TypeResultIndex(0) }))"
+                    }
+                  ],
+                  "results": []
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:io/error@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "error",
+                "type": {
+                  "kind": "resource"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:io/poll@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "pollable",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "poll",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "in",
+                      "type": "List(List(Handle { index: TypeListIndex(2) }))"
+                    }
+                  ],
+                  "results": [
+                    "List(List(Handle { index: TypeListIndex(3) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:io/streams@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "error",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "output-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "input-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "stream-error",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "pollable",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "[method]input-stream.subscribe",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(3) } })"
+                    }
+                  ],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(1) } })"
+                  ]
+                }
+              },
+              {
+                "name": "[method]output-stream.check-write",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]output-stream.write",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                    },
+                    {
+                      "name": "contents",
+                      "type": "List(List(Handle { index: TypeListIndex(4) }))"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]output-stream.blocking-write-and-flush",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                    },
+                    {
+                      "name": "contents",
+                      "type": "List(List(Handle { index: TypeListIndex(4) }))"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]output-stream.blocking-flush",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]output-stream.subscribe",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                    }
+                  ],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(1) } })"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/stdin@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "input-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-stdin",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(3) } })"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/stdout@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "output-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-stdout",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/stderr@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "output-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-stderr",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-input@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-input",
+                "type": {
+                  "kind": "resource"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-output@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-output",
+                "type": {
+                  "kind": "resource"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-stdin@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-input",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-terminal-stdin",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Option(OptionType(Handle { index: TypeOptionIndex(0) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-stdout@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-output",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-terminal-stdout",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:cli/terminal-stderr@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "terminal-output",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-terminal-stderr",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:clocks/monotonic-clock@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "instant",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "duration",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "pollable",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "now",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "U64"
+                  ]
+                }
+              },
+              {
+                "name": "subscribe-instant",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "when",
+                      "type": "U64"
+                    }
+                  ],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(1) } })"
+                  ]
+                }
+              },
+              {
+                "name": "subscribe-duration",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "when",
+                      "type": "U64"
+                    }
+                  ],
+                  "results": [
+                    "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(1) } })"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:clocks/wall-clock@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "datetime",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "now",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "Record(Record(Handle { index: TypeRecordIndex(0) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:filesystem/types@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "error",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "error-code",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "directory-entry-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "descriptor",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "descriptor-flags",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "descriptor-type",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "output-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "filesize",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "input-stream",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "link-count",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "datetime",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "descriptor-stat",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "[method]descriptor.read-via-stream",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                    },
+                    {
+                      "name": "offset",
+                      "type": "U64"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(3) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]descriptor.write-via-stream",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                    },
+                    {
+                      "name": "offset",
+                      "type": "U64"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(4) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]descriptor.append-via-stream",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(4) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]descriptor.get-flags",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(5) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]descriptor.get-type",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(6) }))"
+                  ]
+                }
+              },
+              {
+                "name": "[method]descriptor.stat",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "self",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                    }
+                  ],
+                  "results": [
+                    "Result(ResultType(Handle { index: TypeResultIndex(7) }))"
+                  ]
+                }
+              },
+              {
+                "name": "filesystem-error-code",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "err",
+                      "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(0) } })"
+                    }
+                  ],
+                  "results": [
+                    "Option(OptionType(Handle { index: TypeOptionIndex(3) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:filesystem/preopens@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "descriptor",
+                "type": {
+                  "kind": "resource"
+                }
+              },
+              {
+                "name": "get-directories",
+                "type": {
+                  "kind": "function",
+                  "params": [],
+                  "results": [
+                    "List(List(Handle { index: TypeListIndex(5) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "wasi:random/random@0.2.12",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "get-random-bytes",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "len",
+                      "type": "U64"
+                    }
+                  ],
+                  "results": [
+                    "List(List(Handle { index: TypeListIndex(4) }))"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "pirs:spike/host@0.1.0",
+          "type": {
+            "kind": "interface",
+            "members": [
+              {
+                "name": "event",
+                "type": {
+                  "kind": "type"
+                }
+              },
+              {
+                "name": "emit",
+                "type": {
+                  "kind": "function",
+                  "params": [
+                    {
+                      "name": "value",
+                      "type": "Record(Record(Handle { index: TypeRecordIndex(2) }))"
+                    }
+                  ],
+                  "results": [
+                    "U32"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "runs": [
+    [
+      {
+        "artifact": "artifacts/rust-core.wasm",
+        "bytes": 61044,
+        "call_us": [
+          0.2623884,
+          0.2570865,
+          0.2680085,
+          0.2560674,
+          0.3585653
+        ],
+        "compile_us": 35557.138,
+        "imports": [
+          {
+            "module": "pirs",
+            "name": "emit",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(0), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          }
+        ],
+        "instantiate_us": [
+          48.35,
+          4.8500000000000005,
+          3.5599999999999996,
+          3.01,
+          3.21,
+          3.76,
+          3.35,
+          3.35,
+          2.8,
+          3.4,
+          3.02,
+          3.5999999999999996,
+          3.11,
+          2.95,
+          2.75,
+          2.71,
+          3.18,
+          2.84,
+          2.7,
+          3.01,
+          2.8499999999999996,
+          3.41,
+          3.21,
+          2.7,
+          3.15
+        ],
+        "verified_host_calls": 51000
+      },
+      {
+        "artifact": "artifacts/rust-component.wasm",
+        "bytes": 41715,
+        "call_us": [
+          0.1532847,
+          0.14725470000000002,
+          0.1426087,
+          0.1407297,
+          0.1395817
+        ],
+        "compile_us": 25290.397999999997,
+        "imports": [
+          {
+            "name": "pirs:spike/host@0.1.0",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "event",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "emit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "value",
+                        "type": "Record(Record(Handle { index: TypeRecordIndex(0) }))"
+                      }
+                    ],
+                    "results": [
+                      "U32"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/poll@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "[method]pollable.block",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(0) } })"
+                      }
+                    ],
+                    "results": []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/error@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/streams@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "stream-error",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "[method]output-stream.check-write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(0) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "List(List(Handle { index: TypeListIndex(0) }))"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.blocking-flush",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.subscribe",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(0) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/environment@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "get-environment",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/exit@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "exit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "status",
+                        "type": "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                      }
+                    ],
+                    "results": []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdin@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(2) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdout@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stderr@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702792346320, index: ResourceIndex(3) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-input@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-output@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdin@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(0) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdout@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stderr@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "instantiate_us": [
+          51.08,
+          9.700000000000001,
+          6.62,
+          5.890000000000001,
+          5.82,
+          5.28,
+          5.800000000000001,
+          5.79,
+          5.41,
+          5.79,
+          5.79,
+          5.5,
+          6.06,
+          5.59,
+          5.84,
+          5.58,
+          5.48,
+          5.11,
+          5.289,
+          5.1000000000000005,
+          5.32,
+          5.37,
+          5.14,
+          5.17,
+          5.38
+        ],
+        "verified_host_calls": 51000
+      },
+      {
+        "artifact": "artifacts/go-core.wasm",
+        "bytes": 4357070,
+        "call_us": [
+          1.5306047999999999,
+          1.5192569,
+          1.507357,
+          1.5022309,
+          1.5114219
+        ],
+        "compile_us": 1866363.4789999998,
+        "imports": [
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "sched_yield",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(4), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "proc_exit",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(5), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32], non_i31_gc_ref_params_count: 0, returns: [], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "args_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "args_sizes_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "clock_time_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(7), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I64, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "environ_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "environ_sizes_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_write",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "random_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "poll_oneoff",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_close",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(12), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_read",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_write",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_fdstat_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_fdstat_set_flags",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_prestat_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_prestat_dir_name",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(9), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "pirs",
+            "name": "emit",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          }
+        ],
+        "instantiate_us": [
+          1124.848,
+          218.01899999999998,
+          170.63000000000002,
+          154.73000000000002,
+          134.51899999999998,
+          132.64000000000001,
+          128.17,
+          128.289,
+          127.36999999999999,
+          126.4,
+          132.18,
+          126.85999999999999,
+          126.78,
+          126.64,
+          125.809,
+          126.4,
+          134.69,
+          127.81899999999999,
+          126.4,
+          125.63,
+          127.69999999999999,
+          125.68900000000001,
+          144.27,
+          136.41,
+          128.03900000000002
+        ],
+        "verified_host_calls": 51000
+      },
+      {
+        "artifact": "artifacts/go-component.wasm",
+        "bytes": 2481164,
+        "call_us": [
+          0.5956198,
+          0.6025967000000001,
+          0.5885818,
+          0.6116158,
+          0.5837078
+        ],
+        "compile_us": 1018362.22,
+        "imports": [
+          {
+            "name": "wasi:cli/environment@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "get-environment",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(0) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "get-arguments",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/exit@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "exit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "status",
+                        "type": "Result(ResultType(Handle { index: TypeResultIndex(0) }))"
+                      }
+                    ],
+                    "results": []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/error@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/poll@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "poll",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "in",
+                        "type": "List(List(Handle { index: TypeListIndex(2) }))"
+                      }
+                    ],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(3) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/streams@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "stream-error",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "[method]input-stream.subscribe",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.check-write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "List(List(Handle { index: TypeListIndex(4) }))"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.blocking-write-and-flush",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "List(List(Handle { index: TypeListIndex(4) }))"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.blocking-flush",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.subscribe",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdin@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(3) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdout@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stderr@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(2) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-input@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-output@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdin@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(0) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdout@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stderr@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:clocks/monotonic-clock@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "instant",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "duration",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "now",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "U64"
+                    ]
+                  }
+                },
+                {
+                  "name": "subscribe-instant",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "when",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                },
+                {
+                  "name": "subscribe-duration",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "when",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:clocks/wall-clock@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "datetime",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "now",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Record(Record(Handle { index: TypeRecordIndex(0) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:filesystem/types@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "error-code",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "directory-entry-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "descriptor",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "descriptor-flags",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "descriptor-type",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "filesize",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "link-count",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "datetime",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "descriptor-stat",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "[method]descriptor.read-via-stream",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                      },
+                      {
+                        "name": "offset",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(3) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.write-via-stream",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                      },
+                      {
+                        "name": "offset",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(4) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.append-via-stream",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(4) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.get-flags",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(5) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.get-type",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(6) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.stat",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(7) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "filesystem-error-code",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "err",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 95702795053120, index: ResourceIndex(0) } })"
+                      }
+                    ],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(3) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:filesystem/preopens@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "descriptor",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-directories",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(5) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:random/random@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "get-random-bytes",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "len",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(4) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "pirs:spike/host@0.1.0",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "event",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "emit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "value",
+                        "type": "Record(Record(Handle { index: TypeRecordIndex(2) }))"
+                      }
+                    ],
+                    "results": [
+                      "U32"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "instantiate_us": [
+          612.588,
+          239.4,
+          206.849,
+          170.92,
+          153.66,
+          146.25900000000001,
+          143.73000000000002,
+          138.14000000000001,
+          145.329,
+          135.69,
+          135.38,
+          133.959,
+          132.82,
+          132.42000000000002,
+          139.939,
+          135.32999999999998,
+          134.59,
+          131.35,
+          133.359,
+          132.0,
+          131.76999999999998,
+          140.239,
+          134.32,
+          132.92999999999998,
+          131.549
+        ],
+        "verified_host_calls": 51000
+      }
+    ],
+    [
+      {
+        "artifact": "artifacts/rust-component.wasm",
+        "bytes": 41715,
+        "call_us": [
+          0.14411870000000002,
+          0.1436057,
+          0.1412067,
+          0.1552727,
+          0.1420527
+        ],
+        "compile_us": 24381.77,
+        "imports": [
+          {
+            "name": "pirs:spike/host@0.1.0",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "event",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "emit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "value",
+                        "type": "Record(Record(Handle { index: TypeRecordIndex(0) }))"
+                      }
+                    ],
+                    "results": [
+                      "U32"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/poll@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "[method]pollable.block",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131481306176, index: ResourceIndex(0) } })"
+                      }
+                    ],
+                    "results": []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/error@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/streams@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "stream-error",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "[method]output-stream.check-write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131481306176, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(0) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131481306176, index: ResourceIndex(3) } })"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "List(List(Handle { index: TypeListIndex(0) }))"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.blocking-flush",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131481306176, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.subscribe",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131481306176, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131481306176, index: ResourceIndex(0) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/environment@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "get-environment",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/exit@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "exit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "status",
+                        "type": "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                      }
+                    ],
+                    "results": []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdin@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131481306176, index: ResourceIndex(2) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdout@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131481306176, index: ResourceIndex(3) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stderr@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131481306176, index: ResourceIndex(3) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-input@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-output@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdin@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(0) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdout@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stderr@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "instantiate_us": [
+          51.95,
+          9.41,
+          6.17,
+          6.5,
+          5.859999999999999,
+          5.76,
+          5.28,
+          5.36,
+          5.1000000000000005,
+          5.53,
+          5.51,
+          5.090000000000001,
+          5.35,
+          5.62,
+          5.37,
+          5.42,
+          5.48,
+          5.1499999999999995,
+          5.5,
+          5.38,
+          5.769,
+          5.26,
+          5.6899999999999995,
+          5.22,
+          5.51
+        ],
+        "verified_host_calls": 51000
+      },
+      {
+        "artifact": "artifacts/go-core.wasm",
+        "bytes": 4357070,
+        "call_us": [
+          1.5460247999999999,
+          1.5292949,
+          1.5276279000000001,
+          1.5132179000000001,
+          1.5493368
+        ],
+        "compile_us": 1835953.801,
+        "imports": [
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "sched_yield",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(12), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "proc_exit",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(11), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32], non_i31_gc_ref_params_count: 0, returns: [], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "args_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(10), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "args_sizes_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(10), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "clock_time_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(9), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I64, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "environ_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(10), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "environ_sizes_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(10), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_write",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "random_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(10), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "poll_oneoff",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_close",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(4), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_read",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_write",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(8), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_fdstat_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(10), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_fdstat_set_flags",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(10), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_prestat_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(10), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_prestat_dir_name",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(7), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "pirs",
+            "name": "emit",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(10), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          }
+        ],
+        "instantiate_us": [
+          1079.258,
+          204.659,
+          146.5,
+          134.32999999999998,
+          132.459,
+          130.58,
+          129.17000000000002,
+          135.84,
+          130.1,
+          128.93,
+          126.89999999999999,
+          127.799,
+          126.52,
+          127.69,
+          137.76899999999998,
+          127.66000000000001,
+          126.68,
+          125.95,
+          127.35000000000001,
+          125.61000000000001,
+          136.68,
+          128.829,
+          126.29,
+          126.53,
+          126.51900000000002
+        ],
+        "verified_host_calls": 51000
+      },
+      {
+        "artifact": "artifacts/go-component.wasm",
+        "bytes": 2481164,
+        "call_us": [
+          0.5754829,
+          0.5687318,
+          0.5774758,
+          0.5650649,
+          0.5700648
+        ],
+        "compile_us": 1000521.657,
+        "imports": [
+          {
+            "name": "wasi:cli/environment@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "get-environment",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(0) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "get-arguments",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/exit@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "exit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "status",
+                        "type": "Result(ResultType(Handle { index: TypeResultIndex(0) }))"
+                      }
+                    ],
+                    "results": []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/error@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/poll@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "poll",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "in",
+                        "type": "List(List(Handle { index: TypeListIndex(2) }))"
+                      }
+                    ],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(3) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/streams@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "stream-error",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "[method]input-stream.subscribe",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.check-write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(2) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(2) } })"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "List(List(Handle { index: TypeListIndex(4) }))"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.blocking-write-and-flush",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(2) } })"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "List(List(Handle { index: TypeListIndex(4) }))"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.blocking-flush",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(2) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.subscribe",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(2) } })"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdin@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(3) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdout@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(2) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stderr@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(2) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-input@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-output@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdin@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(0) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdout@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stderr@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:clocks/monotonic-clock@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "instant",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "duration",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "now",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "U64"
+                    ]
+                  }
+                },
+                {
+                  "name": "subscribe-instant",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "when",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                },
+                {
+                  "name": "subscribe-duration",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "when",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:clocks/wall-clock@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "datetime",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "now",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Record(Record(Handle { index: TypeRecordIndex(0) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:filesystem/types@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "error-code",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "directory-entry-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "descriptor",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "descriptor-flags",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "descriptor-type",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "filesize",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "link-count",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "datetime",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "descriptor-stat",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "[method]descriptor.read-via-stream",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(7) } })"
+                      },
+                      {
+                        "name": "offset",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(3) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.write-via-stream",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(7) } })"
+                      },
+                      {
+                        "name": "offset",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(4) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.append-via-stream",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(4) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.get-flags",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(5) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.get-type",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(6) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.stat",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(7) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "filesystem-error-code",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "err",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 94131506406400, index: ResourceIndex(0) } })"
+                      }
+                    ],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(3) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:filesystem/preopens@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "descriptor",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-directories",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(5) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:random/random@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "get-random-bytes",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "len",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(4) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "pirs:spike/host@0.1.0",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "event",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "emit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "value",
+                        "type": "Record(Record(Handle { index: TypeRecordIndex(2) }))"
+                      }
+                    ],
+                    "results": [
+                      "U32"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "instantiate_us": [
+          737.989,
+          200.73000000000002,
+          156.65,
+          152.57899999999998,
+          140.45,
+          134.94,
+          132.789,
+          132.16,
+          131.95000000000002,
+          130.8,
+          133.48,
+          131.12,
+          139.929,
+          133.48,
+          130.55,
+          129.09900000000002,
+          135.42,
+          130.6,
+          159.669,
+          185.48,
+          199.95000000000002,
+          148.56900000000002,
+          144.76,
+          200.29999999999998,
+          196.24
+        ],
+        "verified_host_calls": 51000
+      },
+      {
+        "artifact": "artifacts/rust-core.wasm",
+        "bytes": 61044,
+        "call_us": [
+          0.2719764,
+          0.2756745,
+          0.2624844,
+          0.2648595,
+          0.2646855
+        ],
+        "compile_us": 32461.714000000004,
+        "imports": [
+          {
+            "module": "pirs",
+            "name": "emit",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          }
+        ],
+        "instantiate_us": [
+          44.440000000000005,
+          6.89,
+          5.19,
+          3.84,
+          3.71,
+          3.5999999999999996,
+          9.32,
+          3.74,
+          3.73,
+          5.46,
+          4.05,
+          3.37,
+          5.22,
+          3.9299999999999997,
+          3.44,
+          4.68,
+          3.38,
+          3.43,
+          3.58,
+          3.5,
+          3.5,
+          3.35,
+          3.44,
+          3.8489999999999998,
+          3.39
+        ],
+        "verified_host_calls": 51000
+      }
+    ],
+    [
+      {
+        "artifact": "artifacts/go-core.wasm",
+        "bytes": 4357070,
+        "call_us": [
+          1.5631599,
+          1.5681287,
+          1.5363119,
+          1.5180459000000002,
+          1.5199009
+        ],
+        "compile_us": 1906903.867,
+        "imports": [
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "sched_yield",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(1), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "proc_exit",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(2), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32], non_i31_gc_ref_params_count: 0, returns: [], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "args_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(3), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "args_sizes_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(3), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "clock_time_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(4), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I64, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "environ_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(3), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "environ_sizes_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(3), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_write",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(5), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "random_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(3), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "poll_oneoff",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(5), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_close",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(0), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_read",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(5), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_write",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(5), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_fdstat_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(3), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_fdstat_set_flags",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(3), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_prestat_get",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(3), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "wasi_snapshot_preview1",
+            "name": "fd_prestat_dir_name",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(6), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          },
+          {
+            "module": "pirs",
+            "name": "emit",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(3), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          }
+        ],
+        "instantiate_us": [
+          1134.628,
+          216.029,
+          153.27,
+          135.13899999999998,
+          129.31,
+          127.58,
+          125.64,
+          128.17,
+          126.21,
+          126.22999999999999,
+          126.36,
+          125.71,
+          125.94,
+          131.04,
+          128.22,
+          125.52000000000001,
+          125.56899999999999,
+          125.57000000000001,
+          124.82,
+          124.85900000000001,
+          130.36999999999998,
+          126.42,
+          125.42,
+          124.11900000000001,
+          124.07
+        ],
+        "verified_host_calls": 51000
+      },
+      {
+        "artifact": "artifacts/go-component.wasm",
+        "bytes": 2481164,
+        "call_us": [
+          0.6088787,
+          0.6560256999999999,
+          0.6557287,
+          0.7759944000000001,
+          0.6311467000000001
+        ],
+        "compile_us": 1007321.0040000001,
+        "imports": [
+          {
+            "name": "wasi:cli/environment@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "get-environment",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(0) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "get-arguments",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/exit@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "exit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "status",
+                        "type": "Result(ResultType(Handle { index: TypeResultIndex(0) }))"
+                      }
+                    ],
+                    "results": []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/error@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/poll@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "poll",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "in",
+                        "type": "List(List(Handle { index: TypeListIndex(2) }))"
+                      }
+                    ],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(3) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/streams@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "stream-error",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "[method]input-stream.subscribe",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.check-write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(2) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(2) } })"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "List(List(Handle { index: TypeListIndex(4) }))"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.blocking-write-and-flush",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(2) } })"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "List(List(Handle { index: TypeListIndex(4) }))"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.blocking-flush",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(2) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.subscribe",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(2) } })"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdin@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(3) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdout@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(2) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stderr@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(2) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-input@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-output@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdin@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(0) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdout@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stderr@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:clocks/monotonic-clock@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "instant",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "duration",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "now",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "U64"
+                    ]
+                  }
+                },
+                {
+                  "name": "subscribe-instant",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "when",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                },
+                {
+                  "name": "subscribe-duration",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "when",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(1) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:clocks/wall-clock@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "datetime",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "now",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Record(Record(Handle { index: TypeRecordIndex(0) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:filesystem/types@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "error-code",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "directory-entry-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "descriptor",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "descriptor-flags",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "descriptor-type",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "filesize",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "link-count",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "datetime",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "descriptor-stat",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "[method]descriptor.read-via-stream",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(7) } })"
+                      },
+                      {
+                        "name": "offset",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(3) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.write-via-stream",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(7) } })"
+                      },
+                      {
+                        "name": "offset",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(4) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.append-via-stream",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(4) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.get-flags",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(5) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.get-type",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(6) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]descriptor.stat",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(7) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(7) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "filesystem-error-code",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "err",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050737327584, index: ResourceIndex(0) } })"
+                      }
+                    ],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(3) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:filesystem/preopens@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "descriptor",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-directories",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(5) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:random/random@0.2.12",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "get-random-bytes",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "len",
+                        "type": "U64"
+                      }
+                    ],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(4) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "pirs:spike/host@0.1.0",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "event",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "emit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "value",
+                        "type": "Record(Record(Handle { index: TypeRecordIndex(2) }))"
+                      }
+                    ],
+                    "results": [
+                      "U32"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "instantiate_us": [
+          545.9179999999999,
+          218.28900000000002,
+          203.15,
+          219.50900000000001,
+          240.3,
+          185.389,
+          150.41,
+          149.82999999999998,
+          144.409,
+          160.16000000000003,
+          143.94,
+          146.149,
+          144.36,
+          148.069,
+          137.82,
+          136.85999999999999,
+          135.23,
+          134.229,
+          156.26,
+          146.60000000000002,
+          139.119,
+          151.74,
+          158.62,
+          143.05,
+          138.64
+        ],
+        "verified_host_calls": 51000
+      },
+      {
+        "artifact": "artifacts/rust-core.wasm",
+        "bytes": 61044,
+        "call_us": [
+          0.2779554,
+          0.2885074,
+          0.28139549999999997,
+          0.29075239999999997,
+          0.2823114
+        ],
+        "compile_us": 34034.25,
+        "imports": [
+          {
+            "module": "pirs",
+            "name": "emit",
+            "type": "Func(FuncType { registered_type: RegisteredType { index: VMSharedTypeIndex(7), ty: WasmSubType { is_final: true, supertype: None, composite_type: WasmCompositeType { inner: Func(WasmFuncType { params: [I32, I32], non_i31_gc_ref_params_count: 0, returns: [I32], non_i31_gc_ref_returns_count: 0 }), shared: false } }, layout: None, .. } })"
+          }
+        ],
+        "instantiate_us": [
+          47.660000000000004,
+          6.59,
+          4.18,
+          4.03,
+          3.6399999999999997,
+          3.5300000000000002,
+          3.8500000000000005,
+          3.5599999999999996,
+          3.19,
+          4.52,
+          3.28,
+          4.0,
+          3.43,
+          3.17,
+          4.33,
+          3.05,
+          2.83,
+          3.5999999999999996,
+          3.73,
+          4.79,
+          3.22,
+          4.0600000000000005,
+          3.08,
+          3.59,
+          4.58
+        ],
+        "verified_host_calls": 51000
+      },
+      {
+        "artifact": "artifacts/rust-component.wasm",
+        "bytes": 41715,
+        "call_us": [
+          0.1565156,
+          0.15472270000000002,
+          0.1471507,
+          0.1505067,
+          0.15293969999999998
+        ],
+        "compile_us": 26392.656,
+        "imports": [
+          {
+            "name": "pirs:spike/host@0.1.0",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "event",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "emit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "value",
+                        "type": "Record(Record(Handle { index: TypeRecordIndex(0) }))"
+                      }
+                    ],
+                    "results": [
+                      "U32"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/poll@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "[method]pollable.block",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050728885200, index: ResourceIndex(0) } })"
+                      }
+                    ],
+                    "results": []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/error@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:io/streams@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "error",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "stream-error",
+                  "type": {
+                    "kind": "type"
+                  }
+                },
+                {
+                  "name": "pollable",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "[method]output-stream.check-write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050728885200, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(0) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.write",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050728885200, index: ResourceIndex(3) } })"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "List(List(Handle { index: TypeListIndex(0) }))"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.blocking-flush",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050728885200, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Result(ResultType(Handle { index: TypeResultIndex(1) }))"
+                    ]
+                  }
+                },
+                {
+                  "name": "[method]output-stream.subscribe",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "self",
+                        "type": "Borrow(ResourceType { kind: Uninstantiated { component: 97050728885200, index: ResourceIndex(3) } })"
+                      }
+                    ],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050728885200, index: ResourceIndex(0) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/environment@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "get-environment",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "List(List(Handle { index: TypeListIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/exit@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "exit",
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": "status",
+                        "type": "Result(ResultType(Handle { index: TypeResultIndex(2) }))"
+                      }
+                    ],
+                    "results": []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdin@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "input-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050728885200, index: ResourceIndex(2) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stdout@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050728885200, index: ResourceIndex(3) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/stderr@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "output-stream",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Own(ResourceType { kind: Uninstantiated { component: 97050728885200, index: ResourceIndex(3) } })"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-input@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-output@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdin@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-input",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdin",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(0) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stdout@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stdout",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "wasi:cli/terminal-stderr@0.2.6",
+            "type": {
+              "kind": "interface",
+              "members": [
+                {
+                  "name": "terminal-output",
+                  "type": {
+                    "kind": "resource"
+                  }
+                },
+                {
+                  "name": "get-terminal-stderr",
+                  "type": {
+                    "kind": "function",
+                    "params": [],
+                    "results": [
+                      "Option(OptionType(Handle { index: TypeOptionIndex(1) }))"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "instantiate_us": [
+          46.980000000000004,
+          10.020000000000001,
+          6.62,
+          6.03,
+          6.54,
+          6.319,
+          5.37,
+          6.15,
+          5.859999999999999,
+          5.66,
+          6.22,
+          5.6,
+          6.3500000000000005,
+          6.13,
+          5.43,
+          6.14,
+          5.84,
+          5.43,
+          8.709999999999999,
+          10.7,
+          8.8,
+          8.34,
+          9.61,
+          8.450000000000001,
+          5.9
+        ],
+        "verified_host_calls": 51000
+      }
+    ]
+  ]
+}

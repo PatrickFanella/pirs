@@ -1,0 +1,47 @@
+name: Plugin interface spike
+
+on:
+  push:
+    paths:
+      - service/pirs/interface-spike/**
+      - docs/decisions/**
+      - .gitea/workflows/interface-spike.yaml
+  pull_request:
+    paths:
+      - service/pirs/interface-spike/**
+      - docs/decisions/**
+      - .gitea/workflows/interface-spike.yaml
+
+jobs:
+  compare:
+    runs-on: dozor
+    container: rust:1.95.0-bookworm
+    timeout-minutes: 20
+    env:
+      CARGO_BUILD_JOBS: 2
+      GOMAXPROCS: 2
+    steps:
+      - name: Install action runtime, Python and pinned Go toolchain
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends python3 ca-certificates curl
+          curl --fail --location --output /tmp/pirs-spike-node.tar.xz https://nodejs.org/dist/v24.19.0/node-v24.19.0-linux-x64.tar.xz
+          echo '14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647  /tmp/pirs-spike-node.tar.xz' | sha256sum --check
+          tar -C /usr/local --strip-components=1 -xf /tmp/pirs-spike-node.tar.xz
+          curl --fail --location --output /tmp/pirs-spike-go.tar.gz https://go.dev/dl/go1.27.1.linux-amd64.tar.gz
+          echo '63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445  /tmp/pirs-spike-go.tar.gz' | sha256sum --check
+          tar -C /usr/local -xzf /tmp/pirs-spike-go.tar.gz
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build and validate all four guests
+        working-directory: service/pirs/interface-spike
+        run: |
+          export PATH="/usr/local/go/bin:$PATH"
+          python3 build.py --bootstrap
+      - name: Verify calls and enumerate imports before instantiation
+        working-directory: service/pirs/interface-spike
+        run: |
+          export PATH="/usr/local/go/bin:$PATH"
+          python3 measure.py
