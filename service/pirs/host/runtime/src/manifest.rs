@@ -87,7 +87,7 @@ impl Manifest {
     pub fn parse(bytes: &[u8]) -> Result<Self> {
         let manifest: Self = serde_json::from_slice(bytes)?;
         ensure!(manifest.schema_version == 1, "unsupported manifest version");
-        ensure!(manifest.min_spec_level == 0, "unsupported spec level");
+        ensure!(manifest.min_spec_level <= 1, "unsupported spec level");
         ensure!(
             !manifest.id.is_empty()
                 && manifest.id.len() <= 128
@@ -116,6 +116,29 @@ impl Manifest {
                 "kv.read" | "kv.write" => {
                     crate::kv::quota(&capability.constraints)?;
                 }
+                "xrpc.serve" => {
+                    #[derive(Deserialize)]
+                    #[serde(deny_unknown_fields)]
+                    struct Methods {
+                        nsids: Vec<String>,
+                    }
+                    let grant: Methods = serde_json::from_value(capability.constraints.clone())?;
+                    ensure!(
+                        !grant.nsids.is_empty() && grant.nsids.len() <= 64 && unique(&grant.nsids),
+                        "invalid XRPC methods"
+                    );
+                    ensure!(
+                        grant.nsids.iter().all(|n| nsid(n)
+                            && !n.starts_with("com.atproto.")
+                            && !n.starts_with("app.bsky.")),
+                        "invalid or reserved XRPC method"
+                    );
+                    ensure!(
+                        manifest.min_spec_level == 1
+                            && manifest.hooks.contains(&"xrpc.serve".to_owned()),
+                        "XRPC requires level 1 and hook"
+                    );
+                }
                 "events.subscribe" => {
                     let grant: Subscription =
                         serde_json::from_value(capability.constraints.clone())?;
@@ -143,13 +166,19 @@ impl Manifest {
                         .map(|t| format!("event.{t}"))
                         .collect();
                     ensure!(
-                        hooks == manifest.hooks.iter().cloned().collect(),
+                        hooks
+                            == manifest
+                                .hooks
+                                .iter()
+                                .filter(|h| h.as_str() != "xrpc.serve")
+                                .cloned()
+                                .collect(),
                         "hooks must match subscription event types"
                     );
                 }
                 // Shared spec vocabulary. Recognition never grants a capability
                 // that this runtime has no implementation for.
-                "xrpc.serve" | "http.serve" | "records.read" | "records.write" | "blobs.read"
+                "http.serve" | "records.read" | "records.write" | "blobs.read"
                 | "record.validate" | "record.unique" | "account.create" | "auth.session" => {
                     bail!("capability is not supported by this runtime")
                 }
@@ -157,8 +186,16 @@ impl Manifest {
             }
         }
         ensure!(
-            manifest.hooks.is_empty() || manifest.has("events.subscribe"),
+            manifest.hooks.iter().all(|h| if h == "xrpc.serve" {
+                manifest.has("xrpc.serve")
+            } else {
+                manifest.has("events.subscribe")
+            }),
             "hooks require events.subscribe"
+        );
+        ensure!(
+            (manifest.min_spec_level == 1) == manifest.has("xrpc.serve"),
+            "level 1 requires XRPC grant"
         );
         if manifest.has("kv.read") && manifest.has("kv.write") {
             ensure!(
@@ -167,6 +204,52 @@ impl Manifest {
             );
         }
         Ok(manifest)
+    }
+
+    pub fn xrpc_nsids(&self) -> Vec<String> {
+        self.capabilities
+            .iter()
+            .find(|c| c.name == "xrpc.serve")
+            .map(|c| {
+                serde_json::from_value(c.constraints["nsids"].clone()).expect("validated NSIDs")
+            })
+            .unwrap_or_default()
+    }
+
+    // Only the trusted HTTP supervisor writes this envelope after service auth.
+    // Independently enforce the installed method grant before guest allocation.
+    pub fn input(&self, input: &str) -> Result<Option<String>> {
+        if let Some(raw) = input.strip_prefix("xrpc:") {
+            #[derive(Deserialize)]
+            #[serde(deny_unknown_fields)]
+            struct Call {
+                nsid: String,
+                method: String,
+                issuer: String,
+                query: String,
+                body: Option<Value>,
+            }
+            let call: Call = serde_json::from_str(raw)?;
+            ensure!(self.xrpc_nsids().contains(&call.nsid), "undeclared NSID");
+            ensure!(
+                ["GET", "POST"].contains(&call.method.as_str()),
+                "invalid HTTP method"
+            );
+            ensure!(
+                call.issuer.starts_with("did:plc:")
+                    && call.issuer.len() == 32
+                    && call.issuer[8..]
+                        .bytes()
+                        .all(|c| c.is_ascii_lowercase() || (b'2'..=b'7').contains(&c)),
+                "invalid issuer"
+            );
+            ensure!(
+                call.query.len() <= 8192 && (call.method == "POST" || call.body.is_none()),
+                "invalid request"
+            );
+            return Ok(Some(input.to_owned()));
+        }
+        self.event_input(input)
     }
 
     pub fn network_grant(&self) -> Option<crate::network::Grant> {

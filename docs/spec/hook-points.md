@@ -134,7 +134,7 @@ documents its build and limits. Issue #11's successful PDS-write-to-local-receiv
 demo remains blocked by #10's private/loopback destination prohibition. This is
 partial reference-plugin evidence, not the M1 exit demonstration.
 
-Not yet run: a production plugin host, proxied XRPC to a host, and every level 2 and level 3 hook.
+Not yet run: a production plugin host and every level 2 and level 3 hook.
 
 Standalone WIT sandbox host, 2026-10-03: a separate Wasmtime process passed
 29 local calls covering traps, wall-clock interruption of an infinite loop and
@@ -175,3 +175,16 @@ records evidence and limits. Follow-up review fixes passed ordered parent-sync
 fault injection and shipping operator recovery for malformed and reduced-quota
 state, with six native and twenty KV/operator checks. No power-loss test was
 performed. No additional PDS hook or production deployment is claimed.
+
+
+Proxied plugin XRPC, 2026-10-06: a disposable account called an installed WIT
+guest through the real PDS proxy handler with GET and JSON POST. The separate
+HTTP supervisor verified service signatures, issuer keys, exact audiences,
+method, expiry and nonce before invocation. The Rust runtime independently
+refused undeclared NSIDs before guest allocation. Traps and guest limits
+returned bounded XRPC errors, followed by successful calls in the same runtime.
+[The service qualification](../qualification/xrpc-service.md) records the
+local fixtures and deployment limits. [The per-server service contract](xrpc-service.md)
+decides DID/service-ID addressing and documents the pinned PDS's explicit
+bare-audience compatibility. Per-account addressing and installation remain
+owner decisions. No production or complete level 1 conformance is claimed.

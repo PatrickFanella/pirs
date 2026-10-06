@@ -9,14 +9,19 @@
   "scripts": {
     "smoke": "node pirs/smoke.ts",
     "check:events": "tsc -p pirs/events/tsconfig.json",
-    "qualify:events": "node --test pirs/events/bridge.test.ts && node pirs/events/qualify.ts"
+    "qualify:events": "node --test pirs/events/bridge.test.ts && node pirs/events/qualify.ts",
+    "check:xrpc": "tsc -p pirs/xrpc/tsconfig.json",
+    "qualify:xrpc": "node --test pirs/xrpc/server.test.ts"
   },
   "license": "MIT",
   "dependencies": {
+    "@atproto/identity": "0.5.16",
     "@atproto/lex": "^0.3.13",
-    "@atproto/pds": "file:pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz"
+    "@atproto/pds": "file:pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz",
+    "@atproto/xrpc-server": "0.13.4"
   },
   "devDependencies": {
+    "@atproto/crypto": "0.5.7",
     "@did-plc/lib": "0.0.4",
     "@types/express": "^4.17.25",
     "@types/node": "26.6.4",

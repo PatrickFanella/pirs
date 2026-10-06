@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@atproto/identity':
+        specifier: 0.5.16
+        version: 0.5.16
+      '@atproto/xrpc-server':
+        specifier: 0.13.4
+        version: 0.13.4
       '@atproto/lex':
         specifier: ^0.3.13
         version: 0.3.13
@@ -15,6 +21,9 @@ importers:
         specifier: 0.5.37
         version: 0.5.37
     devDependencies:
+      '@atproto/crypto':
+        specifier: 0.5.7
+        version: 0.5.7
       '@did-plc/lib':
         specifier: 0.0.4
         version: 0.0.4
