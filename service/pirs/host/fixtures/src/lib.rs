@@ -2,7 +2,7 @@
 
 extern crate alloc;
 use alloc::string::String;
-#[cfg(not(feature = "network"))]
+#[cfg(not(any(feature = "network", feature = "kv")))]
 use alloc::{string::ToString, vec, vec::Vec};
 
 #[global_allocator]
@@ -67,15 +67,42 @@ fn panic(_info: &core::panic::PanicInfo<'_>) -> ! {
     core::arch::wasm32::unreachable()
 }
 
-#[cfg(not(feature = "network"))]
+#[cfg(not(any(feature = "network", feature = "kv")))]
 wit_bindgen::generate!({ path: "../wit", world: "sandbox" });
 #[cfg(feature = "network")]
 wit_bindgen::generate!({ path: "../wit", world: "network-sandbox" });
+
+#[cfg(feature = "kv")]
+wit_bindgen::generate!({ path: "../wit", world: "kv-fixture" });
 
 struct Fixture;
 
 impl Guest for Fixture {
     fn run(input: String) -> String {
+        #[cfg(feature = "kv")]
+        {
+            let marker = "\"repo\":\"";
+            let action = input
+                .split(marker)
+                .nth(1)
+                .unwrap_or("")
+                .split('"')
+                .next()
+                .unwrap_or("");
+            return match action {
+                "write" => alloc::format!(
+                    "{:?}",
+                    pirs::sandbox::kv_write::set("entry", Some(&[1, 2, 3]))
+                ),
+                "flood" => alloc::format!(
+                    "{:?}",
+                    pirs::sandbox::kv_write::set("entry", Some(&[255; 128]))
+                ),
+                "delete" => alloc::format!("{:?}", pirs::sandbox::kv_write::set("entry", None)),
+                "list" => alloc::format!("{:?}", pirs::sandbox::kv_read::list("ent")),
+                _ => alloc::format!("{:?}", pirs::sandbox::kv_read::get("entry")),
+            };
+        }
         #[cfg(feature = "network")]
         {
             // Qualification input is a public event's repo field. No PDS keys.
@@ -94,7 +121,7 @@ impl Guest for Fixture {
                 Err(error) => alloc::format!("denied:{error}"),
             };
         }
-        #[cfg(not(feature = "network"))]
+        #[cfg(not(any(feature = "network", feature = "kv")))]
         {
             if let Some(event) = input.strip_prefix("event:") {
                 // A hostile observer echoes every byte it receives. The host,

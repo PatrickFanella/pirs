@@ -12,11 +12,12 @@ use wasmtime::{Config, Engine, ResourceLimiter, Store, UpdateDeadline};
 
 wasmtime::component::bindgen!({
     path: "../wit",
-    world: "network-sandbox",
+    world: "storage-sandbox",
     imports: { default: trappable },
 });
 
 const EPOCH_INTERVAL: Duration = Duration::from_millis(5);
+mod kv;
 mod manifest;
 mod network;
 
@@ -29,6 +30,18 @@ mod network;
 struct Options {
     #[arg(long, value_name = "WASM_COMPONENT")]
     plugin: Option<PathBuf>,
+    /// Private host state root, separate from PDS storage.
+    #[arg(long, requires = "installation")]
+    state_dir: Option<PathBuf>,
+    /// Operator state command: export, delete, or uninstall.
+    #[arg(long, requires_all = ["installation", "state_dir"], value_parser = ["export", "delete", "uninstall"])]
+    state_command: Option<String>,
+    /// Uninstall must explicitly retain, export, or delete state.
+    #[arg(long, requires = "state_command", value_parser = ["retain", "export", "delete"])]
+    state_action: Option<String>,
+    /// New destination file for an export, never stdout.
+    #[arg(long, requires = "state_command")]
+    export_path: Option<PathBuf>,
     /// Manifest for a local file installation.
     #[arg(long, requires = "install_dir")]
     manifest: Option<PathBuf>,
@@ -85,6 +98,10 @@ struct CallState {
     log_bytes: usize,
     network_grant: Option<network::Grant>,
     network_calls: usize,
+    kv: Option<std::sync::Arc<kv::Storage>>,
+    kv_read: bool,
+    kv_write: bool,
+    kv_calls: usize,
 }
 
 impl CallState {
@@ -98,6 +115,10 @@ impl CallState {
             log_bytes: 2,
             network_grant: None,
             network_calls: 0,
+            kv: None,
+            kv_read: false,
+            kv_write: false,
+            kv_calls: 0,
         }
     }
 
@@ -233,10 +254,11 @@ impl Response {
 
 struct Host {
     engine: Engine,
-    plugin: NetworkSandboxPre<CallState>,
+    plugin: StorageSandboxPre<CallState>,
     limits: Limits,
     manifest: Option<manifest::Manifest>,
     installation_id: Option<String>,
+    kv: Option<std::sync::Arc<kv::Storage>>,
 }
 
 impl Host {
@@ -263,13 +285,29 @@ impl Host {
                 None,
             )
         };
+        let kv = if let Some(m) = &manifest {
+            if let Some(quota) = m.kv_quota("kv.write").or(m.kv_quota("kv.read")) {
+                Some(std::sync::Arc::new(kv::Storage::open(
+                    options
+                        .state_dir
+                        .as_ref()
+                        .context("KV requires --state-dir")?,
+                    &m.id,
+                    quota,
+                )?))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
         let component = Component::new(&engine, bytes)?;
         // No WASI, environment, filesystem or PDS API is linked. The network
         // callback checks the installed grant. Pre-instantiation checks the WIT
         // function contract before announcing readiness or executing a guest.
         let mut linker = Linker::new(&engine);
-        NetworkSandbox::add_to_linker::<_, HasSelf<_>>(&mut linker, |state| state)?;
-        let plugin = NetworkSandboxPre::new(linker.instantiate_pre(&component)?)?;
+        StorageSandbox::add_to_linker::<_, HasSelf<_>>(&mut linker, |state| state)?;
+        let plugin = StorageSandboxPre::new(linker.instantiate_pre(&component)?)?;
         let clock_engine = engine.clone();
         std::thread::Builder::new()
             .name("pirs-call-clock".into())
@@ -285,6 +323,7 @@ impl Host {
             limits,
             manifest,
             installation_id,
+            kv,
         })
     }
 
@@ -316,6 +355,9 @@ impl Host {
         let started = Instant::now();
         let mut store = Store::new(&self.engine, CallState::new(self.limits.clone()));
         store.data_mut().network_grant = self.manifest.as_ref().and_then(|m| m.network_grant());
+        store.data_mut().kv = self.kv.clone();
+        store.data_mut().kv_read = self.manifest.as_ref().is_some_and(|m| m.has("kv.read"));
+        store.data_mut().kv_write = self.manifest.as_ref().is_some_and(|m| m.has("kv.write"));
         store.limiter(|state| state);
         store.set_epoch_deadline(1);
         store.epoch_deadline_callback(|mut context| {
@@ -469,13 +511,17 @@ fn main() -> Result<()> {
         let component = Component::new(&engine, &bytes)?;
         let imports = manifest.check_imports(&engine, &component)?;
         let mut linker = Linker::new(&engine);
-        NetworkSandbox::add_to_linker::<_, HasSelf<_>>(&mut linker, |state| state)?;
+        StorageSandbox::add_to_linker::<_, HasSelf<_>>(&mut linker, |state| state)?;
         // Validate all signatures and the export contract without a Store or
         // guest instantiation. Nothing is written before this succeeds.
-        let _ = NetworkSandboxPre::<CallState>::new(linker.instantiate_pre(&component)?)?;
+        let _ = StorageSandboxPre::<CallState>::new(linker.instantiate_pre(&component)?)?;
         let record = manifest::receipt(&bytes, &manifest_bytes, imports);
         let destination = manifest::install(root, &bytes, &manifest_bytes, &record, &engine)?;
         println!("{}", json!({"installed": destination, "receipt": record}));
+        return Ok(());
+    }
+    if options.state_command.is_some() {
+        kv::operator(&options)?;
         return Ok(());
     }
     let host = Host::new(options)

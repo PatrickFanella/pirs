@@ -154,3 +154,13 @@ installed-manifest cursor/restart harness passed on merged #9 source. No
 adapter is installed by default, and no deciding plugin hook gains support.
 [The patch qualification](../qualification/pds-patches.md) records exact pins,
 full-suite status and the unavailable natural next-release rebase gate.
+
+Quota-bound KV state, 2026-10-06: verified installed WIT components used
+`kv.read` and `kv.write` in the separate host against disposable private state.
+Quota rejection, two-plugin isolation, SIGKILL/restart durability, prefix lookup,
+export and explicit uninstall deletion passed. The event consumer forwarded
+the state root and acknowledged a durable guest write through a synthetic
+sequencer and the shipping bridge/runtime. PDS smoke and full event regressions
+also passed with their existing observer. [The KV qualification](../qualification/kv-storage.md)
+records evidence and limits. No additional PDS hook or production deployment
+is claimed.
