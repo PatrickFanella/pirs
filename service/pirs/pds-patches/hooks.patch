@@ -1,0 +1,206 @@
+diff --git a/.changeset/pirs-transport-hook.md b/.changeset/pirs-transport-hook.md
+new file mode 100644
+index 000000000..342e39984
+--- /dev/null
++++ b/.changeset/pirs-transport-hook.md
+@@ -0,0 +1,5 @@
++---
++"@atproto/pds": minor
++---
++
++Expose optional trusted middleware before the XRPC router.
+diff --git a/packages/pds/AGENTS.md b/packages/pds/AGENTS.md
+new file mode 100644
+index 000000000..e23b9d48a
+--- /dev/null
++++ b/packages/pds/AGENTS.md
+@@ -0,0 +1,7 @@
++# PDS transport adapters
++
++`PdsHooks.xrpcMiddleware` accepts trusted transport adapters only. Plugin code
++must remain in a separate process and must not receive the PDS context or keys.
++Keep adapters after basic/well-known routes and CORS, before XRPC and its error
++handler. An omitted or empty adapter list must preserve upstream behavior.
++Run the hook integration tests and the full PDS suite when changing this seam.
+diff --git a/packages/pds/src/index.ts b/packages/pds/src/index.ts
+index 0bc3c8876..613f37644 100644
+--- a/packages/pds/src/index.ts
++++ b/packages/pds/src/index.ts
+@@ -64,6 +64,12 @@ export type SkeletonHandler = MethodHandler<
+   app.bsky.feed.getFeedSkeleton.$Output
+ >
+ 
++/** Trusted transport adapters only. Plugin code belongs in a separate process. */
++export type PdsHooks = {
++  /** Runs after CORS and well-known routes, before the XRPC router. */
++  xrpcMiddleware?: readonly express.RequestHandler[]
++}
++
+ export class PDS implements AsyncDisposable {
+   public ctx: AppContext
+   public app: express.Application
+@@ -78,10 +84,11 @@ export class PDS implements AsyncDisposable {
+   static async fromEnv(
+     env: ServerEnvironment = readEnv(),
+     overrides?: Partial<AppContextOptions>,
++    hooks?: PdsHooks,
+   ): Promise<PDS> {
+     const cfg = envToCfg(env)
+     const secrets = envToSecrets(env)
+-    return PDS.create(cfg, secrets, overrides)
++    return PDS.create(cfg, secrets, overrides, hooks)
+   }
+ 
+   /**
+@@ -94,8 +101,10 @@ export class PDS implements AsyncDisposable {
+     signals = ['SIGINT', 'SIGTERM'],
+     onCreated = undefined,
+     onStarted = undefined,
++    hooks = undefined,
+   }: {
+     env?: ServerEnvironment
++    hooks?: PdsHooks
+     signal?: AbortSignal
+     signals?: readonly NodeJS.Signals[]
+     /**
+@@ -124,7 +133,7 @@ export class PDS implements AsyncDisposable {
+       signal.addEventListener('abort', () => process.off(sig, abort))
+     }
+ 
+-    await using pds = await PDS.fromEnv(env)
++    await using pds = await PDS.fromEnv(env, undefined, hooks)
+ 
+     if (signal.aborted) return
+ 
+@@ -153,6 +162,7 @@ export class PDS implements AsyncDisposable {
+     cfg: ServerConfig,
+     secrets: ServerSecrets,
+     overrides?: Partial<AppContextOptions>,
++    hooks?: PdsHooks,
+   ): Promise<PDS> {
+     const ctx = await AppContext.fromConfig(cfg, secrets, overrides)
+ 
+@@ -208,6 +218,7 @@ export class PDS implements AsyncDisposable {
+     app.use(cors({ maxAge: DAY / SECOND }))
+     app.use(basicRoutes.createRouter(ctx))
+     app.use(wellKnown.createRouter(ctx))
++    if (hooks?.xrpcMiddleware?.length) app.use('/xrpc', ...hooks.xrpcMiddleware)
+     app.use(server.router)
+     app.use(error.handler)
+ 
+diff --git a/packages/pds/tests/pirs-hooks.test.ts b/packages/pds/tests/pirs-hooks.test.ts
+new file mode 100644
+index 000000000..9382c456c
+--- /dev/null
++++ b/packages/pds/tests/pirs-hooks.test.ts
+@@ -0,0 +1,110 @@
++import { randomBytes } from 'node:crypto'
++import { once } from 'node:events'
++import { mkdtemp, rm } from 'node:fs/promises'
++import { createServer } from 'node:http'
++import type { AddressInfo } from 'node:net'
++import { tmpdir } from 'node:os'
++import { join } from 'node:path'
++import { PDS, type PdsHooks } from '../src/index.js'
++
++// No public PLC, real account, or operator environment is used.
++async function fixture(hooks?: PdsHooks) {
++  const dir = await mkdtemp(join(tmpdir(), 'pirs-hooks-'))
++  const pds = await PDS.fromEnv(
++    {
++      devMode: true,
++      hostname: 'localhost',
++      dataDirectory: dir,
++      blobstoreDiskLocation: join(dir, 'blocks'),
++      jwtSecret: randomBytes(32).toString('hex'),
++      adminPassword: randomBytes(16).toString('hex'),
++      plcRotationKeyK256PrivateKeyHex: randomBytes(32).toString('hex'),
++      didPlcUrl: 'http://127.0.0.1:1',
++      crawlers: [],
++    },
++    undefined,
++    hooks,
++  )
++  const server = createServer(pds.app).listen(0, '127.0.0.1')
++  await once(server, 'listening')
++  return {
++    url: `http://127.0.0.1:${(server.address() as AddressInfo).port}`,
++    async [Symbol.asyncDispose]() {
++      try {
++        await new Promise<void>((resolve, reject) => {
++          server.close((err) => (err ? reject(err) : resolve()))
++          server.closeAllConnections()
++        })
++      } finally {
++        try {
++          await pds.destroy()
++        } finally {
++          await rm(dir, { recursive: true, force: true })
++        }
++      }
++    },
++  }
++}
++
++describe('optional XRPC transport middleware', () => {
++  it.each([undefined, { xrpcMiddleware: [] }])(
++    'preserves stock responses with %p',
++    async (hooks) => {
++      await using f = await fixture(hooks)
++      expect((await fetch(`${f.url}/xrpc/_health`)).status).toBe(200)
++      expect((await fetch(`${f.url}/unknown`)).status).toBe(404)
++      expect(
++        (
++          await fetch(`${f.url}/xrpc/com.atproto.repo.createRecord`, {
++            method: 'POST',
++            headers: { 'content-type': 'application/json' },
++            body: '{}',
++          })
++        ).status,
++      ).toBe(401)
++    },
++  )
++
++  it('orders adapters before XRPC and preserves upstream errors and CORS', async () => {
++    const calls: string[] = []
++    await using f = await fixture({
++      xrpcMiddleware: [
++        (req, res, next) => {
++          calls.push('first')
++          if (req.headers['x-pirs-test'] === 'deny') {
++            res.status(403).json({ error: 'TransportDenied' })
++          } else if (req.headers['x-pirs-test'] === 'throw') {
++            throw new Error('private adapter error')
++          } else next()
++        },
++        (_req, _res, next) => {
++          calls.push('second')
++          next()
++        },
++      ],
++    })
++    const denied = await fetch(`${f.url}/xrpc/com.atproto.repo.createRecord`, {
++      method: 'POST',
++      headers: { 'x-pirs-test': 'deny', origin: 'http://example.test' },
++    })
++    expect(denied.status).toBe(403)
++    expect(await denied.json()).toEqual({ error: 'TransportDenied' })
++    expect(denied.headers.get('access-control-allow-origin')).toBe('*')
++    expect(calls.splice(0)).toEqual(['first'])
++    expect((await fetch(`${f.url}/xrpc/_health`)).status).toBe(200)
++    expect(calls).toEqual([])
++    const failed = await fetch(`${f.url}/xrpc/com.atproto.server.getSession`, {
++      headers: { 'x-pirs-test': 'throw' },
++    })
++    expect(failed.status).toBe(500)
++    expect(await failed.json()).toEqual({
++      error: 'InternalServerError',
++      message: 'Internal Server Error',
++    })
++    calls.splice(0)
++    expect(
++      (await fetch(`${f.url}/xrpc/com.atproto.server.getSession`)).status,
++    ).toBe(401)
++    expect(calls).toEqual(['first', 'second'])
++  })
++})

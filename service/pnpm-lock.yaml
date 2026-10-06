@@ -12,8 +12,8 @@ importers:
         specifier: ^0.3.13
         version: 0.3.13
       '@atproto/pds':
-        specifier: 0.5.37
-        version: 0.5.37
+        specifier: file:pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz
+        version: file:pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz
     devDependencies:
       '@did-plc/lib':
         specifier: 0.0.4
@@ -224,8 +224,9 @@ packages:
     resolution: {integrity: sha512-HhY0n6BJtFlxHJTOwT34uf7BiMaEluuwiZqHkamWoFvl+Gk7bPgWhPslr4kX2J/7ryFxhdsKVj1tjWjy0AhjTw==}
     engines: {node: '>=22'}
 
-  '@atproto/pds@0.5.37':
-    resolution: {integrity: sha512-KurO7hdzvbzlv+cgx+sHKPPRPZ8gO0ap3IO5jaJ6K0jbrWifI7EzFifMCG+Eg1d74eaR30RqBD3WJVgg6sbRxA==}
+  '@atproto/pds@file:pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz':
+    resolution: {integrity: sha512-SFeJhrAp2fD6QiujLeMem6xWsZRQUfGphQx1Bn7WnXTaf8DAad0NwFjhSKZ+tb4CzzdHITbQqlA2WJNF86aD/g==, tarball: file:pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz}
+    version: 0.5.37
     engines: {node: '>=22'}
 
   '@atproto/repo@0.10.15':
@@ -2599,7 +2600,7 @@ snapshots:
       '@atproto/jwk': 0.7.4
       zod: 3.25.76
 
-  '@atproto/pds@0.5.37':
+  '@atproto/pds@file:pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz':
     dependencies:
       '@atproto-labs/fetch-node': 0.4.0
       '@atproto-labs/opentelemetry-node': 0.3.0

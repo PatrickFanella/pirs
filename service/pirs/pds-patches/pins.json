@@ -1,0 +1,12 @@
+{
+  "upstreamRepository": "https://github.com/bluesky-social/atproto.git",
+  "upstreamTag": "@atproto/pds@0.5.37",
+  "upstreamCommit": "a7c8604d876a200a1e4fa4aec83d4189ac4f1c12",
+  "forkRepository": "https://git.subcult.tv/subculture-collective/pirs-atproto.git",
+  "forkCommit": "39ec3487005b033e71b554d704c3cd40995d8082",
+  "forkTree": "4332a1d68afc7aebc633fb5f98b8acdae4c32a1d",
+  "packageVersion": "0.5.37",
+  "artifact": "atproto-pds-0.5.37-pirs-7357a80.tgz",
+  "artifactSha256": "63d406bf7a9624572048898ba443f1d2af8ec779bdb656ed3addde9223dba073",
+  "patchSha256": "90e6f7798ce4606a04972bb3bbc4976fcd6d649baa1851f45e8afe92700c64f3"
+}

@@ -1,0 +1,60 @@
+name: PDS patch qualification
+on:
+  push:
+  pull_request:
+jobs:
+  qualify:
+    runs-on: dozor
+    container: node:24-bookworm
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [stock, patched]
+    services:
+      postgres:
+        image: postgres:14.4-alpine
+        env:
+          POSTGRES_USER: pg
+          POSTGRES_PASSWORD: password
+      redis:
+        image: redis:7.0-alpine
+    env:
+      REDIS_HOST: redis:6379
+      CARGO_BUILD_JOBS: 2
+      DB_POSTGRES_URL: postgresql://pg:password@postgres:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build and run full upstream PDS tests
+        run: |
+          corepack enable
+          git clone https://github.com/bluesky-social/atproto.git /tmp/atproto
+          git -C /tmp/atproto checkout a7c8604d876a200a1e4fa4aec83d4189ac4f1c12
+          bash service/pirs/pds-patches/build.sh '${{ matrix.package }}' /tmp/atproto
+      - name: Select qualified package
+        run: |
+          if [ '${{ matrix.package }}' = patched ]; then
+            cmp service/pirs/pds-patches/build/patched/atproto-pds-0.5.37.tgz service/pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz
+          fi
+          node service/pirs/pds-patches/select.mjs '${{ matrix.package }}'
+      - name: Pirs smoke and existing bridge checks
+        working-directory: service
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm smoke
+          node --test pirs/smoke.test.ts pirs/events/bridge.test.ts
+          pnpm check:events
+      - name: Build installed manifest host and qualify delivery
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends build-essential curl python3
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.95.0
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add wasm32-wasip2
+          cd service/pirs/host
+          python3 build.py
+          cd ../..
+          node --test pirs/events/manifest.test.ts
+          pnpm qualify:events
