@@ -10,15 +10,16 @@ import { fileURLToPath } from 'node:url'
 import { listenPrivate } from './local-socket.ts'
 import { PAGE_BYTES, isSequence, parsePage } from './protocol.ts'
 
-type Cursor = { version: 1; stream: string; seq: number }
+type Cursor = { version: 2; stream: string; seq: number; installationId: string }
 
 async function readCursor(path: string): Promise<Cursor | undefined> {
   try {
     const value: unknown = JSON.parse(await readFile(path, 'utf8'))
-    if (!value || typeof value !== 'object' || !('version' in value) || value.version !== 1 ||
+    if (!value || typeof value !== 'object' || !('version' in value) || value.version !== 2 ||
       !('stream' in value) || typeof value.stream !== 'string' || !/^[0-9a-f-]{36}$/.test(value.stream) ||
-      !('seq' in value) || !isSequence(value.seq)) throw new Error('invalid durable cursor')
-    return { version: 1, stream: value.stream, seq: value.seq }
+      !('seq' in value) || !isSequence(value.seq) ||
+      !('installationId' in value) || typeof value.installationId !== 'string' || !/^[0-9a-f]{64}$/.test(value.installationId)) throw new Error('invalid durable cursor')
+    return { version: 2, stream: value.stream, seq: value.seq, installationId: value.installationId }
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return undefined
     throw error
@@ -71,8 +72,8 @@ class Runtime {
   private waiter: { resolve: (value: unknown) => void; reject: (error: Error) => void } | undefined
   private failure: Error | undefined
 
-  constructor(host: string, plugin: string) {
-    this.child = spawn(host, ['--plugin', plugin, '--parent-pid', String(process.pid),
+  constructor(host: string, installation: string) {
+    this.child = spawn(host, ['--installation', installation, '--parent-pid', String(process.pid),
       '--input-bytes', '1048576', '--deadline-ms', '250'], { env: {}, stdio: 'pipe' })
     this.child.stdout.on('data', (chunk: Buffer) => {
       try {
@@ -116,7 +117,9 @@ class Runtime {
 
   async ready() {
     const value = await this.response(30_000)
-    if (!value || typeof value !== 'object' || !('ready' in value) || value.ready !== true) throw new Error('runtime not ready')
+    if (!value || typeof value !== 'object' || !('ready' in value) || value.ready !== true ||
+      !('installationId' in value) || typeof value.installationId !== 'string' || !/^[0-9a-f]{64}$/.test(value.installationId)) throw new Error('installed runtime not ready')
+    return value.installationId
   }
 
   async call(seq: number, event: unknown) {
@@ -125,8 +128,8 @@ class Runtime {
     const value = await response
     if (!value || typeof value !== 'object' || !('id' in value) || value.id !== seq ||
       !('ok' in value) || value.ok !== true || !('logs' in value) || !Array.isArray(value.logs) ||
-      value.logs.some((log: unknown) => typeof log !== 'string')) throw new Error('plugin call failed; cursor unchanged')
-    return value.logs
+      value.logs.some((log: unknown) => typeof log !== 'string') || !('filtered' in value) || typeof value.filtered !== 'boolean') throw new Error('plugin call failed; cursor unchanged')
+    return { logs: value.logs, filtered: value.filtered }
   }
 
   async close() {
@@ -139,15 +142,16 @@ class Runtime {
   }
 }
 
-export async function consume(options: { socket: string; cursor: string; host: string; plugin: string; signal: AbortSignal }) {
-  if (![options.cursor, options.host, options.plugin].every(isAbsolute)) throw new Error('host, plugin and cursor paths must be absolute')
+export async function consume(options: { socket: string; cursor: string; host: string; installation: string; signal: AbortSignal }) {
+  if (![options.cursor, options.host, options.installation].every(isAbsolute)) throw new Error('host, installation and cursor paths must be absolute')
   const lock = createServer((connection) => connection.end())
   const unlock = await listenPrivate(lock, `${options.cursor}.lock`)
   let runtime: Runtime | undefined
   try {
     let cursor = await readCursor(options.cursor)
-    runtime = new Runtime(options.host, options.plugin)
-    await runtime.ready()
+    runtime = new Runtime(options.host, options.installation)
+    const installationId = await runtime.ready()
+    if (cursor && cursor.installationId !== installationId) throw new Error('installation changed; use a new cursor after operator review')
     process.stdout.write(JSON.stringify({ ready: true, runtimePid: runtime.child.pid, cursor: cursor?.seq ?? 0 }) + '\n')
     while (!options.signal.aborted) {
       let page
@@ -159,16 +163,16 @@ export async function consume(options: { socket: string; cursor: string; host: s
         continue
       }
       if (cursor && cursor.stream !== page.stream) throw new Error('event stream changed; cursor unchanged')
-      if (!cursor) { cursor = { version: 1, stream: page.stream, seq: 0 }; await saveCursor(options.cursor, cursor) }
+      if (!cursor) { cursor = { version: 2, stream: page.stream, seq: 0, installationId }; await saveCursor(options.cursor, cursor) }
       for (const event of page.events) {
         if (options.signal.aborted) break
-        const logs = await runtime.call(event.seq, event)
+        const { logs, filtered } = await runtime.call(event.seq, event)
         // A process crash after the call but before this synced rename repeats
         // the event on restart. Persist before acknowledging it to the operator.
-        cursor = { version: 1, stream: page.stream, seq: event.seq }
+        cursor = { version: 2, stream: page.stream, seq: event.seq, installationId }
         await saveCursor(options.cursor, cursor)
         await new Promise<void>((resolve, reject) => process.stdout.write(
-          JSON.stringify({ delivered: event.seq, type: event.type, logs }) + '\n',
+          JSON.stringify({ ...(filtered ? { filtered: event.seq } : { delivered: event.seq }), type: event.type, logs }) + '\n',
           (error) => error ? reject(error) : resolve()))
       }
       if (!page.events.length) await pause(options.signal)
@@ -190,12 +194,12 @@ async function pause(signal: AbortSignal) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const { values } = parseArgs({ options: {
-    socket: { type: 'string' }, cursor: { type: 'string' }, host: { type: 'string' }, plugin: { type: 'string' }
+    socket: { type: 'string' }, cursor: { type: 'string' }, host: { type: 'string' }, installation: { type: 'string' }
   } })
-  if (!values.socket || !values.cursor || !values.host || !values.plugin) throw new Error('required: --socket --cursor --host --plugin')
+  if (!values.socket || !values.cursor || !values.host || !values.installation) throw new Error('required: --socket --cursor --host --installation')
   const stop = new AbortController()
   process.once('SIGTERM', () => stop.abort())
   process.once('SIGINT', () => stop.abort())
-  consume({ socket: values.socket, cursor: values.cursor, host: values.host, plugin: values.plugin, signal: stop.signal })
+  consume({ socket: values.socket, cursor: values.cursor, host: values.host, installation: values.installation, signal: stop.signal })
     .catch((error: unknown) => { console.error(error instanceof Error ? error.message : 'delivery failed'); process.exitCode = 1 })
 }

@@ -11,6 +11,27 @@ use alloc::{
 #[cfg(not(feature = "wasi"))]
 static ALLOCATOR: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
 
+// Newer LLVM can lower string comparisons to memcmp even in no_std builds.
+// Volatile reads keep this fixture implementation from lowering to itself.
+#[unsafe(no_mangle)]
+#[cfg(not(feature = "wasi"))]
+pub unsafe extern "C" fn memcmp(
+    left: *const core::ffi::c_void,
+    right: *const core::ffi::c_void,
+    len: usize,
+) -> i32 {
+    let left = left.cast::<u8>();
+    let right = right.cast::<u8>();
+    for index in 0..len {
+        let a = unsafe { core::ptr::read_volatile(left.add(index)) };
+        let b = unsafe { core::ptr::read_volatile(right.add(index)) };
+        if a != b {
+            return i32::from(a) - i32::from(b);
+        }
+    }
+    0
+}
+
 // The wasip2 target normally obtains this export from std. This no_std
 // fixture supplies it explicitly so no WASI interfaces enter the component.
 #[unsafe(no_mangle)]
@@ -55,6 +76,11 @@ struct Fixture;
 impl Guest for Fixture {
     fn run(input: String) -> String {
         if let Some(event) = input.strip_prefix("event:") {
+            // A hostile observer echoes every byte it receives. The host,
+            // rather than cooperative guest code, must remove denied data.
+            if cfg!(feature = "event-echo") {
+                return event.to_string();
+            }
             // Qualification observer: confirm the sequenced envelope reached
             // Wasm, without echoing its potentially large CAR body.
             // Avoid a substring search that would require libc's memcmp in

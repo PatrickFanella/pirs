@@ -1,10 +1,10 @@
 # WIT sandbox host
 
-This is the standalone host for [issue #7](https://git.subcult.tv/subculture-collective/pirs/issues/7).
+This is the standalone host introduced in [issue #7](https://git.subcult.tv/subculture-collective/pirs/issues/7).
 It loads one WIT component in a separate process and serves bounded test calls.
 The separate [event consumer](../events/README.md) can deliver retained PDS
-events through this call contract. It has no manifest grants or application
-capabilities.
+events through this call contract. Local file installs now enforce [manifest grants](../../../docs/spec/local-manifest.md).
+Only level 0 subscriptions and bounded diagnostics are implemented.
 
 ## Build and qualify
 
@@ -17,6 +17,7 @@ rustup target add wasm32-wasip2
 cargo fmt --all --check
 python3 build.py
 python3 qualify.py
+python3 qualify-manifest.py
 ```
 
 The build creates the host, a no_std guest importing only diagnostics, and a
@@ -32,7 +33,7 @@ they are not a plugin SDK.
 
 ```sh
 target/release/pirs-host \
-  --plugin target/wasm32-wasip2/release/pirs_sandbox_fixture.wasm \
+  --qualification-only --plugin target/wasm32-wasip2/release/pirs_sandbox_fixture.wasm \
   --memory-mib 8 --deadline-ms 250 \
   --response-bytes 1024 --log-bytes 256 --input-bytes 512
 ```

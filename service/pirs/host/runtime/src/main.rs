@@ -3,7 +3,7 @@ use clap::Parser;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{
-    io::{BufRead, Read, Write},
+    io::{BufRead, Write},
     path::PathBuf,
     time::{Duration, Instant},
 };
@@ -17,7 +17,7 @@ wasmtime::component::bindgen!({
 });
 
 const EPOCH_INTERVAL: Duration = Duration::from_millis(5);
-const MAX_COMPONENT_BYTES: u64 = 16 * 1024 * 1024;
+mod manifest;
 
 #[derive(Parser)]
 #[command(
@@ -27,7 +27,19 @@ const MAX_COMPONENT_BYTES: u64 = 16 * 1024 * 1024;
 )]
 struct Options {
     #[arg(long, value_name = "WASM_COMPONENT")]
-    plugin: PathBuf,
+    plugin: Option<PathBuf>,
+    /// Manifest for a local file installation.
+    #[arg(long, requires = "install_dir")]
+    manifest: Option<PathBuf>,
+    /// Validate and copy local bytes to a content-addressed installation.
+    #[arg(long, requires_all = ["plugin", "manifest"], conflicts_with_all = ["installation", "qualification_only"])]
+    install_dir: Option<PathBuf>,
+    /// Run verified installed bytes, never the mutable source file.
+    #[arg(long, conflicts_with_all = ["plugin", "qualification_only"])]
+    installation: Option<PathBuf>,
+    /// Raw component mode for isolated sandbox qualification only.
+    #[arg(long, requires = "plugin")]
+    qualification_only: bool,
     #[arg(long, default_value_t = 16, value_parser = clap::value_parser!(u64).range(1..=64))]
     memory_mib: u64,
     #[arg(long, default_value_t = 100, value_parser = clap::value_parser!(u64).range(1..=60_000))]
@@ -185,6 +197,7 @@ struct Request {
 
 #[derive(Serialize)]
 struct Response {
+    filtered: bool,
     id: Option<u64>,
     ok: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -200,6 +213,7 @@ struct Response {
 impl Response {
     fn invalid() -> Self {
         Self {
+            filtered: false,
             id: None,
             ok: false,
             result: None,
@@ -216,6 +230,8 @@ struct Host {
     engine: Engine,
     plugin: SandboxPre<CallState>,
     limits: Limits,
+    manifest: Option<manifest::Manifest>,
+    installation_id: Option<String>,
 }
 
 impl Host {
@@ -227,17 +243,21 @@ impl Host {
             log_bytes: options.log_bytes as usize,
             input_bytes: options.input_bytes as usize,
         };
-        let mut bytes = Vec::new();
-        std::fs::File::open(options.plugin)?
-            .take(MAX_COMPONENT_BYTES + 1)
-            .read_to_end(&mut bytes)?;
-        ensure!(
-            bytes.len() as u64 <= MAX_COMPONENT_BYTES,
-            "component exceeds artifact size ceiling"
-        );
         let mut config = Config::new();
         config.epoch_interruption(true).wasm_backtrace(false);
         let engine = Engine::new(&config)?;
+        let (bytes, manifest, installation_id) = if let Some(path) = &options.installation {
+            let (bytes, manifest, receipt) = manifest::load(path, &engine)?;
+            (bytes, Some(manifest), Some(receipt.installation_id))
+        } else {
+            ensure!(options.qualification_only, "an installation is required");
+            let path = options.plugin.as_ref().context("missing component")?;
+            (
+                manifest::read_bounded(path, manifest::MAX_ARTIFACT)?,
+                None,
+                None,
+            )
+        };
         let component = Component::new(&engine, bytes)?;
         // Only diagnostics exist. No WASI, environment, filesystem, PDS or
         // application capability is linked. Pre-instantiation checks the WIT
@@ -258,10 +278,36 @@ impl Host {
             engine,
             plugin,
             limits,
+            manifest,
+            installation_id,
         })
     }
 
-    fn call(&self, request: Request) -> Response {
+    fn call(&self, mut request: Request) -> Response {
+        if let Some(manifest) = &self.manifest {
+            match manifest.event_input(&request.input) {
+                Ok(Some(input)) => request.input = input,
+                Ok(None) => {
+                    return Response {
+                        filtered: true,
+                        id: request.id,
+                        ok: true,
+                        result: None,
+                        error: None,
+                        logs: Vec::new(),
+                        log_bytes: 2,
+                        peak_memory_bytes: 0,
+                        elapsed_ms: 0.0,
+                    };
+                }
+                Err(_) => {
+                    return Response {
+                        id: request.id,
+                        ..Response::invalid()
+                    };
+                }
+            }
+        }
         let started = Instant::now();
         let mut store = Store::new(&self.engine, CallState::new(self.limits.clone()));
         store.limiter(|state| state);
@@ -294,6 +340,7 @@ impl Host {
         }
         let state = store.into_data();
         Response {
+            filtered: false,
             id: request.id,
             ok: failure.is_none(),
             result: output,
@@ -351,7 +398,7 @@ fn serve(host: Host) -> Result<()> {
     let mut output = std::io::stdout().lock();
     serde_json::to_writer(
         &mut output,
-        &json!({ "ready": true, "interface": "pirs:sandbox@0.1.0", "limits": host.limits, "epoch_interval_ms": 5 }),
+        &json!({ "ready": true, "interface": "pirs:sandbox@0.1.0", "limits": host.limits, "epoch_interval_ms": 5, "installationId": host.installation_id }),
     )?;
     writeln!(output)?;
     output.flush()?;
@@ -403,6 +450,27 @@ fn main() -> Result<()> {
         }
         #[cfg(not(target_os = "linux"))]
         bail!("supervised event delivery requires Linux (parent {parent})");
+    }
+    if let Some(root) = &options.install_dir {
+        let engine = Engine::default();
+        let bytes = manifest::read_bounded(
+            options.plugin.as_ref().context("missing plugin")?,
+            manifest::MAX_ARTIFACT,
+        )?;
+        let manifest_bytes =
+            manifest::read_manifest(options.manifest.as_ref().context("missing manifest")?)?;
+        let manifest = manifest::Manifest::parse(&manifest_bytes)?;
+        let component = Component::new(&engine, &bytes)?;
+        let imports = manifest.check_imports(&engine, &component)?;
+        let mut linker = Linker::new(&engine);
+        Sandbox::add_to_linker::<_, HasSelf<_>>(&mut linker, |state| state)?;
+        // Validate all signatures and the export contract without a Store or
+        // guest instantiation. Nothing is written before this succeeds.
+        let _ = SandboxPre::<CallState>::new(linker.instantiate_pre(&component)?)?;
+        let record = manifest::receipt(&bytes, &manifest_bytes, imports);
+        let destination = manifest::install(root, &bytes, &manifest_bytes, &record, &engine)?;
+        println!("{}", json!({"installed": destination, "receipt": record}));
+        return Ok(());
     }
     let host = Host::new(options)
         .map_err(|_| anyhow::anyhow!("plugin load or sandbox contract check failed"))?;

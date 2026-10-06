@@ -103,6 +103,17 @@ commands and local measurements. This adds retained-event delivery evidence
 for `event.commit`, `event.sync`, `event.identity` and `event.account`, not
 manifest grants or production qualification.
 
+Local manifest enforcement, 2026-10-05: the separate host rejected unknown
+capabilities and uncovered component imports before instantiation, including a
+startup callback/loop probe. Installed artifact and manifest hashes pin exact
+bytes; corruption and valid replacement fail before readiness. Host filtering
+removed denied event types, collections and opaque CAR data before guest delivery.
+A disposable PDS produced a denied-collection write and a mixed-collection batch;
+filtered progress and installed cursor identity survived restart.
+[The manifest qualification](../qualification/manifest-install.md) records the
+runtime tests, byte hashes and limits. This adds level 0 manifest enforcement
+only; future capabilities remain unimplemented.
+
 Not yet run: a production plugin host, proxied XRPC to a host, and every level 2 and level 3 hook.
 
 Standalone WIT sandbox host, 2026-10-03: a separate Wasmtime process passed
