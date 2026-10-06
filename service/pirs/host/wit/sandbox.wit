@@ -23,6 +23,11 @@ world sandbox {
   export run: func(input: string) -> string;
 }
 
+world webhook {
+  import network;
+  export run: func(input: string) -> string;
+}
+
 interface kv-read {
   get: func(key: string) -> result<option<list<u8>>, string>;
   %list: func(prefix: string) -> result<list<string>, string>;

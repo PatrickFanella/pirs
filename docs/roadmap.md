@@ -26,6 +26,11 @@ CI runs the smoke check, real account events are verified locally, the image bui
 
 A sandboxed plugin in a separate host process receives PDS events with enforced limits. Exit demo: a commit webhook plugin.
 
+The [commit webhook reference](qualification/commit-webhook.md) has source and
+component checks. Its required successful local receiver demo conflicts with
+#10's loopback/private destination prohibition and awaits an owner decision.
+M1 has not passed its exit demonstration.
+
 | Issue | Priority | Blocked by |
 | --- | --- | --- |
 | [#7](https://git.subcult.tv/subculture-collective/pirs/issues/7) Run one plugin in a separate host process with enforced limits | P0 | [#6](https://git.subcult.tv/subculture-collective/pirs/issues/6) |
