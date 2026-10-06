@@ -13,6 +13,8 @@ on:
       - docs/qualification/event-delivery.md
       - docs/qualification/manifest-install.md
       - docs/spec/local-manifest.md
+      - docs/spec/kv-storage.md
+      - docs/qualification/kv-storage.md
       - .gitea/workflows/host-sandbox.yaml
   pull_request:
     paths:
@@ -26,6 +28,8 @@ on:
       - docs/qualification/event-delivery.md
       - docs/qualification/manifest-install.md
       - docs/spec/local-manifest.md
+      - docs/spec/kv-storage.md
+      - docs/qualification/kv-storage.md
       - .gitea/workflows/host-sandbox.yaml
 
 jobs:
@@ -60,6 +64,11 @@ jobs:
       - name: Qualify manifest imports, startup and integrity
         working-directory: service/pirs/host
         run: python3 qualify-manifest.py
+      - name: Qualify durable plugin state and operator commands
+        working-directory: service/pirs/host
+        run: |
+          cargo test -p pirs-plugin-host --locked
+          python3 qualify-kv.py
       - name: Install event qualification dependencies
         working-directory: service
         run: |
@@ -70,7 +79,7 @@ jobs:
         run: pnpm check:events
       - name: Qualify installed consumer filtering and cursor integrity
         working-directory: service
-        run: node --test pirs/events/manifest.test.ts
+        run: node --test pirs/events/manifest.test.ts pirs/events/kv.test.ts
       - name: Qualify event delivery, restarts and stopped-host writes
         working-directory: service
         run: pnpm qualify:events

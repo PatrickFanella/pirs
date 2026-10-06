@@ -68,3 +68,6 @@ are test-only; they are never loaded by the distribution entrypoint.
 Results go to ignored `../host/target/event-delivery.json`. The
 [qualification record](../../../docs/qualification/event-delivery.md) documents
 the exact protocol, commands, evidence and remaining boundaries.
+
+KV-enabled plugins require `--state-dir /absolute/private/plugin-state` on the
+consumer. It forwards that path to the host. See [storage and backup scope](../../../docs/spec/kv-storage.md).

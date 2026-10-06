@@ -107,6 +107,19 @@ deliverable, and direct client calls to it do not qualify #11.
 
 ## Evidence scope
 
+The October 6 merge review combined this reference with the merged KV host.
+The WIT conflict was resolved by retaining the network-only webhook world and
+both KV worlds. The locked release/component build, nine native host/webhook
+tests, twenty installed KV checks, five installed webhook checks, sandbox and
+manifest qualifications, event typecheck, both installed consumer tests, PDS
+smoke and full event restart/replay qualification passed on the combined tree.
+The host binary hash remained the recorded KV release hash. The production
+network denial checks passed, but its external example.com GET gate failed;
+an independent curl also could not reach that destination from this host.
+This review does not claim fresh successful public HTTPS qualification. The
+unchanged network implementation retains its earlier qualification evidence.
+Hosted CI was waived under the owner's PR backlog instruction.
+
 The recorded checks cover source build, manifest/import enforcement, notice
 projection, signing and tamper rejection, bounded retry logic, and a denied
 local destination in the installed WIT runtime. The repository smoke gate

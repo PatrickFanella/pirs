@@ -20,7 +20,7 @@ const MAX_MANIFEST: u64 = 64 * 1024;
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Manifest {
     schema_version: u32,
-    id: String,
+    pub id: String,
     min_spec_level: u32,
     hooks: Vec<String>,
     capabilities: Vec<Capability>,
@@ -113,6 +113,9 @@ impl Manifest {
                 "network.request" => {
                     crate::network::Grant::parse(&capability.constraints)?;
                 }
+                "kv.read" | "kv.write" => {
+                    crate::kv::quota(&capability.constraints)?;
+                }
                 "events.subscribe" => {
                     let grant: Subscription =
                         serde_json::from_value(capability.constraints.clone())?;
@@ -147,8 +150,7 @@ impl Manifest {
                 // Shared spec vocabulary. Recognition never grants a capability
                 // that this runtime has no implementation for.
                 "xrpc.serve" | "http.serve" | "records.read" | "records.write" | "blobs.read"
-                | "kv.read" | "kv.write" | "record.validate" | "record.unique"
-                | "account.create" | "auth.session" => {
+                | "record.validate" | "record.unique" | "account.create" | "auth.session" => {
                     bail!("capability is not supported by this runtime")
                 }
                 _ => bail!("unknown capability category or operation"),
@@ -158,6 +160,12 @@ impl Manifest {
             manifest.hooks.is_empty() || manifest.has("events.subscribe"),
             "hooks require events.subscribe"
         );
+        if manifest.has("kv.read") && manifest.has("kv.write") {
+            ensure!(
+                manifest.kv_quota("kv.read") == manifest.kv_quota("kv.write"),
+                "KV quotas must match"
+            );
+        }
         Ok(manifest)
     }
 
@@ -168,16 +176,25 @@ impl Manifest {
             .map(|c| crate::network::Grant::parse(&c.constraints).expect("validated grant"))
     }
 
-    fn has(&self, name: &str) -> bool {
+    pub fn kv_quota(&self, name: &str) -> Option<usize> {
+        self.capabilities
+            .iter()
+            .find(|c| c.name == name)
+            .map(|c| crate::kv::quota(&c.constraints).expect("validated quota"))
+    }
+
+    pub fn has(&self, name: &str) -> bool {
         self.capabilities.iter().any(|c| c.name == name)
     }
 
     pub fn check_imports(&self, engine: &Engine, component: &Component) -> Result<Vec<String>> {
         let mut imports = Vec::new();
         for (name, item) in component.component_type().imports(engine) {
-            let (capability, allowed_operation) = match name {
-                "pirs:sandbox/diagnostics@0.1.0" => ("diagnostics.log", "log"),
-                "pirs:sandbox/network@0.1.0" => ("network.request", "request"),
+            let (capability, allowed_operations): (&str, &[&str]) = match name {
+                "pirs:sandbox/diagnostics@0.1.0" => ("diagnostics.log", &["log"]),
+                "pirs:sandbox/network@0.1.0" => ("network.request", &["request"]),
+                "pirs:sandbox/kv-read@0.1.0" => ("kv.read", &["get", "list"]),
+                "pirs:sandbox/kv-write@0.1.0" => ("kv.write", &["set"]),
                 _ => bail!("unsupported component import"),
             };
             ensure!(self.has(capability), "undeclared capability import");
@@ -194,7 +211,7 @@ impl Manifest {
                     continue;
                 }
                 ensure!(
-                    operation == allowed_operation
+                    allowed_operations.contains(&operation)
                         && matches!(item, ComponentItem::ComponentFunc(_)),
                     "unsupported import operation"
                 );

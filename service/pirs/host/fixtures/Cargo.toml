@@ -11,6 +11,7 @@ crate-type = ["cdylib"]
 wasi = []
 event-echo = []
 network = []
+kv = []
 
 [dependencies]
 wit-bindgen = { version = "=0.62.0", default-features = false, features = ["macros", "realloc"] }
