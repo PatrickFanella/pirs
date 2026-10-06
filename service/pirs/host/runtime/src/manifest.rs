@@ -67,6 +67,8 @@ fn unique(values: &[String]) -> bool {
     values.iter().collect::<BTreeSet<_>>().len() == values.len()
 }
 
+// Mirrors @atproto/syntax 0.7.6: only the first authority label and
+// final name must start with a letter; the name cannot contain hyphens.
 fn nsid(value: &str) -> bool {
     let parts: Vec<_> = value.split('.').collect();
     value.len() <= 317
@@ -74,13 +76,28 @@ fn nsid(value: &str) -> bool {
         && parts.iter().all(|part| {
             !part.is_empty()
                 && part.len() <= 63
-                && part.as_bytes()[0].is_ascii_alphabetic()
+                && part.as_bytes()[0].is_ascii_alphanumeric()
                 && part
                     .as_bytes()
                     .last()
                     .is_some_and(u8::is_ascii_alphanumeric)
                 && part.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-')
         })
+        && parts[0].as_bytes()[0].is_ascii_alphabetic()
+        && parts.last().is_some_and(|name| {
+            name.as_bytes()[0].is_ascii_alphabetic()
+                && name.bytes().all(|c| c.is_ascii_alphanumeric())
+        })
+}
+
+fn reserved_xrpc(value: &str) -> bool {
+    let authority = value
+        .rsplit_once('.')
+        .map_or("", |(authority, _)| authority);
+    let authority = authority.to_ascii_lowercase();
+    ["com.atproto", "app.bsky"]
+        .iter()
+        .any(|reserved| authority == *reserved || authority.starts_with(&format!("{reserved}.")))
 }
 
 impl Manifest {
@@ -128,9 +145,7 @@ impl Manifest {
                         "invalid XRPC methods"
                     );
                     ensure!(
-                        grant.nsids.iter().all(|n| nsid(n)
-                            && !n.starts_with("com.atproto.")
-                            && !n.starts_with("app.bsky.")),
+                        grant.nsids.iter().all(|n| nsid(n) && !reserved_xrpc(n)),
                         "invalid or reserved XRPC method"
                     );
                     ensure!(
@@ -483,4 +498,63 @@ pub fn install(
 
 pub fn read_manifest(path: &Path) -> Result<Vec<u8>> {
     read_bounded(path, MAX_MANIFEST)
+}
+
+#[cfg(test)]
+mod nsid_tests {
+    use super::*;
+
+    #[test]
+    fn atproto_nsid_syntax() {
+        for valid in ["tv.123.echo", "tv.a-b.echo", "Tv.Test.echo2", "a.b.c"] {
+            assert!(nsid(valid), "{valid}");
+        }
+        for invalid in [
+            "tv.test.bad-name",
+            "1tv.test.echo",
+            "tv.-test.echo",
+            "tv.test-.echo",
+            "tv.test.1echo",
+            "tv..echo",
+            "tv.test.écho",
+        ] {
+            assert!(!nsid(invalid), "{invalid}");
+        }
+    }
+
+    #[test]
+    fn reserved_xrpc_authority_is_case_insensitive() {
+        for method in ["Com.Atproto.repo.describeRepo", "APP.Bsky.feed.getTimeline"] {
+            let manifest = json!({"schemaVersion": 1, "id": "test", "minSpecLevel": 1,
+                "hooks": ["xrpc.serve"], "capabilities": [{"name": "xrpc.serve", "constraints": {"nsids": [method]}}]});
+            assert!(
+                Manifest::parse(&serde_json::to_vec(&manifest).unwrap()).is_err(),
+                "{method}"
+            );
+        }
+    }
+
+    #[test]
+    fn numeric_collection_projection_preserves_exact_grants() {
+        let value = json!({"schemaVersion": 1, "id": "test", "minSpecLevel": 0,
+            "hooks": ["event.commit"], "capabilities": [{"name": "events.subscribe", "constraints": {
+                "eventTypes": ["commit"], "collections": ["tv.123.echo"]}}]});
+        let manifest = Manifest::parse(&serde_json::to_vec(&value).unwrap()).unwrap();
+        let event = json!({"seq": 1, "type": "commit", "time": "now", "evt": {
+            "repo": "did:plc:test", "rev": "1", "blocks": "private", "ops": [
+                {"path": "tv.123.echo/a", "action": "create"},
+                {"path": "Tv.123.echo/b", "action": "create"},
+                {"path": "tv.other.echo/c", "action": "delete"}]}});
+        let filtered = manifest
+            .event_input(&format!("event:{event}"))
+            .unwrap()
+            .unwrap();
+        let projected: Value =
+            serde_json::from_str(filtered.strip_prefix("event:").unwrap()).unwrap();
+        assert_eq!(
+            projected["evt"]["ops"],
+            json!([{"path": "tv.123.echo/a", "action": "create"}])
+        );
+        assert!(projected["evt"].get("blocks").is_none());
+    }
 }

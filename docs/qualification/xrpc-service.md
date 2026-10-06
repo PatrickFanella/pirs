@@ -46,6 +46,23 @@ committed source head, final binary hashes, per-command outcomes and any
 failed preliminary attempts are retained in audit `chunks/7/pirs13-status.json`.
 The Gitea host workflow includes the XRPC type and runtime checks.
 
+Independent review found two NSID validation errors. On 2026-10-06, focused
+regressions failed before correction in the native manifest and HTTP supervisor:
+`tv.123.echo` was refused, `tv.test.bad-name` was accepted, and mixed-case
+reserved authorities were accepted. The corrected validators follow the frozen
+`@atproto/syntax@0.7.6` rules and compare reserved authorities without case
+sensitivity. The final name remains case-sensitive for routing and grants.
+
+A fresh locked host/component build passed. The expanded XRPC suite passed
+22 manifest/readiness cases against the pinned upstream validator, real signed
+HTTP calls for numeric-authority and mixed-case methods, invalid/reserved HTTP
+and direct-runtime refusals before guest allocation, and real proxy calls on
+both stock and carried PDS 0.5.37 packages.
+Nine native tests include numeric-collection projection with exact grants and
+opaque-data removal. Sandbox, manifest, KV, consumer, smoke and event/restart
+regressions passed. Audit `chunks/7/pirs13-fix-status.json` records the fix head,
+commands, raw logs, preliminary failures and remaining gates.
+
 This is local evidence using a real PDS proxy handler, real account signatures
 and installed Wasm. The PLC/service documents and their loopback transports
 are disposable test fixtures. No real/public identity, HTTPS ingress, hosted

@@ -17,7 +17,7 @@ import { startXrpc } from './server.ts'
 const host = fileURLToPath(new URL('../host/target/release/pirs-host', import.meta.url))
 const plugin = fileURLToPath(new URL('../host/target/wasm32-wasip2/release/pirs_sandbox_fixture.wasm', import.meta.url))
 const serviceDid = `did:plc:${'b'.repeat(24)}`
-const nsids = ['tv.test.echo', 'tv.test.trap', 'tv.test.loop', 'tv.test.memory', 'tv.test.response', 'tv.test.log', 'tv.test.invalid']
+const nsids = ['tv.123.echo', 'Tv.Test.echo2', 'tv.test.echo', 'tv.test.trap', 'tv.test.loop', 'tv.test.memory', 'tv.test.response', 'tv.test.log', 'tv.test.invalid']
 
 test('installed host verifies service auth and serves a real PDS proxy call', { timeout: 120_000 }, async () => {
   const root = await mkdtemp(join(tmpdir(), 'pirs-xrpc-'))
@@ -67,7 +67,7 @@ test('installed host verifies service auth and serves a real PDS proxy call', { 
   }
   try {
     const installation = await install()
-    for (const invalid of [[], ['tv.test.echo', 'tv.test.echo'], ['com.atproto.repo.createRecord'], ['app.bsky.feed.getTimeline'], ['bad'], ['tv.test.*']]) {
+    for (const invalid of [[], ['tv.test.echo', 'tv.test.echo'], ['com.atproto.repo.createRecord'], ['app.bsky.feed.getTimeline'], ['bad'], ['tv.test.*'], ['tv.test.bad-name'], ['Com.Atproto.repo.describeRepo'], ['APP.Bsky.feed.getTimeline']]) {
       const bad = structuredClone(manifest); bad.capabilities[1].constraints = { nsids: invalid }
       await install(bad, false)
     }
@@ -95,6 +95,21 @@ test('installed host verifies service auth and serves a real PDS proxy call', { 
     assert.equal(success.status, 200)
     assert.deepEqual(success.body, { nsid: 'tv.test.echo', method: 'GET', issuer: rogueDid, query: 'hello=world', body: null })
     invoked++
+    for (const method of ['tv.123.echo', 'Tv.Test.echo2']) {
+      const response = await request(await sign({ lxm: method }), method)
+      assert.equal(response.status, 200)
+      assert.equal(response.body.nsid, method)
+      invoked++
+    }
+    for (const method of ['tv.test.bad-name', 'Com.Atproto.repo.describeRepo', 'APP.Bsky.feed.getTimeline', 'tv.test.echo2']) {
+      assert.equal((await request(await sign({ lxm: method }), method)).body.error, 'MethodNotImplemented')
+      const direct = JSON.parse(execFileSync(host, ['--installation', installation], { encoding: 'utf8',
+        input: JSON.stringify({ id: 1, input: `xrpc:${JSON.stringify({ nsid: method, method: 'GET', issuer: rogueDid, query: '', body: null })}` }) + '\n'
+      }).trim().split('\n')[1])
+      assert.equal(direct.error, 'invalid_request')
+      assert.equal(direct.peak_memory_bytes, 0)
+      assert.deepEqual(direct.logs, [])
+    }
     assert.equal((await request(good)).body.error, 'InvalidToken', 'replay refused')
     assert.equal((await request()).status, 401)
     assert.equal((await request(await sign(), 'tv.test.undeclared')).body.error, 'MethodNotImplemented')
@@ -149,7 +164,9 @@ test('installed host verifies service auth and serves a real PDS proxy call', { 
     try {
       const shortNow = Math.floor(Date.now() / 1000)
       const pending = request(await sign({ iat: shortNow, exp: shortNow + 1 }), 'tv.test.echo', {}, stalled)
-      while (!entered) await new Promise(resolve => setTimeout(resolve, 5))
+      const resolutionDeadline = Date.now() + 5000
+      while (!entered && Date.now() < resolutionDeadline) await new Promise(resolve => setTimeout(resolve, 5))
+      if (!entered) assert.fail(`resolver was not entered: ${JSON.stringify(await pending)}`)
       assert.equal((await request(await sign(), 'tv.test.echo', {}, stalled)).body.error, 'PluginBusy')
       await new Promise(resolve => setTimeout(resolve, 1100))
       release!()
@@ -178,13 +195,16 @@ test('installed host verifies service auth and serves a real PDS proxy call', { 
     const proxied = await fetch(`${base}/xrpc/tv.test.echo?through=pds`, { headers: { authorization: `Bearer ${account.accessJwt}`, 'atproto-proxy': `${serviceDid}#pirs`, cookie: 'must-not-reach-guest' } })
     assert.equal(proxied.status, 200, await proxied.clone().text())
     assert.deepEqual(await proxied.json(), { nsid: 'tv.test.echo', method: 'GET', issuer: account.did, query: 'through=pds', body: null })
+    const numericProxy = await fetch(`${base}/xrpc/tv.123.echo`, { headers: { authorization: `Bearer ${account.accessJwt}`, 'atproto-proxy': `${serviceDid}#pirs` } })
+    assert.equal(numericProxy.status, 200, await numericProxy.clone().text())
+    assert.equal((await numericProxy.json()).nsid, 'tv.123.echo')
     assert.equal((await fetch(`${base}/xrpc/tv.test.undeclared`, { headers: { authorization: `Bearer ${account.accessJwt}`, 'atproto-proxy': `${serviceDid}#pirs` } })).status, 400)
     assert.equal((await fetch(`${base}/xrpc/tv.test.echo`, { headers: { 'atproto-proxy': `${serviceDid}#pirs` } })).status, 401)
     const proxyPost = await fetch(`${base}/xrpc/tv.test.echo`, { method: 'POST', headers: { authorization: `Bearer ${account.accessJwt}`, 'atproto-proxy': `${serviceDid}#pirs`, 'content-type': 'application/json' }, body: '{"through":"pds"}' })
     assert.equal(proxyPost.status, 200, await proxyPost.clone().text())
     assert.deepEqual((await proxyPost.json()).body, { through: 'pds' })
     console.log(JSON.stringify({ realPdsProxy: ['GET', 'POST'], issuer: account.did, audience: 'explicit legacy bare DID',
-      nativeGrantBypassRefused: true, guestFailureRecoveryPairs: 6, authNegativeCases: 18, installNegativeCases: 9, directInvocations: invoked,
+      nativeGrantBypassRefused: true, guestFailureRecoveryPairs: 6, authNegativeCases: 18, installNegativeCases: 12, directInvocations: invoked,
       runtimeEnvironmentEmpty: true, productionOrHostedClaim: false }))
   } finally {
     if (pds && pds.exitCode === null && pds.signalCode === null) { const exit = once(pds, 'exit'); pds.kill('SIGKILL'); await exit }

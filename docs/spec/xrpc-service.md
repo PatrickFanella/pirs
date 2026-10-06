@@ -68,7 +68,11 @@ follows from this contract.
 
 The nonempty NSID list is exact, unique and limited to 64 methods. Wildcards,
 unknown constraints and the reserved `com.atproto.*` and `app.bsky.*`
-namespaces are refused. `xrpc.serve` requires level 1 and the matching hook.
+namespaces are refused regardless of authority casing. NSIDs use AT Protocol
+syntax: intermediate authority labels may start with digits; the final name
+starts with a letter and contains only letters and digits. Routing and grants
+still match the original NSID bytes exactly. `xrpc.serve` requires level 1 and
+the matching hook.
 Event subscriptions can coexist and still require matching `event.*` hooks.
 Other level 1 capabilities remain unsupported. The existing installer checks
 all imports, WIT exports and pinned bytes without instantiating the guest.

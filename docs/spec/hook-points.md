@@ -188,3 +188,11 @@ local fixtures and deployment limits. [The per-server service contract](xrpc-ser
 decides DID/service-ID addressing and documents the pinned PDS's explicit
 bare-audience compatibility. Per-account addressing and installation remain
 owner decisions. No production or complete level 1 conformance is claimed.
+
+The 2026-10-06 NSID review correction accepts numeric intermediate authority
+labels, refuses hyphens in method names and rejects reserved XRPC authorities
+regardless of casing. Fresh native, installed-manifest, HTTP, runtime and
+PDS-proxy checks passed alongside the shared event and KV regressions.
+[The service qualification](../qualification/xrpc-service.md) records the
+regression evidence. Exact method/collection matching and deployment gates
+remain unchanged.

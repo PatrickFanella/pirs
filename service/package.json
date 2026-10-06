@@ -11,7 +11,7 @@
     "check:events": "tsc -p pirs/events/tsconfig.json",
     "qualify:events": "node --test pirs/events/bridge.test.ts && node pirs/events/qualify.ts",
     "check:xrpc": "tsc -p pirs/xrpc/tsconfig.json",
-    "qualify:xrpc": "node --test pirs/xrpc/server.test.ts"
+    "qualify:xrpc": "node --test pirs/xrpc/*.test.ts"
   },
   "license": "MIT",
   "dependencies": {

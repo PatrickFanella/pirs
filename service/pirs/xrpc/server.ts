@@ -9,7 +9,12 @@ import { DidResolver } from '@atproto/identity'
 import { verifyJwt } from '@atproto/xrpc-server'
 
 const BODY_BYTES = 8192
-const NSID = /^(?:[A-Za-z][A-Za-z0-9-]{0,61}[A-Za-z0-9]?\.){2,}[A-Za-z][A-Za-z0-9-]{0,61}[A-Za-z0-9]?$/
+// Same syntax as the frozen @atproto/syntax 0.7.6 validator.
+const NSID = /^[A-Za-z](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+(?:\.[A-Za-z][A-Za-z0-9]{0,62})$/
+function reservedXrpc(nsid: string) {
+  const authority = nsid.slice(0, nsid.lastIndexOf('.')).toLowerCase()
+  return ['com.atproto', 'app.bsky'].some(prefix => authority === prefix || authority.startsWith(`${prefix}.`))
+}
 const ISSUER = /^did:plc:[a-z2-7]{24}$/
 
 export type Options = {
@@ -101,7 +106,7 @@ export async function startXrpc(options: Options, port = 0, bind = '127.0.0.1') 
     const ready = await runtime.response(30_000)
     if (ready?.ready !== true || !/^[0-9a-f]{64}$/.test(ready.installationId) ||
       !Array.isArray(ready.xrpcNsids) || !ready.xrpcNsids.length || ready.xrpcNsids.length > 64 ||
-      ready.xrpcNsids.some((n: unknown) => typeof n !== 'string' || n.length > 317 || !NSID.test(n) || n.startsWith('com.atproto.') || n.startsWith('app.bsky.'))) throw new Error('verified XRPC installation required')
+      ready.xrpcNsids.some((n: unknown) => typeof n !== 'string' || n.length > 317 || !NSID.test(n) || reservedXrpc(n))) throw new Error('verified XRPC installation required')
     runtime.outputCeiling = 8192
     const nsids = new Set<string>(ready.xrpcNsids)
     const resolver = options.resolver ?? new DidResolver({ timeout: 3000 })
