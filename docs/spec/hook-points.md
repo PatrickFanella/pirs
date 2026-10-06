@@ -64,7 +64,7 @@ Proposed shape, following EmDash's registry RFC so that one manifest vocabulary 
 | --- | --- |
 | `events.subscribe` | event types, collections |
 | `xrpc.serve` | NSIDs |
-| `http.serve` | route prefix |
+| `http.serve` | exact routes, requestBytes, responseBytes, deadlineMs |
 | `records.read`, `records.write` | collections |
 | `blobs.read` | none yet |
 | `network.request` | `allowedHosts` |
@@ -196,3 +196,13 @@ PDS-proxy checks passed alongside the shared event and KV regressions.
 [The service qualification](../qualification/xrpc-service.md) records the
 regression evidence. Exact method/collection matching and deployment gates
 remain unchanged.
+
+Plugin HTTP implementation for issue #14 uses a separate local listener per
+installed component and a scriptless opaque HTML sandbox. It does not attach
+plugin routes to the PDS router. [The origin decision](../decisions/0002-plugin-http-origin.md)
+records cookie and fetch credential limits; [the local qualification procedure](../qualification/plugin-http.md)
+records T3 browser runtime observations on 2026-10-06. The installed hostile
+HTML did not execute script or reach the disposable cookie-session endpoint;
+image, frame, refresh and form attempts were blocked. The baseline authenticated
+request count remained one. This qualifies the local static HTML contract only.
+Public ingress, a real OAuth session and script-enabled HTML remain unqualified.

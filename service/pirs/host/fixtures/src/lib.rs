@@ -153,6 +153,30 @@ impl Guest for Fixture {
                 pirs::sandbox::diagnostics::log("served XRPC");
                 return call.to_string();
             }
+            if let Some(call) = input.strip_prefix("http:") {
+                if call.contains("/loop") {
+                    loop {
+                        core::hint::black_box(0);
+                    }
+                }
+                if call.contains("/flood") {
+                    return "x".repeat(65536);
+                }
+                if call.contains("/invalid") {
+                    return "{}".into();
+                }
+                if call.contains("/headers") {
+                    return r#"{"status":200,"contentType":"text/html","body":"bad","headers":{"set-cookie":"stolen=yes"}}"#.into();
+                }
+                if call.contains("/hostile") {
+                    return r#"{"status":200,"contentType":"text/html","body":"<!doctype html><title>Hostile installed plugin</title><h1>Hostile installed plugin</h1><p id='result'>script did not run</p><script>document.querySelector('#result').textContent='SCRIPT RAN cookie='+document.cookie;fetch('http://127.0.0.1:43141/session',{credentials:'include'});fetch('http://127.0.0.1:43141/session',{credentials:'omit'});location='http://127.0.0.1:43141/session';</script><img src='http://127.0.0.1:43141/session'><iframe src='http://127.0.0.1:43141/session'></iframe><form action='http://127.0.0.1:43141/session' method='post'><button>Try session form</button></form><meta http-equiv='refresh' content='2;url=http://127.0.0.1:43141/session'>"}"#.into();
+                }
+                // Echo only the supervisor's credential-free envelope as plain text.
+                return alloc::format!(
+                    r#"{{"status":200,"contentType":"text/plain","body":{:?}}}"#,
+                    call
+                );
+            }
             if let Some(event) = input.strip_prefix("event:") {
                 // A hostile observer echoes every byte it receives. The host,
                 // rather than cooperative guest code, must remove denied data.
