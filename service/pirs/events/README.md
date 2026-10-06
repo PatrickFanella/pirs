@@ -12,7 +12,8 @@ creates a mode-0600 Unix socket there and stores the stream identity beside
 it. Delivery is disabled when that variable is absent. Both processes need
 access to this private directory; the WIT guest has no filesystem import.
 
-Build the host as described in [its README](../host/README.md), then start the
+Build the host as described in [its README](../host/README.md), install the local
+component and [manifest](../../../docs/spec/local-manifest.md), then start the
 consumer from `service/` in a separate process:
 
 ```sh
@@ -20,7 +21,7 @@ node pirs/events/consumer.ts \
   --socket /run/pirs-events/events.sock \
   --cursor /var/lib/pirs-host/cursor.json \
   --host /absolute/path/pirs-host \
-  --plugin /absolute/path/observer.wasm
+  --installation /absolute/path/local-installs/INSTALLATION_ID
 ```
 
 The cursor parent must also be owned with mode 0700 and must be separate from
@@ -31,9 +32,12 @@ The shipping consumer's supervised runtime requires Linux; parent death kills
 it even when the consumer is terminated with SIGKILL.
 
 The consumer sends `event:` followed by the sequenced JSON envelope to the
-guest's existing `run(string) -> string` WIT call. A successful call advances
-the synced cursor; failure stops without advancing it. Stdout emits readiness
-and `{delivered, type, logs}` receipts after persistence. Guest logs remain
+guest's existing `run(string) -> string` WIT call. A successful call or a host-filtered event advances
+the synced cursor; failure stops without advancing it. Filtering runs inside
+the runtime before guest instantiation. Version 2 cursors bind progress to the
+installation ID. Changed installs and version 1 cursors require operator review
+and a new cursor path; the consumer preserves existing cursor bytes. Stdout emits readiness
+and `{delivered, type, logs}` or `{filtered, type, logs}` receipts after persistence. Guest logs remain
 bounded but may contain event data; keep these operational outputs private.
 Use SIGTERM for graceful stop. On restart, the same cursor and stream identity
 resume retained events. Do not delete them to resolve a delivery failure.
@@ -50,6 +54,7 @@ directory and handle the resulting stream mismatch explicitly.
 
 ```sh
 pnpm check:events
+node --test pirs/events/manifest.test.ts
 pnpm qualify:events
 ```
 

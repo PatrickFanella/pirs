@@ -26,7 +26,7 @@ def main():
     parser.add_argument("--forbidden-plugin", type=Path, default=ROOT / "target/forbidden-wasi.wasm")
     options = parser.parse_args()
     assert options.forbidden_plugin.read_bytes()[:8] == b"\0asm\x0d\0\x01\0", "negative fixture is not a component"
-    rejected = subprocess.run([str(options.host.resolve()), "--plugin", str(options.forbidden_plugin.resolve())],
+    rejected = subprocess.run([str(options.host.resolve()), "--qualification-only", "--plugin", str(options.forbidden_plugin.resolve())],
                               input=b"", capture_output=True, timeout=30)
     assert rejected.returncode != 0 and rejected.stdout == b"", "ungranted WASI component became ready"
     assert rejected.stderr == b"Error: plugin load or sandbox contract check failed\n", rejected.stderr
@@ -39,7 +39,7 @@ def main():
                            PDS_PLC_ROTATION_KEY_K256_PRIVATE_KEY_HEX="not-a-key",
                            PDS_REPO_SIGNING_KEY_K256_PRIVATE_KEY_HEX="not-a-key")
         process = subprocess.Popen([
-            str(options.host.resolve()), "--plugin", str(options.plugin.resolve()),
+            str(options.host.resolve()), "--qualification-only", "--plugin", str(options.plugin.resolve()),
             "--memory-mib", "8", "--deadline-ms", "250",
             "--response-bytes", "1024", "--log-bytes", "256", "--input-bytes", "512",
         ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,

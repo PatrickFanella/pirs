@@ -1,6 +1,6 @@
 // Disposable process-level qualification. Never supplies operator PDS state.
 import assert from 'node:assert/strict'
-import { spawn, type ChildProcess } from 'node:child_process'
+import { spawn, execFileSync, type ChildProcess } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
 import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -17,6 +17,13 @@ const root = await mkdtemp(join(tmpdir(), 'pirs-delivery-'))
 const data = join(root, 'pds')
 const socket = join(root, 'transport', 'events.sock')
 const cursor = join(root, 'host-state', 'cursor.json')
+const installationManifest = join(root, 'manifest.json')
+await writeFile(installationManifest, JSON.stringify({ schemaVersion: 1, id: 'qualification-observer', minSpecLevel: 0,
+  hooks: ['event.commit', 'event.sync', 'event.identity', 'event.account'], capabilities: [
+    { name: 'diagnostics.log', constraints: {} },
+    { name: 'events.subscribe', constraints: { eventTypes: ['commit', 'sync', 'identity', 'account'], collections: ['*'] } }
+  ] }))
+const installation = JSON.parse(execFileSync(host, ['--plugin', plugin, '--manifest', installationManifest, '--install-dir', join(root, 'installs')], { encoding: 'utf8' })).installed
 const children: ChildProcess[] = []
 const runtimePids: number[] = []
 const received: { delivered: number; type: string; logs: string[] }[] = []
@@ -77,7 +84,7 @@ async function startPds() {
 
 async function startConsumer(checkEnvironment = true, preload?: string) {
   const consumer = child(fileURLToPath(new URL('./consumer.ts', import.meta.url)),
-    ['--socket', socket, '--cursor', cursor, '--host', host, '--plugin', plugin], preload)
+    ['--socket', socket, '--cursor', cursor, '--host', host, '--installation', installation], preload)
   let buffer = ''
   consumer.process.stdout!.on('data', (chunk: Buffer) => {
     buffer += chunk.toString()
@@ -248,7 +255,7 @@ try {
 
   // A second consumer must not share the cursor or start a second runtime.
   const second = child(fileURLToPath(new URL('./consumer.ts', import.meta.url)),
-    ['--socket', socket, '--cursor', cursor, '--host', host, '--plugin', plugin])
+    ['--socket', socket, '--cursor', cursor, '--host', host, '--installation', installation])
   await waitFor(() => second.process.exitCode !== null, 'second cursor owner rejected')
   assert.equal(second.process.exitCode, 1)
   assert.match(second.error(), /already active/)
@@ -266,9 +273,53 @@ try {
   await writeFile(cursor, originalCursor)
   assert.equal(await readFile(join(root, 'operator', 'sentinel'), 'utf8'), 'preserve')
 
+  // Real PDS qualification for a collection-scoped installed observer. Use a
+  // separate cursor because the receipt/grant differs from the broad observer.
+  const scopedManifest = join(root, 'scoped-manifest.json')
+  await writeFile(scopedManifest, JSON.stringify({ schemaVersion: 1, id: 'scoped-real-observer', minSpecLevel: 0,
+    hooks: ['event.commit'], capabilities: [
+      { name: 'diagnostics.log', constraints: {} },
+      { name: 'events.subscribe', constraints: { eventTypes: ['commit'], collections: ['app.bsky.feed.post'] } }
+    ] }))
+  const scopedPlugin = fileURLToPath(new URL('../host/target/event-echo.wasm', import.meta.url))
+  const scopedInstallation = JSON.parse(execFileSync(host, ['--plugin', scopedPlugin, '--manifest', scopedManifest,
+    '--install-dir', join(root, 'installs')], { encoding: 'utf8' }))
+  const scopedCursor = join(root, 'host-state', 'scoped-cursor.json')
+  const scoped = child(fileURLToPath(new URL('./consumer.ts', import.meta.url)),
+    ['--socket', socket, '--cursor', scopedCursor, '--host', host, '--installation', scopedInstallation.installed])
+  await waitFor(() => scoped.output().includes('"ready":true'), 'scoped observer ready')
+  runtimePids.push(JSON.parse(scoped.output().trim().split('\n')[0]).runtimePid)
+  await waitFor(async () => {
+    try { return JSON.parse(await readFile(scopedCursor, 'utf8')).seq === finalSeq }
+    catch (error) { if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return false; throw error }
+  }, 'scoped replay caught up')
+  await xrpc('com.atproto.repo.createRecord', { repo: account.did, collection: 'org.test.denied',
+    record: { $type: 'org.test.denied', secret: 'DENIED-COLLECTION' } }, account.accessJwt)
+  await xrpc('com.atproto.repo.applyWrites', { repo: account.did, writes: [
+    { $type: 'com.atproto.repo.applyWrites#create', collection: 'app.bsky.feed.post',
+      value: { $type: 'app.bsky.feed.post', text: 'mixed allowed', createdAt: new Date().toISOString() } },
+    { $type: 'com.atproto.repo.applyWrites#create', collection: 'org.test.denied',
+      value: { $type: 'org.test.denied', secret: 'DENIED-MIXED' } }
+  ] }, account.accessJwt)
+  const scopedFinalSeq = await lastSeq()
+  await waitFor(async () => JSON.parse(await readFile(scopedCursor, 'utf8')).seq === scopedFinalSeq, 'scoped real writes persisted')
+  await waitFor(() => scoped.output().includes(`"delivered":${scopedFinalSeq}`), 'mixed commit delivered')
+  await stop(scoped.process, 'SIGTERM')
+  assert.equal(scoped.process.exitCode, 0, scoped.error())
+  const scopedRows = scoped.output().trim().split('\n').slice(1).map(line => JSON.parse(line))
+  assert.deepEqual(scopedRows.slice(-2).map(row => row.delivered ?? -row.filtered), [-167, 168])
+  assert.ok(scopedRows.filter(row => row.delivered).every(row => row.type === 'commit'))
+  assert.ok(scopedRows.filter(row => row.filtered).every(row => row.logs.length === 0))
+  assert.ok(!scoped.output().includes('DENIED'))
+  const scopedEvidence = { receipt: scopedInstallation.receipt, final_cursor: JSON.parse(await readFile(scopedCursor, 'utf8')),
+    filtered: scopedRows.filter(row => row.filtered).map(row => row.filtered),
+    delivered: scopedRows.filter(row => row.delivered).map(row => row.delivered),
+    denied_collection_sequence: 167, mixed_collection_sequence: 168 }
+
   const report = { generated_at: new Date().toISOString(), platform: process.platform, node: process.version,
     artifact_sha256: { host: createHash('sha256').update(await readFile(host)).digest('hex'),
       plugin: createHash('sha256').update(await readFile(plugin)).digest('hex') },
+    scoped_observer: scopedEvidence,
     first_backlog: backlog, crash_cursor: persisted.seq, final_cursor: finalSeq,
     replayed_after_success_before_cursor: replayedSeq,
     delivered: received.length, unique_sequences: new Set(sequences).size,

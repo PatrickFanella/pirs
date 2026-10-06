@@ -11,6 +11,8 @@ on:
       - service/pnpm-lock.yaml
       - docs/qualification/plugin-host.md
       - docs/qualification/event-delivery.md
+      - docs/qualification/manifest-install.md
+      - docs/spec/local-manifest.md
       - .gitea/workflows/host-sandbox.yaml
   pull_request:
     paths:
@@ -22,6 +24,8 @@ on:
       - service/pnpm-lock.yaml
       - docs/qualification/plugin-host.md
       - docs/qualification/event-delivery.md
+      - docs/qualification/manifest-install.md
+      - docs/spec/local-manifest.md
       - .gitea/workflows/host-sandbox.yaml
 
 jobs:
@@ -53,6 +57,9 @@ jobs:
       - name: Qualify limits, isolation and recovery
         working-directory: service/pirs/host
         run: python3 qualify.py
+      - name: Qualify manifest imports, startup and integrity
+        working-directory: service/pirs/host
+        run: python3 qualify-manifest.py
       - name: Install event qualification dependencies
         working-directory: service
         run: |
@@ -61,6 +68,9 @@ jobs:
       - name: Check event delivery types
         working-directory: service
         run: pnpm check:events
+      - name: Qualify installed consumer filtering and cursor integrity
+        working-directory: service
+        run: node --test pirs/events/manifest.test.ts
       - name: Qualify event delivery, restarts and stopped-host writes
         working-directory: service
         run: pnpm qualify:events
