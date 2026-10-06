@@ -14,7 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "@atproto/lex": "^0.3.13",
-    "@atproto/pds": "0.5.37"
+    "@atproto/pds": "file:pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz"
   },
   "devDependencies": {
     "@did-plc/lib": "0.0.4",

@@ -136,3 +136,10 @@ Upstream rehearsal, 2026-10-03: distribution `v0.4.5037` (`@atproto/pds`
 checks passed locally with the same event counts and cursor advancement.
 [The merge record](../upstream-merge.md) describes the seam inspection, timing
 and hosted qualification. No additional hook was added.
+
+Patch carrier, 2026-10-06: a pinned fork package adds one optional trusted XRPC
+transport adapter seam. Stock and patched Pirs account/record smoke and the
+installed-manifest cursor/restart harness passed on merged #9 source. No
+adapter is installed by default, and no deciding plugin hook gains support.
+[The patch qualification](../qualification/pds-patches.md) records exact pins,
+full-suite status and the unavailable natural next-release rebase gate.
