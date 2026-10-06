@@ -75,6 +75,10 @@ reference, revision and blob takedown changes during the tested requests. Reads
 have no cache. These HTTP checks are observations, not a transaction spanning the
 PDS and host. A change after the final check cannot retract bytes already returned;
 an account that changes state and restores it between checks may go unobserved.
+Review also reproduced delivery after takedown completed while a final response
+was buffered. Account revision equality does not cover record or blob moderation.
+See the [readiness blocker](../qualification/public-read.md#readiness-blocker-found-during-review);
+this implementation has not met strict visibility at guest delivery.
 
 ## Bounds
 

@@ -64,7 +64,7 @@ Proposed shape, following EmDash's registry RFC so that one manifest vocabulary 
 | --- | --- |
 | `events.subscribe` | event types, collections |
 | `xrpc.serve` | NSIDs |
-| `http.serve` | route prefix |
+| `http.serve` | exact routes, requestBytes, responseBytes, deadlineMs |
 | `records.read`, `records.write` | collections |
 | `blobs.read` | collections and a current visible owning record, see [public reads](public-read.md) |
 | `network.request` | `allowedHosts` |
@@ -209,3 +209,25 @@ describes the loopback transport and HTTP visibility observation limits. This
 adds public auxiliary reads for existing hooks; private preferences, Spaces and
 level 2 account consent remain outside the implementation. No hosted or production
 qualification is claimed.
+
+Plugin HTTP implementation for issue #14 uses a separate local listener per
+installed component and a scriptless opaque HTML sandbox. It does not attach
+plugin routes to the PDS router. [The origin decision](../decisions/0002-plugin-http-origin.md)
+records the boundary; [the local qualification procedure](../qualification/plugin-http.md)
+records the installed fixture and browser checks. The first browser run on
+2026-10-06 blocked scripts, images, frames, refresh and forms, but did not cover
+ordinary links. Independent review reproduced a credentialed session call when
+a visitor clicked an installed guest link. That run did not qualify the full
+navigation boundary.
+
+The correction parses HTML with an HTML5 tree builder and emits inert semantic
+markup without guest URLs, forms, styles, active tags or foreign trees. Ordinary
+anchor labels remain visible but cannot navigate. Headings, lists, tables and
+details controls remain rendered HTML. Native HTTP calls now apply installed
+deadline and body-byte budgets before Store creation; CLI options may only
+tighten those budgets. JSON ABI overhead is measured separately. A hard socket
+lifetime covers incomplete headers as well as stalled bodies. Local parser,
+installed HTTP and direct-native denial/recovery regressions passed on
+2026-10-06. Exact-head browser qualification must click the links supplied by
+the installed component and verify the session counter remains at its baseline.
+Public ingress, a real OAuth session and script-enabled HTML remain unqualified.

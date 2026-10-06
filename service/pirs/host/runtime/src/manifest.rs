@@ -100,6 +100,28 @@ fn reserved_xrpc(value: &str) -> bool {
         .any(|reserved| authority == *reserved || authority.starts_with(&format!("{reserved}.")))
 }
 
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+pub struct HttpGrant {
+    pub routes: Vec<String>,
+    pub request_bytes: usize,
+    pub response_bytes: usize,
+    pub deadline_ms: u64,
+}
+
+fn http_route(path: &str) -> bool {
+    path.starts_with('/')
+        && path.len() <= 256
+        && !path.contains("//")
+        && !path.contains("..")
+        && path
+            .bytes()
+            .all(|c| c.is_ascii_alphanumeric() || b"/-_.".contains(&c))
+        && !["/xrpc", "/oauth", "/.well-known"]
+            .iter()
+            .any(|prefix| path == *prefix || path.starts_with(&format!("{prefix}/")))
+}
+
 impl Manifest {
     pub fn parse(bytes: &[u8]) -> Result<Self> {
         let manifest: Self = serde_json::from_slice(bytes)?;
@@ -157,6 +179,27 @@ impl Manifest {
                         "XRPC requires level 1 and hook"
                     );
                 }
+                "http.serve" => {
+                    let grant: HttpGrant = serde_json::from_value(capability.constraints.clone())?;
+                    ensure!(
+                        !grant.routes.is_empty()
+                            && grant.routes.len() <= 64
+                            && unique(&grant.routes)
+                            && grant.routes.iter().all(|p| http_route(p)),
+                        "invalid HTTP routes"
+                    );
+                    ensure!(
+                        (1..=8192).contains(&grant.request_bytes)
+                            && (1..=16384).contains(&grant.response_bytes)
+                            && (1..=1000).contains(&grant.deadline_ms),
+                        "invalid HTTP limits"
+                    );
+                    ensure!(
+                        manifest.min_spec_level == 1
+                            && manifest.hooks.contains(&"http.serve".to_owned()),
+                        "HTTP requires level 1 and hook"
+                    );
+                }
                 "events.subscribe" => {
                     let grant: Subscription =
                         serde_json::from_value(capability.constraints.clone())?;
@@ -188,7 +231,7 @@ impl Manifest {
                             == manifest
                                 .hooks
                                 .iter()
-                                .filter(|h| h.as_str() != "xrpc.serve")
+                                .filter(|h| !["xrpc.serve", "http.serve"].contains(&h.as_str()))
                                 .cloned()
                                 .collect(),
                         "hooks must match subscription event types"
@@ -196,24 +239,28 @@ impl Manifest {
                 }
                 // Shared spec vocabulary. Recognition never grants a capability
                 // that this runtime has no implementation for.
-                "http.serve" | "records.write" | "record.validate" | "record.unique"
-                | "account.create" | "auth.session" => {
+                "records.write" | "record.validate" | "record.unique" | "account.create"
+                | "auth.session" => {
                     bail!("capability is not supported by this runtime")
                 }
                 _ => bail!("unknown capability category or operation"),
             }
         }
         ensure!(
-            manifest.hooks.iter().all(|h| if h == "xrpc.serve" {
-                manifest.has("xrpc.serve")
-            } else {
-                manifest.has("events.subscribe")
-            }),
+            manifest
+                .hooks
+                .iter()
+                .all(|h| if ["xrpc.serve", "http.serve"].contains(&h.as_str()) {
+                    manifest.has(h)
+                } else {
+                    manifest.has("events.subscribe")
+                }),
             "hooks require events.subscribe"
         );
         ensure!(
-            (manifest.min_spec_level == 1) == manifest.has("xrpc.serve"),
-            "level 1 requires XRPC grant"
+            (manifest.min_spec_level == 1)
+                == (manifest.has("xrpc.serve") || manifest.has("http.serve")),
+            "level 1 requires a serving grant"
         );
         if manifest.has("kv.read") && manifest.has("kv.write") {
             ensure!(
@@ -222,6 +269,13 @@ impl Manifest {
             );
         }
         Ok(manifest)
+    }
+
+    pub fn http_grant(&self) -> Option<HttpGrant> {
+        self.capabilities
+            .iter()
+            .find(|c| c.name == "http.serve")
+            .map(|c| serde_json::from_value(c.constraints.clone()).expect("validated HTTP grant"))
     }
 
     pub fn xrpc_nsids(&self) -> Vec<String> {
@@ -264,6 +318,32 @@ impl Manifest {
             ensure!(
                 call.query.len() <= 8192 && (call.method == "POST" || call.body.is_none()),
                 "invalid request"
+            );
+            return Ok(Some(input.to_owned()));
+        }
+        if let Some(raw) = input.strip_prefix("http:") {
+            #[derive(Deserialize)]
+            #[serde(deny_unknown_fields)]
+            struct Call {
+                path: String,
+                method: String,
+                query: String,
+                body: String,
+            }
+            let call: Call = serde_json::from_str(raw)?;
+            let grant = self
+                .http_grant()
+                .ok_or_else(|| anyhow::anyhow!("no HTTP grant"))?;
+            ensure!(
+                grant.routes.contains(&call.path) && http_route(&call.path),
+                "undeclared route"
+            );
+            ensure!(
+                ["GET", "POST"].contains(&call.method.as_str())
+                    && call.query.len() <= 1024
+                    && call.body.len() <= grant.request_bytes
+                    && (call.method == "POST" || call.body.is_empty()),
+                "invalid HTTP request"
             );
             return Ok(Some(input.to_owned()));
         }

@@ -18,7 +18,8 @@
     "@atproto/identity": "0.5.16",
     "@atproto/lex": "^0.3.13",
     "@atproto/pds": "file:pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz",
-    "@atproto/xrpc-server": "0.13.4"
+    "@atproto/xrpc-server": "0.13.4",
+    "parse5": "8.0.1"
   },
   "devDependencies": {
     "@atproto/crypto": "0.5.7",

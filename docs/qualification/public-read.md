@@ -50,3 +50,18 @@ Use `PIRS_READ_PDS_MODULE=/absolute/path/to/stock/dist/index.js` for the stock r
 `PIRS_READ_REPORT=/absolute/path/report.json` retains hashes and acceptance flags.
 The harness removes its PDS data, signed local identities, installs and processes.
 Evidence is retained in the authorized audit workspace under `chunks/7/pirs15-*`.
+
+## Readiness blocker found during review
+
+Independent review on 2026-10-06 reproduced three late-recheck races against
+a real local PDS. A buffered final active-account response allowed record
+delivery after account deactivation. Buffered second blob responses allowed
+blob delivery after owning-record or blob takedown; the account remained active
+at the same revision. Anonymous reads after those takedowns were refused.
+The probes reproduced on the tree integrated with the HTTP sandbox changes.
+
+The positive harness above qualifies sampled HTTP checks, not strict visibility
+at guest delivery. Public-read readiness remains blocked pending a consistent
+PDS authorization boundary or an explicit owner decision accepting sampled
+visibility. Adding more separate HTTP rechecks cannot establish that boundary.
+PR #54 and issue #15 must remain open under the current acceptance requirement.
