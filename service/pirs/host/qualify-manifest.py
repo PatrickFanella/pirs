@@ -61,7 +61,7 @@ def main():
             ("undeclared_import", lambda m: m["capabilities"].pop(0)),
             ("unknown_category", lambda m: m["capabilities"].append({"name": "alien.read", "constraints": {}})),
             ("unknown_operation", lambda m: m["capabilities"].append({"name": "events.delete", "constraints": {}})),
-            ("known_unimplemented", lambda m: m["capabilities"].append({"name": "network.request", "constraints": {"allowedHosts": ["example.com"]}})),
+            ("known_unimplemented", lambda m: m["capabilities"].append({"name": "kv.read", "constraints": {"size": 1024}})),
             ("unknown_constraint", lambda m: m["capabilities"][1]["constraints"].update({"collection": "app.bsky.feed.post"})),
             ("unknown_event", lambda m: m["capabilities"][1]["constraints"].update({"eventTypes": ["spaces"]})),
             ("unknown_hook", lambda m: m.update({"hooks": ["event.spaces"]})),

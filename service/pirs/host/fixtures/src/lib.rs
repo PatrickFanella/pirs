@@ -1,11 +1,9 @@
 #![cfg_attr(not(feature = "wasi"), no_std)]
 
 extern crate alloc;
-use alloc::{
-    string::{String, ToString},
-    vec,
-    vec::Vec,
-};
+use alloc::string::String;
+#[cfg(not(feature = "network"))]
+use alloc::{string::ToString, vec, vec::Vec};
 
 #[global_allocator]
 #[cfg(not(feature = "wasi"))]
@@ -69,80 +67,106 @@ fn panic(_info: &core::panic::PanicInfo<'_>) -> ! {
     core::arch::wasm32::unreachable()
 }
 
+#[cfg(not(feature = "network"))]
 wit_bindgen::generate!({ path: "../wit", world: "sandbox" });
+#[cfg(feature = "network")]
+wit_bindgen::generate!({ path: "../wit", world: "network-sandbox" });
 
 struct Fixture;
 
 impl Guest for Fixture {
     fn run(input: String) -> String {
-        if let Some(event) = input.strip_prefix("event:") {
-            // A hostile observer echoes every byte it receives. The host,
-            // rather than cooperative guest code, must remove denied data.
-            if cfg!(feature = "event-echo") {
-                return event.to_string();
-            }
-            // Qualification observer: confirm the sequenced envelope reached
-            // Wasm, without echoing its potentially large CAR body.
-            // Avoid a substring search that would require libc's memcmp in
-            // this no_std fixture. The envelope starts with its sequence.
-            let bytes = event.as_bytes();
-            let mut start = 0;
-            while start < bytes.len() && bytes[start] != b':' {
-                start += 1;
-            }
-            start = (start + 1).min(bytes.len());
-            let mut end = start;
-            while end < bytes.len() && bytes[end].is_ascii_digit() {
-                end += 1;
-            }
-            let seq = &event[start..end];
-            pirs::sandbox::diagnostics::log(&alloc::format!("seq:{seq}"));
-            return "observed".into();
+        #[cfg(feature = "network")]
+        {
+            // Qualification input is a public event's repo field. No PDS keys.
+            let marker = "\"repo\":\"";
+            let url = input
+                .split(marker)
+                .nth(1)
+                .unwrap_or("")
+                .split('"')
+                .next()
+                .unwrap_or("");
+            return match pirs::sandbox::network::request("GET", url, &[], &[]) {
+                Ok(response) => {
+                    alloc::format!("status:{} bytes:{}", response.status, response.body.len())
+                }
+                Err(error) => alloc::format!("denied:{error}"),
+            };
         }
-        match input.as_str() {
-            "trap" => panic!("qualification trap"),
-            "loop" => loop {
-                core::hint::black_box(0);
-            },
-            "allocate" => {
-                let mut blocks = Vec::new();
-                loop {
-                    let block = vec![1u8; 1024 * 1024];
-                    core::hint::black_box(&block);
-                    blocks.push(block);
+        #[cfg(not(feature = "network"))]
+        {
+            if let Some(event) = input.strip_prefix("event:") {
+                // A hostile observer echoes every byte it receives. The host,
+                // rather than cooperative guest code, must remove denied data.
+                if cfg!(feature = "event-echo") {
+                    return event.to_string();
                 }
+                // Qualification observer: confirm the sequenced envelope reached
+                // Wasm, without echoing its potentially large CAR body.
+                // Avoid a substring search that would require libc's memcmp in
+                // this no_std fixture. The envelope starts with its sequence.
+                let bytes = event.as_bytes();
+                let mut start = 0;
+                while start < bytes.len() && bytes[start] != b':' {
+                    start += 1;
+                }
+                start = (start + 1).min(bytes.len());
+                let mut end = start;
+                while end < bytes.len() && bytes[end].is_ascii_digit() {
+                    end += 1;
+                }
+                let seq = &event[start..end];
+                pirs::sandbox::diagnostics::log(&alloc::format!("seq:{seq}"));
+                return "observed".into();
             }
-            "interpreter" => {
-                // A bytecode interpreter executing a jump to itself. The VM's
-                // instruction count never advances; Wasmtime's wall clock must
-                // still interrupt the Wasm instructions running the interpreter.
-                let code = core::hint::black_box([0x01u8, 0, 0]);
-                let mut pc = 0;
-                loop {
-                    match code[pc] {
-                        0x01 => pc = usize::from(code[pc + 1]) | (usize::from(code[pc + 2]) << 8),
-                        _ => panic!("unknown opcode"),
+            match input.as_str() {
+                "trap" => panic!("qualification trap"),
+                "loop" => loop {
+                    core::hint::black_box(0);
+                },
+                "allocate" => {
+                    let mut blocks = Vec::new();
+                    loop {
+                        let block = vec![1u8; 1024 * 1024];
+                        core::hint::black_box(&block);
+                        blocks.push(block);
                     }
-                    core::hint::black_box(pc);
                 }
-            }
-            "response-flood" => "x".repeat(8192),
-            "escaped-response" => "\0".repeat(8192),
-            "boundary-response" => "\n".repeat(511),
-            "over-boundary-response" => "\n".repeat(512),
-            "log-flood" => loop {
-                pirs::sandbox::diagnostics::log("guest log line");
-            },
-            "empty-log-flood" => loop {
-                pirs::sandbox::diagnostics::log("");
-            },
-            "escaped-log" => {
-                pirs::sandbox::diagnostics::log(&"\n".repeat(256));
-                "unreachable after log quota".into()
-            }
-            _ => {
-                pirs::sandbox::diagnostics::log("served");
-                input.strip_prefix("echo:").unwrap_or(&input).to_string()
+                "interpreter" => {
+                    // A bytecode interpreter executing a jump to itself. The VM's
+                    // instruction count never advances; Wasmtime's wall clock must
+                    // still interrupt the Wasm instructions running the interpreter.
+                    let code = core::hint::black_box([0x01u8, 0, 0]);
+                    let mut pc = 0;
+                    loop {
+                        match code[pc] {
+                            0x01 => {
+                                pc = usize::from(code[pc + 1]) | (usize::from(code[pc + 2]) << 8)
+                            }
+                            _ => panic!("unknown opcode"),
+                        }
+                        core::hint::black_box(pc);
+                    }
+                }
+                "response-flood" => "x".repeat(8192),
+                "escaped-response" => "\0".repeat(8192),
+                "boundary-response" => "\n".repeat(511),
+                "over-boundary-response" => "\n".repeat(512),
+                "log-flood" => loop {
+                    pirs::sandbox::diagnostics::log("guest log line");
+                },
+                "empty-log-flood" => loop {
+                    pirs::sandbox::diagnostics::log("");
+                },
+                "escaped-log" => {
+                    pirs::sandbox::diagnostics::log(&"\n".repeat(256));
+                    "unreachable after log quota".into()
+                }
+                _ => {
+                    pirs::sandbox::diagnostics::log("served");
+                    input.strip_prefix("echo:").unwrap_or(&input).to_string()
+                }
             }
         }
     }
