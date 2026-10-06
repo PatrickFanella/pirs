@@ -87,6 +87,7 @@ enum Failure {
     ResponseLimit,
     LogLimit,
     InvalidRequest,
+    InvalidResponse,
 }
 
 struct CallState {
@@ -352,8 +353,20 @@ impl Host {
                 }
             }
         }
+        // Installed HTTP authority is applied before Store allocation. Other
+        // invocation paths retain their existing encoded-result CLI ceilings.
+        let http_grant = if request.input.starts_with("http:") {
+            self.manifest.as_ref().and_then(|m| m.http_grant())
+        } else {
+            None
+        };
+        let mut limits = self.limits.clone();
+        if let Some(grant) = &http_grant {
+            limits.deadline_ms = limits.deadline_ms.min(grant.deadline_ms);
+            limits.response_bytes = limits.response_bytes.min(grant.response_bytes);
+        }
         let started = Instant::now();
-        let mut store = Store::new(&self.engine, CallState::new(self.limits.clone()));
+        let mut store = Store::new(&self.engine, CallState::new(limits.clone()));
         store.data_mut().network_grant = self.manifest.as_ref().and_then(|m| m.network_grant());
         store.data_mut().kv = self.kv.clone();
         store.data_mut().kv_read = self.manifest.as_ref().is_some_and(|m| m.has("kv.read"));
@@ -375,13 +388,21 @@ impl Host {
                 failure = Some(Failure::Timeout);
             } else {
                 match result {
-                    Ok(value)
-                        if json_string_bytes(&value, self.limits.response_bytes)
-                            <= self.limits.response_bytes =>
-                    {
-                        output = Some(value)
+                    Ok(value) => {
+                        let checked = if http_grant.is_some() {
+                            http_response(&value, limits.response_bytes)
+                        } else if json_string_bytes(&value, limits.response_bytes)
+                            <= limits.response_bytes
+                        {
+                            Ok(())
+                        } else {
+                            Err(Failure::ResponseLimit)
+                        };
+                        match checked {
+                            Ok(()) => output = Some(value),
+                            Err(reason) => failure = Some(reason),
+                        }
                     }
-                    Ok(_) => failure = Some(Failure::ResponseLimit),
                     Err(_) => failure = Some(Failure::Trap),
                 }
             }
@@ -399,6 +420,31 @@ impl Host {
             elapsed_ms: started.elapsed().as_secs_f64() * 1000.0,
         }
     }
+}
+
+// responseBytes is the UTF-8 HTTP body budget, not JSON ABI overhead. Bound
+// the envelope before parsing, then validate its exact shape and decoded body.
+fn http_response(value: &str, body_limit: usize) -> std::result::Result<(), Failure> {
+    if value.len() > body_limit * 6 + 1024 {
+        return Err(Failure::ResponseLimit);
+    }
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields, rename_all = "camelCase")]
+    struct Output {
+        status: u16,
+        content_type: String,
+        body: String,
+    }
+    let output: Output = serde_json::from_str(value).map_err(|_| Failure::InvalidResponse)?;
+    if output.body.len() > body_limit {
+        return Err(Failure::ResponseLimit);
+    }
+    if ![200, 400, 404, 500].contains(&output.status)
+        || !["text/html", "text/plain", "application/json"].contains(&output.content_type.as_str())
+    {
+        return Err(Failure::InvalidResponse);
+    }
+    Ok(())
 }
 
 enum Line {
@@ -527,4 +573,31 @@ fn main() -> Result<()> {
     let host = Host::new(options)
         .map_err(|_| anyhow::anyhow!("plugin load or sandbox contract check failed"))?;
     serve(host)
+}
+
+#[cfg(test)]
+mod http_tests {
+    use super::*;
+
+    #[test]
+    fn body_budget_counts_utf8_not_encoded_envelope() {
+        let value =
+            json!({"status": 200, "contentType": "text/plain", "body": "é\n\""}).to_string();
+        assert!(value.len() > 4);
+        assert!(http_response(&value, 4).is_ok());
+        assert!(matches!(
+            http_response(&value, 3),
+            Err(Failure::ResponseLimit)
+        ));
+        assert!(matches!(
+            http_response(&"x".repeat(65536), 16),
+            Err(Failure::ResponseLimit)
+        ));
+        let bad = json!({"status": 200, "contentType": "text/plain", "body": "ok", "headers": {}})
+            .to_string();
+        assert!(matches!(
+            http_response(&bad, 16),
+            Err(Failure::InvalidResponse)
+        ));
+    }
 }

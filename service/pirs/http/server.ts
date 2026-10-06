@@ -3,6 +3,7 @@ import { createServer, type ServerResponse } from 'node:http'
 import { once } from 'node:events'
 import { isAbsolute } from 'node:path'
 import { Runtime } from './runtime.ts'
+import { staticHtml } from './html.ts'
 
 export const POLICY = "sandbox; default-src 'none'; script-src 'none'; connect-src 'none'; img-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; style-src 'unsafe-inline'"
 const occupied = new Set<string>()
@@ -37,7 +38,7 @@ export async function startHttp(options: Options, port = 0) {
     const configured = manifest.capabilities?.find((c: any) => c.name === 'http.serve')?.constraints
     if (!configured || !Number.isSafeInteger(configured.deadlineMs) || configured.deadlineMs < 1 || configured.deadlineMs > 1000 ||
         !Number.isSafeInteger(configured.responseBytes) || configured.responseBytes < 1 || configured.responseBytes > 16384) throw new Error('HTTP limits required')
-    runtime = new Runtime({ ...options, deadlineMs: configured.deadlineMs, responseBytes: configured.responseBytes * 6 + 1024 })
+    runtime = new Runtime({ ...options, deadlineMs: configured.deadlineMs, responseBytes: Math.max(2, configured.responseBytes) })
     const ready = await runtime.response(30_000)
     if (ready?.ready !== true || !/^[0-9a-f]{64}$/.test(ready.installationId) || !ready.httpGrant) throw new Error('verified HTTP installation required')
     const grant: Grant = ready.httpGrant
@@ -79,9 +80,17 @@ export async function startHttp(options: Options, port = 0) {
         if (!output || Object.keys(output).sort().join(',') !== 'body,contentType,status' ||
             ![200, 400, 404, 500].includes(output.status) || !['text/html', 'text/plain', 'application/json'].includes(output.contentType) ||
             typeof output.body !== 'string' || Buffer.byteLength(output.body) > grant.responseBytes) { send(res, 500, 'PluginInvalidResponse'); return }
-        send(res, output.status, output.body, output.contentType)
+        const rendered = output.contentType === 'text/html' ? staticHtml(output.body, grant.responseBytes) : output.body
+        send(res, output.status, rendered, output.contentType)
       } catch { send(res, 503, 'PluginUnavailable') }
       finally { clearTimeout(timer); busy = false; req.resume() }
+    })
+    // Node's headersTimeout sweeper is not a two-second socket deadline.
+    // A hard connection timer also bounds partial headers and trickle traffic.
+    server.on('connection', socket => {
+      const timer = setTimeout(() => socket.destroy(), 2000)
+      timer.unref()
+      socket.once('close', () => clearTimeout(timer))
     })
     server.on('upgrade', (_req, socket) => socket.end('HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n'))
     server.requestTimeout = 2000; server.headersTimeout = 2000

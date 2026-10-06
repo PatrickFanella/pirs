@@ -46,7 +46,7 @@ test('installed HTTP origin bounds requests and excludes credentials and route s
     for (const route of ['/flood', '/invalid', '/headers']) assert.equal((await fetch(`${one.origin}${route}`)).status, 500)
     assert.equal((await fetch(`${one.origin}/echo`)).status, 200, 'same worker recovers')
     const page = await fetch(`${one.origin}/hostile`)
-    assert.equal(page.status, 200); assert.match(await page.text(), /credentials:'include'/)
+    assert.equal(page.status, 200); assert.match(await page.text(), /<h2>Useful static content<\/h2>/)
     // Runtime enforces the grant before Store allocation when the supervisor is bypassed.
     for (const call of [ { path: '/ungranted', method: 'GET', query: '', body: '' },
       { path: '/echo', method: 'POST', query: '', body: 'x'.repeat(1025) },
@@ -64,6 +64,14 @@ test('installed HTTP origin bounds requests and excludes credentials and route s
     await new Promise<void>(resolve => { slow.resume(); slow.once('close', () => resolve()) })
     assert.ok(Date.now() - stalled < 3000, 'stalled request has a deadline')
     assert.equal((await fetch(`${one.origin}/echo`)).status, 200)
+    const partial = connect(Number(new URL(one.origin).port), '127.0.0.2')
+    partial.on('error', () => {})
+    await new Promise<void>(resolve => partial.once('connect', resolve))
+    const headersStarted = Date.now()
+    partial.write(`GET /echo HTTP/1.1\r\nHost: ${new URL(one.origin).host}\r\n`)
+    await new Promise<void>(resolve => { partial.resume(); partial.once('close', () => resolve()) })
+    assert.ok(Date.now() - headersStarted < 2800, 'incomplete headers have a hard socket deadline')
+    assert.equal((await fetch(`${one.origin}/echo`)).status, 200, 'partial headers recover')
     const upgrade = await new Promise<string>(resolve => { const socket = connect(Number(new URL(one.origin).port), '127.0.0.2'); let data = ''; socket.on('data', c => data += c); socket.on('end', () => resolve(data)); socket.on('connect', () => socket.write(`GET /echo HTTP/1.1\r\nHost: ${new URL(one.origin).host}\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\n`)) })
     assert.match(upgrade, /400 Bad Request/)
   } finally { await one.close(); await two?.close(); await f2.close(); await f.close() }
@@ -75,4 +83,43 @@ test('HTTP installation rejects unsupported routes, limits and missing hook', as
     await assert.rejects(fixture(bad))
   }
   const bad = structuredClone(manifest); bad.hooks = []; await assert.rejects(fixture(bad))
+})
+
+
+test('direct native HTTP calls enforce installed body and time budgets with recovery', async () => {
+  for (const deadlineMs of [100, 1]) {
+    const value = structuredClone(manifest)
+    Object.assign(value.capabilities[1].constraints, { responseBytes: 16, deadlineMs })
+    const f = await fixture(value)
+    function calls(args: string[], routes: string[]) {
+      const input = routes.map((path, id) => JSON.stringify({ id, input: `http:${JSON.stringify({ path, method: 'GET', query: '', body: '' })}` })).join('\n') + '\n'
+      return execFileSync(host, ['--installation', f.installation, ...args], { input, encoding: 'utf8' }).trim().split('\n').map(s => JSON.parse(s))
+    }
+    try {
+      for (const args of [[], ['--deadline-ms', '1000', '--response-bytes', '100000']]) {
+        const rows = calls(args, ['/echo', '/loop', '/flood', '/tiny', '/ungranted', '/tiny'])
+        assert.equal(rows[0].httpGrant.responseBytes, 16)
+        assert.equal(rows[0].httpGrant.deadlineMs, deadlineMs)
+        assert.equal(rows[1].ok, false, 'echo body exceeds installed ceiling')
+        assert.ok((deadlineMs === 1 ? ['response_limit', 'timeout'] : ['response_limit']).includes(rows[1].error))
+        assert.equal(rows[2].error, 'timeout')
+        assert.ok(rows[2].elapsed_ms < deadlineMs + 50, `installed ${deadlineMs}ms deadline, observed ${rows[2].elapsed_ms}`)
+        assert.equal(rows[3].ok, false, 'CLI cannot expand installed response ceiling')
+        assert.ok((deadlineMs === 1 ? ['response_limit', 'timeout'] : ['response_limit']).includes(rows[3].error))
+        assert.equal(rows[4].ok, true, 'short body succeeds despite envelope overhead')
+        assert.ok(Buffer.byteLength(rows[4].result) > 16)
+        assert.equal(JSON.parse(rows[4].result).body, 'ok')
+        assert.equal(rows[5].error, 'invalid_request'); assert.equal(rows[5].peak_memory_bytes, 0)
+        assert.equal(rows[6].ok, true, 'recovers in same runtime')
+      }
+    } finally { await f.close() }
+  }
+  const normal = await fixture()
+  try {
+    const rows = execFileSync(host, ['--installation', normal.installation, '--response-bytes', '2', '--deadline-ms', '1'], {
+      input: ['/echo', '/loop', '/tiny'].map((path, id) => JSON.stringify({ id, input: `http:${JSON.stringify({ path, method: 'GET', query: '', body: '' })}` })).join('\n') + '\n', encoding: 'utf8'
+    }).trim().split('\n').map(s => JSON.parse(s))
+    assert.equal(rows[1].ok, false); assert.equal(rows[2].error, 'timeout'); assert.ok(rows[2].elapsed_ms < 50)
+    assert.equal(rows[3].ok, true, 'CLI tightens body budget without counting ABI overhead')
+  } finally { await normal.close() }
 })
