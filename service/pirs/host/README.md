@@ -5,6 +5,7 @@ It loads one WIT component in a separate process and serves bounded test calls.
 The separate [event consumer](../events/README.md) can deliver retained PDS
 events through this call contract. Local file installs now enforce [manifest grants](../../../docs/spec/local-manifest.md).
 Level 0 subscriptions, bounded diagnostics and manifest-granted HTTP requests are implemented.
+Quota-bound [plugin state](../../../docs/spec/kv-storage.md) is implemented.
 See [outbound request policy](../../../docs/spec/network-request.md).
 
 ## Build and qualify
@@ -21,6 +22,7 @@ python3 qualify.py
 python3 qualify-manifest.py
 cargo test -p pirs-plugin-host --locked
 python3 qualify-network.py
+python3 qualify-kv.py
 ```
 
 The build creates the host, a no_std guest importing only diagnostics, and a
@@ -61,8 +63,8 @@ response contains `id`, `ok:true`, `result`, `logs`, `log_bytes`,
 EOF exits successfully. Unknown request fields and oversized lines are rejected.
 
 Each request gets a fresh Store and instance. Discarding them after the call
-releases guest state and allows the next request after a failure. This is a
-serial call contract with no persistent plugin state or delivery guarantee.
+releases guest state and allows the next request after a failure. KV-enabled installations persist state through explicit imports. This remains
+a serial call contract without an exactly-once delivery guarantee.
 
 ## Limits and their scope
 

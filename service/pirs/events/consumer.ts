@@ -72,8 +72,8 @@ class Runtime {
   private waiter: { resolve: (value: unknown) => void; reject: (error: Error) => void } | undefined
   private failure: Error | undefined
 
-  constructor(host: string, installation: string) {
-    this.child = spawn(host, ['--installation', installation, '--parent-pid', String(process.pid),
+  constructor(host: string, installation: string, stateDir?: string) {
+    this.child = spawn(host, ['--installation', installation, ...(stateDir ? ['--state-dir', stateDir] : []), '--parent-pid', String(process.pid),
       '--input-bytes', '1048576', '--deadline-ms', '250'], { env: {}, stdio: 'pipe' })
     this.child.stdout.on('data', (chunk: Buffer) => {
       try {
@@ -142,14 +142,14 @@ class Runtime {
   }
 }
 
-export async function consume(options: { socket: string; cursor: string; host: string; installation: string; signal: AbortSignal }) {
+export async function consume(options: { socket: string; cursor: string; host: string; installation: string; stateDir?: string; signal: AbortSignal }) {
   if (![options.cursor, options.host, options.installation].every(isAbsolute)) throw new Error('host, installation and cursor paths must be absolute')
   const lock = createServer((connection) => connection.end())
   const unlock = await listenPrivate(lock, `${options.cursor}.lock`)
   let runtime: Runtime | undefined
   try {
     let cursor = await readCursor(options.cursor)
-    runtime = new Runtime(options.host, options.installation)
+    runtime = new Runtime(options.host, options.installation, options.stateDir)
     const installationId = await runtime.ready()
     if (cursor && cursor.installationId !== installationId) throw new Error('installation changed; use a new cursor after operator review')
     process.stdout.write(JSON.stringify({ ready: true, runtimePid: runtime.child.pid, cursor: cursor?.seq ?? 0 }) + '\n')
@@ -194,12 +194,12 @@ async function pause(signal: AbortSignal) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const { values } = parseArgs({ options: {
-    socket: { type: 'string' }, cursor: { type: 'string' }, host: { type: 'string' }, installation: { type: 'string' }
+    socket: { type: 'string' }, cursor: { type: 'string' }, host: { type: 'string' }, installation: { type: 'string' }, 'state-dir': { type: 'string' }
   } })
   if (!values.socket || !values.cursor || !values.host || !values.installation) throw new Error('required: --socket --cursor --host --installation')
   const stop = new AbortController()
   process.once('SIGTERM', () => stop.abort())
   process.once('SIGINT', () => stop.abort())
-  consume({ socket: values.socket, cursor: values.cursor, host: values.host, installation: values.installation, signal: stop.signal })
+  consume({ socket: values.socket, cursor: values.cursor, host: values.host, installation: values.installation, stateDir: values['state-dir'], signal: stop.signal })
     .catch((error: unknown) => { console.error(error instanceof Error ? error.message : 'delivery failed'); process.exitCode = 1 })
 }

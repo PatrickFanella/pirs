@@ -39,14 +39,14 @@ has empty constraints because the host's existing encoded log quota applies.
 Every imported `pirs:sandbox/diagnostics@0.1.0.log` function must be covered by
 `diagnostics.log`. The `pirs:sandbox/network@0.1.0.request` import requires
 `network.request` with typed [allowed-host constraints](network-request.md).
-Its response record type is checked by the WIT linker. All other import
+Its response record type is checked by the WIT linker. The KV read/write interfaces require the matching grants and typed
+[quota constraints](kv-storage.md). All other import
 interfaces, operations and kinds fail.
 Wasmtime checks the linked WIT signatures and required export before any
 Store or guest instance exists, both at installation and runtime startup.
 
 The shared `category.operation` vocabulary reserves `xrpc.serve`, `http.serve`,
-`records.read`, `records.write`, `blobs.read`, `kv.read`,
-`kv.write`, `record.validate`, `record.unique`, `account.create` and
+`records.read`, `records.write`, `blobs.read`, `record.validate`, `record.unique`, `account.create` and
 `auth.session`. This runtime rejects them as unsupported. Future issues can
 add implementations, import mappings and typed constraints without granting
 these capabilities through a permissive fallback.

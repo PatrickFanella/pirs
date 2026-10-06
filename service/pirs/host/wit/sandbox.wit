@@ -22,3 +22,23 @@ world sandbox {
   import diagnostics;
   export run: func(input: string) -> string;
 }
+
+interface kv-read {
+  get: func(key: string) -> result<option<list<u8>>, string>;
+  %list: func(prefix: string) -> result<list<string>, string>;
+}
+interface kv-write {
+  set: func(key: string, value: option<list<u8>>) -> result<_, string>;
+}
+world storage-sandbox {
+  import diagnostics;
+  import network;
+  import kv-read;
+  import kv-write;
+  export run: func(input: string) -> string;
+}
+world kv-fixture {
+  import kv-read;
+  import kv-write;
+  export run: func(input: string) -> string;
+}
