@@ -22,3 +22,8 @@ world sandbox {
   import diagnostics;
   export run: func(input: string) -> string;
 }
+
+world webhook {
+  import network;
+  export run: func(input: string) -> string;
+}

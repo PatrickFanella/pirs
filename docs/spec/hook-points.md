@@ -125,6 +125,15 @@ limits without a shipping loopback exception.
 bytes, the tested base and synthetic limits. This adds `network.request`
 evidence for the local level 0 host; no webhook or hosted use is qualified.
 
+The commit webhook reference adds a network-only WIT guest with a manifest
+grant for `events.subscribe`, collection projection, HMAC-SHA256 notices and
+at most three requests per event call. Native tests check signing, projection
+and retry outcomes; installed-host qualification checks imports, filtering and
+production localhost denial. [The reference record](../qualification/commit-webhook.md)
+documents its build and limits. Issue #11's successful PDS-write-to-local-receiver
+demo remains blocked by #10's private/loopback destination prohibition. This is
+partial reference-plugin evidence, not the M1 exit demonstration.
+
 Not yet run: a production plugin host, proxied XRPC to a host, and every level 2 and level 3 hook.
 
 Standalone WIT sandbox host, 2026-10-03: a separate Wasmtime process passed
