@@ -18,7 +18,7 @@ function reservedXrpc(nsid: string) {
 const ISSUER = /^did:plc:[a-z2-7]{24}$/
 
 export type Options = {
-  host: string; installation: string; stateDir?: string
+  host: string; installation: string; stateDir?: string; publicPds?: string
   serviceDid: string; serviceId: string; legacyBareAudience?: boolean
   // Trusted resolver injection for disposable qualification, absent from CLI.
   resolver?: Pick<DidResolver, 'resolveAtprotoKey'>
@@ -48,6 +48,7 @@ class Runtime {
   constructor(options: Options) {
     this.child = spawn(options.host, ['--installation', options.installation,
       ...(options.stateDir ? ['--state-dir', options.stateDir] : []),
+      ...(options.publicPds ? ['--public-pds', options.publicPds] : []),
       '--parent-pid', String(process.pid), '--input-bytes', '65536', '--deadline-ms', '250'],
       { env: {}, stdio: 'pipe' })
     this.child.stdout!.on('data', (chunk: Buffer) => {
@@ -226,7 +227,7 @@ export async function startXrpc(options: Options, port = 0, bind = '127.0.0.1') 
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const { values } = parseArgs({ options: {
-    host: { type: 'string' }, installation: { type: 'string' }, 'state-dir': { type: 'string' },
+    'public-pds': { type: 'string' }, host: { type: 'string' }, installation: { type: 'string' }, 'state-dir': { type: 'string' },
     'service-did': { type: 'string' }, 'service-id': { type: 'string' }, port: { type: 'string' },
     'legacy-bare-audience': { type: 'boolean', default: false }
   } })
@@ -234,7 +235,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const port = Number(values.port ?? 3001)
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('invalid port')
   const host = await startXrpc({ host: values.host, installation: values.installation, stateDir: values['state-dir'],
-    serviceDid: values['service-did'], serviceId: values['service-id'], legacyBareAudience: values['legacy-bare-audience'] }, port)
+    publicPds: values['public-pds'], serviceDid: values['service-did'], serviceId: values['service-id'], legacyBareAudience: values['legacy-bare-audience'] }, port)
   console.log(JSON.stringify({ ready: true, ...host }))
   const close = () => { void host.close().then(() => process.exit(0)) }
   process.once('SIGTERM', close); process.once('SIGINT', close)

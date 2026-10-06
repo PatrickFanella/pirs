@@ -2,7 +2,7 @@
 
 extern crate alloc;
 use alloc::string::String;
-#[cfg(not(any(feature = "network", feature = "kv")))]
+#[cfg(not(any(feature = "network", feature = "kv", feature = "public-read")))]
 use alloc::{string::ToString, vec, vec::Vec};
 
 #[global_allocator]
@@ -67,7 +67,7 @@ fn panic(_info: &core::panic::PanicInfo<'_>) -> ! {
     core::arch::wasm32::unreachable()
 }
 
-#[cfg(not(any(feature = "network", feature = "kv")))]
+#[cfg(not(any(feature = "network", feature = "kv", feature = "public-read")))]
 wit_bindgen::generate!({ path: "../wit", world: "sandbox" });
 #[cfg(feature = "network")]
 wit_bindgen::generate!({ path: "../wit", world: "network-sandbox" });
@@ -75,10 +75,67 @@ wit_bindgen::generate!({ path: "../wit", world: "network-sandbox" });
 #[cfg(feature = "kv")]
 wit_bindgen::generate!({ path: "../wit", world: "kv-fixture" });
 
+#[cfg(feature = "public-read")]
+wit_bindgen::generate!({ path: "../wit", world: "public-read-fixture" });
+
 struct Fixture;
 
 impl Guest for Fixture {
     fn run(input: String) -> String {
+        #[cfg(feature = "public-read")]
+        {
+            let action = input
+                .split("\"repo\":\"")
+                .nth(1)
+                .unwrap_or("")
+                .split('"')
+                .next()
+                .unwrap_or("");
+            let parts: alloc::vec::Vec<_> = action.split('|').collect();
+            if parts.len() < 4 {
+                return "invalid fixture request".into();
+            }
+            let mut output = String::new();
+            let count = if parts[0] == "flood" {
+                9
+            } else if parts[0] == "budget" {
+                3
+            } else {
+                1
+            };
+            for _ in 0..count {
+                if parts[0] == "blob" || parts[0] == "budget" {
+                    match pirs::sandbox::blobs_read::get(
+                        parts[1],
+                        parts[2],
+                        parts[3],
+                        parts.get(4).copied().unwrap_or(""),
+                    ) {
+                        Ok(bytes) => {
+                            output.push_str(&alloc::format!("blob:{}:", bytes.len()));
+                            if bytes.len() < 100 {
+                                for b in bytes {
+                                    output.push_str(&alloc::format!("{b:02x}"));
+                                }
+                            }
+                        }
+                        Err(e) => output.push_str(&alloc::format!("denied:{e}")),
+                    }
+                } else {
+                    match pirs::sandbox::records_read::get(parts[1], parts[2], parts[3]) {
+                        Ok(value) => {
+                            if count == 1 {
+                                output.push_str(&value);
+                            } else {
+                                output.push_str("allowed;");
+                            }
+                        }
+                        Err(e) => output.push_str(&alloc::format!("denied:{e}")),
+                    }
+                }
+            }
+            return output;
+        }
         #[cfg(feature = "kv")]
         {
             let marker = "\"repo\":\"";
@@ -121,7 +178,7 @@ impl Guest for Fixture {
                 Err(error) => alloc::format!("denied:{error}"),
             };
         }
-        #[cfg(not(any(feature = "network", feature = "kv")))]
+        #[cfg(not(any(feature = "network", feature = "kv", feature = "public-read")))]
         {
             if let Some(call) = input.strip_prefix("xrpc:") {
                 if call.contains("tv.test.trap") {

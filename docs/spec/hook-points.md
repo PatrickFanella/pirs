@@ -66,7 +66,7 @@ Proposed shape, following EmDash's registry RFC so that one manifest vocabulary 
 | `xrpc.serve` | NSIDs |
 | `http.serve` | route prefix |
 | `records.read`, `records.write` | collections |
-| `blobs.read` | none yet |
+| `blobs.read` | collections and a current visible owning record, see [public reads](public-read.md) |
 | `network.request` | `allowedHosts` |
 | `kv.read`, `kv.write` | size quota |
 
@@ -196,3 +196,16 @@ PDS-proxy checks passed alongside the shared event and KV regressions.
 [The service qualification](../qualification/xrpc-service.md) records the
 regression evidence. Exact method/collection matching and deployment gates
 remain unchanged.
+
+Public repository reads, 2026-10-06: installed WIT guests passed real record and
+blob reads against stock PDS 0.5.37 and the selected pinned package. Exact
+collection grants, local account status, current typed record references and
+same-account blob availability constrain each read. Real self-deactivation,
+account/record/blob takedowns and changes during reads refused guest delivery.
+Result streams, operation count, invocation byte totals and deadlines were
+bounded. [The public-read qualification](../qualification/public-read.md) records
+the 38-call runs and direct stock API checks. [The contract](public-read.md)
+describes the loopback transport and HTTP visibility observation limits. This
+adds public auxiliary reads for existing hooks; private preferences, Spaces and
+level 2 account consent remain outside the implementation. No hosted or production
+qualification is claimed.

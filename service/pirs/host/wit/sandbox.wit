@@ -40,10 +40,25 @@ world storage-sandbox {
   import network;
   import kv-read;
   import kv-write;
+  import records-read;
+  import blobs-read;
   export run: func(input: string) -> string;
 }
 world kv-fixture {
   import kv-read;
   import kv-write;
+  export run: func(input: string) -> string;
+}
+
+// Public repository reads only. A blob requires a current owning record.
+interface records-read {
+  get: func(did: string, collection: string, rkey: string) -> result<string, string>;
+}
+interface blobs-read {
+  get: func(did: string, collection: string, rkey: string, cid: string) -> result<list<u8>, string>;
+}
+world public-read-fixture {
+  import records-read;
+  import blobs-read;
   export run: func(input: string) -> string;
 }

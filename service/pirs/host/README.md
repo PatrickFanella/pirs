@@ -101,3 +101,20 @@ what was run and the remaining integration boundaries.
 Authenticated XRPC uses a separate [HTTP supervisor](../../../docs/spec/xrpc-service.md)
 and an installed `xrpc.serve` grant. Run its disposable PDS proxy qualification
 with `pnpm check:xrpc` and `pnpm qualify:xrpc` from `service/`.
+
+Public reads use installed `records.read` and `blobs.read` imports and a fixed
+`--public-pds http://127.0.0.1:PORT` origin. Both supervisors forward this option.
+[The public-read contract](../../../docs/spec/public-read.md) describes account
+visibility, current record ownership and the 64 KiB result bound. Build the
+`public-read.wasm` fixture with `python3 build.py`, then run from `service/`:
+
+```sh
+pnpm exec tsc -p pirs/public-read/tsconfig.json
+node --test pirs/public-read/public-read.test.ts
+```
+
+The test boots and removes a disposable PDS and two signed local PLC accounts.
+To qualify an already installed stock package without changing dependency pins,
+set `PIRS_READ_PDS_MODULE` to its absolute `dist/index.js` path. `PIRS_READ_REPORT`
+selects an optional evidence JSON path. These options belong to the test harness;
+the shipping host has no fixture override.

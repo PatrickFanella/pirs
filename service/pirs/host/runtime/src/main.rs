@@ -20,6 +20,7 @@ const EPOCH_INTERVAL: Duration = Duration::from_millis(5);
 mod kv;
 mod manifest;
 mod network;
+mod public_read;
 
 #[derive(Parser)]
 #[command(
@@ -33,6 +34,9 @@ struct Options {
     /// Private host state root, separate from PDS storage.
     #[arg(long, requires = "installation")]
     state_dir: Option<PathBuf>,
+    /// Fixed anonymous local PDS origin for public reads, never guest-selected.
+    #[arg(long, requires = "installation")]
+    public_pds: Option<String>,
     /// Operator state command: export, delete, or uninstall.
     #[arg(long, requires_all = ["installation", "state_dir"], value_parser = ["export", "delete", "uninstall"])]
     state_command: Option<String>,
@@ -102,6 +106,11 @@ struct CallState {
     kv_read: bool,
     kv_write: bool,
     kv_calls: usize,
+    public_reader: Option<std::sync::Arc<public_read::Reader>>,
+    records_grant: Option<public_read::Grant>,
+    blobs_grant: Option<public_read::Grant>,
+    public_calls: usize,
+    public_bytes: usize,
 }
 
 impl CallState {
@@ -119,6 +128,11 @@ impl CallState {
             kv_read: false,
             kv_write: false,
             kv_calls: 0,
+            public_reader: None,
+            records_grant: None,
+            blobs_grant: None,
+            public_calls: 0,
+            public_bytes: 0,
         }
     }
 
@@ -259,6 +273,7 @@ struct Host {
     manifest: Option<manifest::Manifest>,
     installation_id: Option<String>,
     kv: Option<std::sync::Arc<kv::Storage>>,
+    public_reader: Option<std::sync::Arc<public_read::Reader>>,
 }
 
 impl Host {
@@ -301,8 +316,21 @@ impl Host {
         } else {
             None
         };
+        let public_reader = if manifest
+            .as_ref()
+            .is_some_and(|m| m.has("records.read") || m.has("blobs.read"))
+        {
+            Some(std::sync::Arc::new(public_read::Reader::new(
+                options
+                    .public_pds
+                    .as_deref()
+                    .context("public reads require --public-pds")?,
+            )?))
+        } else {
+            None
+        };
         let component = Component::new(&engine, bytes)?;
-        // No WASI, environment, filesystem or PDS API is linked. The network
+        // No WASI, environment or filesystem is linked. The network
         // callback checks the installed grant. Pre-instantiation checks the WIT
         // function contract before announcing readiness or executing a guest.
         let mut linker = Linker::new(&engine);
@@ -324,6 +352,7 @@ impl Host {
             manifest,
             installation_id,
             kv,
+            public_reader,
         })
     }
 
@@ -356,6 +385,15 @@ impl Host {
         let mut store = Store::new(&self.engine, CallState::new(self.limits.clone()));
         store.data_mut().network_grant = self.manifest.as_ref().and_then(|m| m.network_grant());
         store.data_mut().kv = self.kv.clone();
+        store.data_mut().public_reader = self.public_reader.clone();
+        store.data_mut().records_grant = self
+            .manifest
+            .as_ref()
+            .and_then(|m| m.public_grant("records.read"));
+        store.data_mut().blobs_grant = self
+            .manifest
+            .as_ref()
+            .and_then(|m| m.public_grant("blobs.read"));
         store.data_mut().kv_read = self.manifest.as_ref().is_some_and(|m| m.has("kv.read"));
         store.data_mut().kv_write = self.manifest.as_ref().is_some_and(|m| m.has("kv.write"));
         store.limiter(|state| state);

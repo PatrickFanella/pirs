@@ -21,4 +21,6 @@ if __name__ == "__main__":
     shutil.copyfile(ROOT / "target/wasm32-wasip2/release/pirs_sandbox_fixture.wasm", ROOT / "target/network.wasm")
     cargo("--target", "wasm32-wasip2", "-p", "pirs-sandbox-fixture", "--features", "kv")
     shutil.copyfile(ROOT / "target/wasm32-wasip2/release/pirs_sandbox_fixture.wasm", ROOT / "target/kv.wasm")
+    cargo("--target", "wasm32-wasip2", "-p", "pirs-sandbox-fixture", "--features", "public-read")
+    shutil.copyfile(ROOT / "target/wasm32-wasip2/release/pirs_sandbox_fixture.wasm", ROOT / "target/public-read.wasm")
     cargo("--target", "wasm32-wasip2", "-p", "pirs-sandbox-fixture")

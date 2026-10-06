@@ -12,6 +12,7 @@ wasi = []
 event-echo = []
 network = []
 kv = []
+public-read = []
 
 [dependencies]
 wit-bindgen = { version = "=0.62.0", default-features = false, features = ["macros", "realloc"] }

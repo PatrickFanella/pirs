@@ -29,8 +29,9 @@ consent or expose a policy API. The manifest ID is a lowercase ASCII slug of
 1 to 128 letters, digits or hyphens. This host supports level 0 observers and level 1 XRPC services. Level 1 requires an `xrpc.serve` grant and hook.
 Unknown fields, duplicate hooks/capabilities, unknown event types and unknown
 capability categories or operations fail installation. Collection constraints
-must be nonempty, unique NSIDs, or exactly `["*"]` for explicit unrestricted
-collection access. Partial wildcards are rejected.
+for `events.subscribe` must be nonempty, unique NSIDs, or exactly `["*"]`
+for explicit unrestricted event collection access. Public-read grants require
+1 to 64 exact NSIDs and reject wildcards. Partial wildcards are rejected.
 
 `events.subscribe` supports `commit`, `sync`, `identity` and `account`. Its
 event types must match the manifest's `event.*` hooks exactly. The empty hooks
@@ -40,14 +41,15 @@ Every imported `pirs:sandbox/diagnostics@0.1.0.log` function must be covered by
 `diagnostics.log`. The `pirs:sandbox/network@0.1.0.request` import requires
 `network.request` with typed [allowed-host constraints](network-request.md).
 Its response record type is checked by the WIT linker. The KV read/write interfaces require the matching grants and typed
-[quota constraints](kv-storage.md). All other import
+[quota constraints](kv-storage.md). The `records-read.get` and `blobs-read.get`
+interfaces require matching grants and [public collection constraints](public-read.md). All other import
 interfaces, operations and kinds fail.
 Wasmtime checks the linked WIT signatures and required export before any
 Store or guest instance exists, both at installation and runtime startup.
 
 The `xrpc.serve` grant has an exact NSID list, described in [service proxying](xrpc-service.md).
 The shared `category.operation` vocabulary reserves `http.serve`,
-`records.read`, `records.write`, `blobs.read`, `record.validate`, `record.unique`, `account.create` and
+`records.write`, `record.validate`, `record.unique`, `account.create` and
 `auth.session`. This runtime rejects them as unsupported. Future issues can
 add implementations, import mappings and typed constraints without granting
 these capabilities through a permissive fallback.
