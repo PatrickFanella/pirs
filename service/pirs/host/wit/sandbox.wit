@@ -4,6 +4,20 @@ interface diagnostics {
   log: func(message: string);
 }
 
+interface network {
+  record response {
+    status: u16,
+    body: list<u8>,
+  }
+  request: func(method: string, url: string, headers: list<tuple<string, string>>, body: list<u8>) -> result<response, string>;
+}
+
+world network-sandbox {
+  import diagnostics;
+  import network;
+  export run: func(input: string) -> string;
+}
+
 world sandbox {
   import diagnostics;
   export run: func(input: string) -> string;

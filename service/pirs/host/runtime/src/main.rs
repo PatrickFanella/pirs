@@ -12,12 +12,13 @@ use wasmtime::{Config, Engine, ResourceLimiter, Store, UpdateDeadline};
 
 wasmtime::component::bindgen!({
     path: "../wit",
-    world: "sandbox",
+    world: "network-sandbox",
     imports: { default: trappable },
 });
 
 const EPOCH_INTERVAL: Duration = Duration::from_millis(5);
 mod manifest;
+mod network;
 
 #[derive(Parser)]
 #[command(
@@ -82,6 +83,8 @@ struct CallState {
     peak_memory: usize,
     logs: Vec<String>,
     log_bytes: usize,
+    network_grant: Option<network::Grant>,
+    network_calls: usize,
 }
 
 impl CallState {
@@ -93,6 +96,8 @@ impl CallState {
             peak_memory: 0,
             logs: Vec::new(),
             log_bytes: 2,
+            network_grant: None,
+            network_calls: 0,
         }
     }
 
@@ -228,7 +233,7 @@ impl Response {
 
 struct Host {
     engine: Engine,
-    plugin: SandboxPre<CallState>,
+    plugin: NetworkSandboxPre<CallState>,
     limits: Limits,
     manifest: Option<manifest::Manifest>,
     installation_id: Option<String>,
@@ -259,12 +264,12 @@ impl Host {
             )
         };
         let component = Component::new(&engine, bytes)?;
-        // Only diagnostics exist. No WASI, environment, filesystem, PDS or
-        // application capability is linked. Pre-instantiation checks the WIT
+        // No WASI, environment, filesystem or PDS API is linked. The network
+        // callback checks the installed grant. Pre-instantiation checks the WIT
         // function contract before announcing readiness or executing a guest.
         let mut linker = Linker::new(&engine);
-        Sandbox::add_to_linker::<_, HasSelf<_>>(&mut linker, |state| state)?;
-        let plugin = SandboxPre::new(linker.instantiate_pre(&component)?)?;
+        NetworkSandbox::add_to_linker::<_, HasSelf<_>>(&mut linker, |state| state)?;
+        let plugin = NetworkSandboxPre::new(linker.instantiate_pre(&component)?)?;
         let clock_engine = engine.clone();
         std::thread::Builder::new()
             .name("pirs-call-clock".into())
@@ -310,6 +315,7 @@ impl Host {
         }
         let started = Instant::now();
         let mut store = Store::new(&self.engine, CallState::new(self.limits.clone()));
+        store.data_mut().network_grant = self.manifest.as_ref().and_then(|m| m.network_grant());
         store.limiter(|state| state);
         store.set_epoch_deadline(1);
         store.epoch_deadline_callback(|mut context| {
@@ -463,10 +469,10 @@ fn main() -> Result<()> {
         let component = Component::new(&engine, &bytes)?;
         let imports = manifest.check_imports(&engine, &component)?;
         let mut linker = Linker::new(&engine);
-        Sandbox::add_to_linker::<_, HasSelf<_>>(&mut linker, |state| state)?;
+        NetworkSandbox::add_to_linker::<_, HasSelf<_>>(&mut linker, |state| state)?;
         // Validate all signatures and the export contract without a Store or
         // guest instantiation. Nothing is written before this succeeds.
-        let _ = SandboxPre::<CallState>::new(linker.instantiate_pre(&component)?)?;
+        let _ = NetworkSandboxPre::<CallState>::new(linker.instantiate_pre(&component)?)?;
         let record = manifest::receipt(&bytes, &manifest_bytes, imports);
         let destination = manifest::install(root, &bytes, &manifest_bytes, &record, &engine)?;
         println!("{}", json!({"installed": destination, "receipt": record}));

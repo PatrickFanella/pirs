@@ -114,6 +114,17 @@ filtered progress and installed cursor identity survived restart.
 runtime tests, byte hashes and limits. This adds level 0 manifest enforcement
 only; future capabilities remain unimplemented.
 
+Outbound requests, 2026-10-06: the separately installed WIT guest used the
+shipping resolver and TLS transport for two successful public HTTPS GETs,
+with denied loopback DNS, private/metadata literals, unlisted hosts and a
+non-HTTP URL between them. Undeclared imports failed before installation,
+and raw mode granted no network access. Test-only transport fixtures exercised
+private redirects, unknown-length oversized bodies, deadlines and redirect
+limits without a shipping loopback exception.
+[The network qualification](../qualification/network-request.md) records exact
+bytes, the tested base and synthetic limits. This adds `network.request`
+evidence for the local level 0 host; no webhook or hosted use is qualified.
+
 Not yet run: a production plugin host, proxied XRPC to a host, and every level 2 and level 3 hook.
 
 Standalone WIT sandbox host, 2026-10-03: a separate Wasmtime process passed

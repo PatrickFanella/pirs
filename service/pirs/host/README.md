@@ -4,7 +4,8 @@ This is the standalone host introduced in [issue #7](https://git.subcult.tv/subc
 It loads one WIT component in a separate process and serves bounded test calls.
 The separate [event consumer](../events/README.md) can deliver retained PDS
 events through this call contract. Local file installs now enforce [manifest grants](../../../docs/spec/local-manifest.md).
-Only level 0 subscriptions and bounded diagnostics are implemented.
+Level 0 subscriptions, bounded diagnostics and manifest-granted HTTP requests are implemented.
+See [outbound request policy](../../../docs/spec/network-request.md).
 
 ## Build and qualify
 
@@ -18,6 +19,8 @@ cargo fmt --all --check
 python3 build.py
 python3 qualify.py
 python3 qualify-manifest.py
+cargo test -p pirs-plugin-host --locked
+python3 qualify-network.py
 ```
 
 The build creates the host, a no_std guest importing only diagnostics, and a
@@ -43,8 +46,10 @@ before loading the component. The serving process has no PDS configuration or
 account database access API. The operator should launch it as a separate user
 without PDS directory permissions or inherited secret file descriptors; this
 implementation does not install an OS sandbox or change filesystem permissions.
-Only `pirs:sandbox/diagnostics@0.1.0.log(string)` is linked. No WASI environment,
-filesystem, networking or stream interface is available. An unlinked import or
+Diagnostics and the explicit `pirs:sandbox/network@0.1.0.request` import are linked.
+The latter checks the installed grant on every call, including startup. Raw
+qualification mode grants no network capability. No WASI environment, filesystem,
+sockets, HTTP or stream interface is available. An unlinked import or
 incorrect WIT export prevents readiness.
 
 Stdout starts with one JSON readiness line containing the interface and limits.
