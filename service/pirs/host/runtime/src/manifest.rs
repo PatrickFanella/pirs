@@ -69,7 +69,7 @@ fn unique(values: &[String]) -> bool {
 
 // Mirrors @atproto/syntax 0.7.6: only the first authority label and
 // final name must start with a letter; the name cannot contain hyphens.
-fn nsid(value: &str) -> bool {
+pub(crate) fn nsid(value: &str) -> bool {
     let parts: Vec<_> = value.split('.').collect();
     value.len() <= 317
         && parts.len() >= 3
@@ -151,6 +151,9 @@ impl Manifest {
                 ),
                 "network.request" => {
                     crate::network::Grant::parse(&capability.constraints)?;
+                }
+                "records.read" | "blobs.read" => {
+                    crate::public_read::Grant::parse(&capability.constraints)?;
                 }
                 "kv.read" | "kv.write" => {
                     crate::kv::quota(&capability.constraints)?;
@@ -236,8 +239,8 @@ impl Manifest {
                 }
                 // Shared spec vocabulary. Recognition never grants a capability
                 // that this runtime has no implementation for.
-                "records.read" | "records.write" | "blobs.read" | "record.validate"
-                | "record.unique" | "account.create" | "auth.session" => {
+                "records.write" | "record.validate" | "record.unique" | "account.create"
+                | "auth.session" => {
                     bail!("capability is not supported by this runtime")
                 }
                 _ => bail!("unknown capability category or operation"),
@@ -354,6 +357,12 @@ impl Manifest {
             .map(|c| crate::network::Grant::parse(&c.constraints).expect("validated grant"))
     }
 
+    pub fn public_grant(&self, name: &str) -> Option<crate::public_read::Grant> {
+        self.capabilities.iter().find(|c| c.name == name).map(|c| {
+            crate::public_read::Grant::parse(&c.constraints).expect("validated collections")
+        })
+    }
+
     pub fn kv_quota(&self, name: &str) -> Option<usize> {
         self.capabilities
             .iter()
@@ -371,6 +380,8 @@ impl Manifest {
             let (capability, allowed_operations): (&str, &[&str]) = match name {
                 "pirs:sandbox/diagnostics@0.1.0" => ("diagnostics.log", &["log"]),
                 "pirs:sandbox/network@0.1.0" => ("network.request", &["request"]),
+                "pirs:sandbox/records-read@0.1.0" => ("records.read", &["get"]),
+                "pirs:sandbox/blobs-read@0.1.0" => ("blobs.read", &["get"]),
                 "pirs:sandbox/kv-read@0.1.0" => ("kv.read", &["get", "list"]),
                 "pirs:sandbox/kv-write@0.1.0" => ("kv.write", &["set"]),
                 _ => bail!("unsupported component import"),
