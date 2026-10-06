@@ -40,8 +40,9 @@ were disposable. No public identity or production PDS was used.
 - Formatting, lint and exported-tree identity checks passed.
 
 The package built from the release tag resolves workspace dependencies to that
-tag's versions. The patched frozen graph includes `@atproto/lex` 0.3.14 and
-`@atproto/repo` 0.11.0; the published stock graph uses 0.3.13 and 0.10.15.
+tag's versions. Both frozen PDS graphs include `@atproto/lex` 0.3.14 and
+`@atproto/repo` 0.11.0. Every dependency snapshot is identical after renaming
+the PDS package key; only the PDS artifact resolution changes.
 The artifact filename includes the fork commit prefix so replacing a package
 cannot silently retain the earlier file dependency graph. Final patched smoke
 and consumer qualification use the freshly resolved frozen graph.
