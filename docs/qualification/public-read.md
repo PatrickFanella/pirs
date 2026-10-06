@@ -23,7 +23,8 @@ Verified cases include:
   record and blob reads. The stock PDS represents suspended accounts with its
   account takedown field. An explicit synthetic `suspended` status is also refused.
 - Real record and blob takedowns, reference removal, account deactivation and
-  unrelated repository revision changes during reads fail before guest delivery.
+  unrelated repository revision changes observed by the HTTP rechecks fail before
+  guest delivery. Buffered final responses have the accepted race described below.
 - A 64 KiB blob succeeds and a 64 KiB plus one byte blob fails. Oversized record
   JSON, unknown-length response overflow, the eight-operation quota and the
   128 KiB invocation budget are enforced. Redirects are refused.
@@ -51,7 +52,7 @@ Use `PIRS_READ_PDS_MODULE=/absolute/path/to/stock/dist/index.js` for the stock r
 The harness removes its PDS data, signed local identities, installs and processes.
 Evidence is retained in the authorized audit workspace under `chunks/7/pirs15-*`.
 
-## Readiness blocker found during review
+## Accepted HTTP observation semantics
 
 Independent review on 2026-10-06 reproduced three late-recheck races against
 a real local PDS. A buffered final active-account response allowed record
@@ -60,8 +61,13 @@ blob delivery after owning-record or blob takedown; the account remained active
 at the same revision. Anonymous reads after those takedowns were refused.
 The probes reproduced on the tree integrated with the HTTP sandbox changes.
 
-The positive harness above qualifies sampled HTTP checks, not strict visibility
-at guest delivery. Public-read readiness remains blocked pending a consistent
-PDS authorization boundary or an explicit owner decision accepting sampled
-visibility. Adding more separate HTTP rechecks cannot establish that boundary.
-PR #54 and issue #15 must remain open under the current acceptance requirement.
+The positive harness above qualifies sampled HTTP checks. On 2026-10-06, the
+owner accepted this contract for PR #54 and authorized merge after validation.
+Data was public when the PDS sampled it, but a later takedown can race guest
+delivery. Strict visibility at delivery would require a consistent PDS
+authorization boundary and is outside the accepted contract. This decision is
+independent of any hosted CI waiver.
+
+The three buffered-response cases are retained in `public-read.test.ts`. They
+assert delivery of the sampled data and refusal by subsequent anonymous PDS
+requests after moderation. The updated harness makes 41 calls per run.

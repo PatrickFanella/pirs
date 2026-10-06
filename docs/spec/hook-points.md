@@ -201,7 +201,10 @@ Public repository reads, 2026-10-06: installed WIT guests passed real record and
 blob reads against stock PDS 0.5.37 and the selected pinned package. Exact
 collection grants, local account status, current typed record references and
 same-account blob availability constrain each read. Real self-deactivation,
-account/record/blob takedowns and changes during reads refused guest delivery.
+account/record/blob takedowns and changes observed by the HTTP rechecks refused
+guest delivery. The owner accepted HTTP observation semantics on 2026-10-06;
+buffered final responses can deliver sampled data after a later takedown. The
+three reproduced races are retained as qualification cases.
 Result streams, operation count, invocation byte totals and deadlines were
 bounded. [The public-read qualification](../qualification/public-read.md) records
 the 38-call runs and direct stock API checks. [The contract](public-read.md)

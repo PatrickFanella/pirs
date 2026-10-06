@@ -16,7 +16,7 @@ const plugin = fileURLToPath(new URL('../host/target/public-read.wasm', import.m
 const collection = 'tv.123.asset'
 const deniedCollection = 'tv.other.asset'
 
-test('installed guest reads public data from real local PDS with current ownership and visibility', { timeout: 120_000 }, async () => {
+test('installed guest enforces public-read grants and HTTP observation semantics against real local PDS', { timeout: 120_000 }, async () => {
   const root = await mkdtemp(join(tmpdir(), 'pirs-public-read-'))
   const plc = await startPlcFixture(2)
   const admin = randomBytes(24).toString('hex')
@@ -114,8 +114,11 @@ test('installed guest reads public data from real local PDS with current ownersh
         }
         const upstream = await fetch(`${base}${req.url}`)
         const bytes = Buffer.from(await upstream.arrayBuffer())
+        if (mode === 'late-account-deactivate' && url.pathname.endsWith('getRepoStatus') && recordCalls === 2) await moderation(repo, { deactivated: { applied: true } })
         if (url.pathname.endsWith('getBlob')) {
           blobCalls++
+          if (mode === 'late-record-takedown' && blobCalls === 2) await moderation({ $type: 'com.atproto.repo.strongRef', ...original }, { takedown: { applied: true } })
+          if (mode === 'late-blob-takedown' && blobCalls === 2) await moderation({ $type: 'com.atproto.admin.defs#repoBlobRef', did: alice.did, cid: blob.ref.$link }, { takedown: { applied: true } })
           if (mode === 'blob-takedown' && blobCalls === 1) await moderation({ $type: 'com.atproto.admin.defs#repoBlobRef', did: alice.did, cid: blob.ref.$link }, { takedown: { applied: true } })
           if (mode === 'account-deactivate') await moderation(repo, { deactivated: { applied: true } })
           if (mode === 'ref-delete') await put(alice, collection, 'page', { text: 'reference removed' })
@@ -194,6 +197,26 @@ test('installed guest reads public data from real local PDS with current ownersh
     await moderation({ $type: 'com.atproto.repo.strongRef', ...original }, { takedown: { applied: false } })
     mode = 'rev-change'; await denied(); mode = ''
     checks.inflight_account_blob_record_and_revision_changes_denied = true
+    // Accepted observation semantics: moderation after the final sample cannot
+    // retract a buffered response. Subsequent anonymous requests must refuse it.
+    for (const late of ['late-record-takedown', 'late-blob-takedown']) {
+      mode = late
+      const delivered = await call('blob'); mode = ''
+      assert.equal(delivered.result, `blob:12:${Buffer.from('public bytes').toString('hex')}`)
+      const hiddenMethod = late === 'late-record-takedown' ? `com.atproto.repo.getRecord?repo=${alice.did}&collection=${collection}&rkey=page` : `com.atproto.sync.getBlob?did=${alice.did}&cid=${blob.ref.$link}`
+      const hidden = await fetch(`${base}/xrpc/${hiddenMethod}`)
+      assert.notEqual(hidden.status, 200)
+      console.log(JSON.stringify({reviewProbe: late, guestResult: delivered.result, anonymousApiAfterTakedown: hidden.status, moderationCompletedBeforeSecondBlobResponse: true}))
+      await moderation(late === 'late-record-takedown' ? { $type: 'com.atproto.repo.strongRef', ...original } : { $type: 'com.atproto.admin.defs#repoBlobRef', did: alice.did, cid: blob.ref.$link }, { takedown: { applied: false } })
+    }
+    mode = 'late-account-deactivate'
+    const lateAccount = await call('get'); mode = ''
+    assert.equal(JSON.parse(lateAccount.result).value.text, 'allowed record')
+    const inactiveStatus = await (await fetch(`${base}/xrpc/com.atproto.sync.getRepoStatus?did=${alice.did}`)).json()
+    assert.equal(inactiveStatus.active, false)
+    console.log(JSON.stringify({reviewProbe: 'late-account-deactivate', guestReceivedRecord: true, actualActiveAtGuestDelivery: inactiveStatus.active, actualStatus: inactiveStatus.status, deactivationCompletedBeforeFinalStatusResponse: true}))
+    await moderation(repo, { deactivated: { applied: false } })
+    checks.buffered_final_responses_follow_accepted_observation_semantics = true
     mode = 'suspended'; await denied(); await denied('blob'); mode = ''
     checks.explicit_suspended_status_denied = true
     mode = 'redirect'; await denied(); mode = ''
