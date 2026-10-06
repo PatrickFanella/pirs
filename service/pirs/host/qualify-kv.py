@@ -106,6 +106,78 @@ with tempfile.TemporaryDirectory(prefix="pirs-kv-") as temporary:
     assert call(cb, "read") == "Ok(None)"
     stop(cb)
     checks.append("retain uninstall and standalone state deletion")
+    # Recovery must use verified installations and the shipping CLI, even when
+    # state cannot be loaded. Reduce a grant by installing a new verified version.
+    for kind in ("corrupt", "reduced"):
+        for action in ("delete", "uninstall-delete", "uninstall-retain"):
+            name = kind + "-" + action
+            installation = Path(json.loads(install(name).stdout)["installed"])
+            child = start(installation)
+            assert call(child, "write") == "Ok(())"
+            stop(child)
+            saved = state / name / "state.json"
+            if kind == "corrupt":
+                saved.write_text("{broken")
+            else:
+                installation = Path(json.loads(install(name, quota=8).stdout)["installed"])
+            before = saved.read_bytes()
+            start(installation, success=False)
+            command("--installation", installation, "--state-dir", state,
+                    "--state-command", "export", "--export-path", root / (name + "-export.json"), success=False)
+            assert installation.exists() and saved.read_bytes() == before
+            args = ["--installation", installation, "--state-dir", state, "--state-command"]
+            if action == "delete":
+                command(*args, "delete")
+                assert installation.exists() and not saved.parent.exists()
+                child = start(installation)
+                assert call(child, "read") == "Ok(None)"
+                stop(child)
+            else:
+                choice = action.removeprefix("uninstall-")
+                command(*args, "uninstall", "--state-action", choice)
+                assert not installation.exists()
+                if choice == "retain":
+                    assert saved.read_bytes() == before
+                else:
+                    assert not saved.parent.exists()
+            checks.append(kind + " state recovery through " + action)
+    # Retain must still exclude a running host without consuming its state.
+    child = start(b)
+    command("--installation", b, "--state-dir", state, "--state-command", "uninstall",
+            "--state-action", "retain", success=False)
+    assert b.exists()
+    stop(child)
+    checks.append("retain uninstall respects namespace lock")
+    # Non-consuming recovery still verifies installation receipts and rejects
+    # namespace/lock symlinks before touching state or removing installations.
+    invalid = Path(json.loads(install("invalid-recovery").stdout)["installed"])
+    invalid_state = state / "invalid-recovery"
+    invalid_state.mkdir()
+    (invalid_state / "state.json").write_text("{broken")
+    receipt = invalid / "receipt.json"
+    original_receipt = receipt.read_bytes()
+    receipt.write_text("{}")
+    for choice in ("delete", "retain"):
+        command("--installation", invalid, "--state-dir", state, "--state-command", "uninstall",
+                "--state-action", choice, success=False)
+        assert invalid.exists() and (invalid_state / "state.json").read_text() == "{broken"
+    receipt.write_bytes(original_receipt)
+    checks.append("recovery refuses unverified installations")
+    outside = root / "outside-state"
+    outside.mkdir()
+    sentinel = outside / "sentinel"
+    sentinel.write_text("preserved")
+    link_install = Path(json.loads(install("linked-recovery").stdout)["installed"])
+    (state / "linked-recovery").symlink_to(outside, target_is_directory=True)
+    command("--installation", link_install, "--state-dir", state, "--state-command", "delete", success=False)
+    assert sentinel.read_text() == "preserved" and link_install.exists()
+    (state / "linked-recovery").unlink()
+    (state / ".linked-recovery.lock").unlink()
+    (state / ".linked-recovery.lock").symlink_to(sentinel)
+    command("--installation", link_install, "--state-dir", state, "--state-command", "uninstall",
+            "--state-action", "retain", success=False)
+    assert sentinel.read_text() == "preserved" and link_install.exists()
+    checks.append("recovery rejects namespace and lock symlinks")
     raw = subprocess.Popen([str(HOST), "--qualification-only", "--plugin", str(GUEST)],
                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     assert json.loads(raw.stdout.readline())["ready"]

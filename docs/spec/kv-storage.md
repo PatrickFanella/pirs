@@ -21,7 +21,10 @@ byte value can cost more than one quota byte. A rejected write leaves the
 previous value intact. Replacement and deletion reclaim space. The host
 checks the complete prospective state before writing a private staging file,
 syncing it, renaming it to `state.json`, and syncing the namespace directory.
-Reads use the last committed state. Staging left by a crash is ignored and
+Before opening state, the host syncs the parent of every directory entry in
+the root and namespace path, including newly created root ancestors. A sync
+failure aborts opening state. Retries also sync existing entries left by a
+failed or concurrent creation. Reads use the last committed state. Staging left by a crash is ignored and
 replaced on the next write. A successful write is durable before the guest
 receives success. KV writes are independent of event cursor persistence;
 replayed events must use idempotent keys or handle repeated writes.
@@ -82,7 +85,10 @@ pirs-host ... --state-command uninstall --state-action delete
 has empty state. `uninstall` refuses to run without an explicit state choice.
 Export completes before removing the installation and retains state. Delete
 removes state before removing the installation. Retain removes only the
-installation. Export failure leaves the installation present. The commands
+installation. Delete and retain do not parse or quota-check saved state, so
+they remain available after corruption or a reduced grant. Export still
+requires valid state within the current quota. Export failure leaves the
+installation present. The commands
 verify installed checksums and hold the namespace lock throughout. Uninstall
 removes only that content-addressed installation; other versions with the
 same plugin ID share the retained state. This implements the #16 state

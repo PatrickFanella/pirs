@@ -27,14 +27,28 @@ pub fn quota(value: &Value) -> Result<usize> {
     Ok(grant.quota_bytes)
 }
 fn private_dir(path: &Path) -> Result<()> {
-    fs::DirBuilder::new()
-        .recursive(true)
-        .mode(0o700)
-        .create(path)?;
-    ensure!(
-        fs::symlink_metadata(path)?.file_type().is_dir(),
-        "state directory must not be a symlink"
-    );
+    private_dir_with_sync(path, |parent| Ok(fs::File::open(parent)?.sync_all()?))
+}
+fn private_dir_with_sync(path: &Path, mut sync: impl FnMut(&Path) -> Result<()>) -> Result<()> {
+    ensure!(path.is_absolute(), "state directory must be absolute");
+    let ancestors: Vec<_> = path.ancestors().collect();
+    for directory in ancestors.into_iter().rev() {
+        let Some(parent) = directory.parent() else {
+            continue;
+        };
+        match fs::DirBuilder::new().mode(0o700).create(directory) {
+            Ok(()) => (),
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => (),
+            Err(e) => return Err(e.into()),
+        }
+        ensure!(
+            fs::symlink_metadata(directory)?.file_type().is_dir(),
+            "state directory must not be a symlink"
+        );
+        // Sync existing entries too: a prior attempt or concurrent creator may
+        // have created the directory but failed before syncing its parent.
+        sync(parent)?;
+    }
     Ok(())
 }
 fn key(value: &str) -> Result<()> {
@@ -42,14 +56,12 @@ fn key(value: &str) -> Result<()> {
     Ok(())
 }
 
-pub struct Storage {
+struct Namespace {
     directory: PathBuf,
-    quota: usize,
-    data: Mutex<Data>,
     _lock: fs::File,
 }
-impl Storage {
-    pub fn open(root: &Path, id: &str, quota: usize) -> Result<Self> {
+impl Namespace {
+    fn open(root: &Path, id: &str) -> Result<Self> {
         ensure!(root.is_absolute(), "state root must be absolute");
         ensure!(
             !id.is_empty()
@@ -80,7 +92,29 @@ impl Storage {
         );
         let directory = root.join(id);
         private_dir(&directory)?;
-        let path = directory.join("state.json");
+        Ok(Self {
+            directory,
+            _lock: lock,
+        })
+    }
+    fn delete(&self) -> Result<()> {
+        fs::remove_dir_all(&self.directory)?;
+        fs::File::open(self.directory.parent().unwrap())?.sync_all()?;
+        Ok(())
+    }
+}
+
+pub struct Storage {
+    namespace: Namespace,
+    quota: usize,
+    data: Mutex<Data>,
+}
+impl Storage {
+    pub fn open(root: &Path, id: &str, quota: usize) -> Result<Self> {
+        Self::load(Namespace::open(root, id)?, quota)
+    }
+    fn load(namespace: Namespace, quota: usize) -> Result<Self> {
+        let path = namespace.directory.join("state.json");
         let data = match fs::OpenOptions::new()
             .read(true)
             .custom_flags(libc::O_NOFOLLOW)
@@ -104,10 +138,9 @@ impl Storage {
             Err(e) => return Err(e.into()),
         };
         Ok(Self {
-            directory,
+            namespace,
             quota,
             data: Mutex::new(data),
-            _lock: lock,
         })
     }
     fn bytes(&self) -> Result<Vec<u8>> {
@@ -149,7 +182,7 @@ impl Storage {
         }
         let bytes = serde_json::to_vec(&next)?;
         ensure!(bytes.len() <= self.quota, "quota exceeded");
-        let staging = self.directory.join(".state.tmp");
+        let staging = self.namespace.directory.join(".state.tmp");
         // A previous crash can leave this private, never-visible staging file.
         match fs::remove_file(&staging) {
             Ok(()) => (),
@@ -164,10 +197,10 @@ impl Storage {
             .open(&staging)?;
         file.write_all(&bytes)?;
         file.sync_all()?;
-        fs::rename(&staging, self.directory.join("state.json"))?;
+        fs::rename(&staging, self.namespace.directory.join("state.json"))?;
         // Keep memory aligned with the visible file even if directory sync fails.
         *data = next;
-        fs::File::open(&self.directory)?.sync_all()?;
+        fs::File::open(&self.namespace.directory)?.sync_all()?;
         Ok(())
     }
     fn export(&self, path: &Path) -> Result<()> {
@@ -181,11 +214,6 @@ impl Storage {
         file.write_all(&self.bytes()?)?;
         file.sync_all()?;
         fs::File::open(path.parent().context("export parent")?)?.sync_all()?;
-        Ok(())
-    }
-    fn delete(&self) -> Result<()> {
-        fs::remove_dir_all(&self.directory)?;
-        fs::File::open(self.directory.parent().unwrap())?.sync_all()?;
         Ok(())
     }
 }
@@ -249,12 +277,24 @@ pub fn operator(options: &crate::Options) -> Result<()> {
         .kv_quota("kv.write")
         .or(manifest.kv_quota("kv.read"))
         .context("installation has no KV grant")?;
-    let storage = Storage::open(options.state_dir.as_ref().unwrap(), &manifest.id, quota)?;
-    if action == "export" {
+    let mut namespace = Some(Namespace::open(
+        options.state_dir.as_ref().unwrap(),
+        &manifest.id,
+    )?);
+    // Keep the same lock through installation removal, including export.
+    let storage = if action == "export" {
+        Some(Storage::load(namespace.take().unwrap(), quota)?)
+    } else {
+        None
+    };
+    let namespace = if let Some(storage) = &storage {
         storage.export(options.export_path.as_ref().unwrap())?;
-    }
+        &storage.namespace
+    } else {
+        namespace.as_ref().unwrap()
+    };
     if action == "delete" {
-        storage.delete()?;
+        namespace.delete()?;
     }
     if command == "uninstall" {
         // Export means export and retain. Deletion is always an explicit choice.
@@ -271,6 +311,41 @@ pub fn operator(options: &crate::Options) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn directory_creation_syncs_every_parent_and_retries_failures() -> Result<()> {
+        let base = std::env::temp_dir().join(format!("pirs-kv-sync-{}", std::process::id()));
+        let directory = base.join("ancestor/root/plugin");
+        let mut expected: Vec<_> = directory
+            .ancestors()
+            .skip(1)
+            .map(Path::to_path_buf)
+            .collect();
+        expected.reverse();
+        for fail_at in 0..expected.len() {
+            let mut observed = Vec::new();
+            let result = private_dir_with_sync(&directory, |parent| {
+                observed.push(parent.to_path_buf());
+                if observed.len() - 1 == fail_at {
+                    anyhow::bail!("injected directory sync failure");
+                }
+                Ok(fs::File::open(parent)?.sync_all()?)
+            });
+            assert!(result.is_err());
+            assert_eq!(observed, expected[..=fail_at]);
+            // Retry must sync even the entries left behind by the failed attempt.
+            observed.clear();
+            private_dir_with_sync(&directory, |parent| {
+                observed.push(parent.to_path_buf());
+                Ok(fs::File::open(parent)?.sync_all()?)
+            })?;
+            assert_eq!(observed, expected);
+            let storage = Storage::open(directory.parent().unwrap(), "plugin", 32)?;
+            storage.set("k", Some(vec![1]))?;
+            drop(storage);
+            fs::remove_dir_all(&base)?;
+        }
+        Ok(())
+    }
     #[test]
     fn encoded_boundaries_and_callbacks() -> Result<()> {
         let root = std::env::temp_dir().join(format!("pirs-kv-bounds-{}", std::process::id()));
@@ -325,7 +400,7 @@ mod tests {
         assert_eq!(a.get("k")?, Some(vec![255]));
         a.set("k", None)?;
         assert_eq!(a.get("k")?, None);
-        a.delete()?;
+        a.namespace.delete()?;
         drop(a);
         drop(b);
         fs::remove_dir_all(root)?;

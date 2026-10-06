@@ -162,5 +162,7 @@ export and explicit uninstall deletion passed. The event consumer forwarded
 the state root and acknowledged a durable guest write through a synthetic
 sequencer and the shipping bridge/runtime. PDS smoke and full event regressions
 also passed with their existing observer. [The KV qualification](../qualification/kv-storage.md)
-records evidence and limits. No additional PDS hook or production deployment
-is claimed.
+records evidence and limits. Follow-up review fixes passed ordered parent-sync
+fault injection and shipping operator recovery for malformed and reduced-quota
+state, with six native and twenty KV/operator checks. No power-loss test was
+performed. No additional PDS hook or production deployment is claimed.
