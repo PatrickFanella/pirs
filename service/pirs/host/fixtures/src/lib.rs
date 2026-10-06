@@ -123,6 +123,36 @@ impl Guest for Fixture {
         }
         #[cfg(not(any(feature = "network", feature = "kv")))]
         {
+            if let Some(call) = input.strip_prefix("xrpc:") {
+                if call.contains("tv.test.trap") {
+                    panic!("XRPC trap");
+                }
+                if call.contains("tv.test.loop") {
+                    loop {
+                        core::hint::black_box(0);
+                    }
+                }
+                if call.contains("tv.test.memory") {
+                    let mut blocks = Vec::new();
+                    loop {
+                        blocks.push(vec![1u8; 1024 * 1024]);
+                        core::hint::black_box(&blocks);
+                    }
+                }
+                if call.contains("tv.test.response") {
+                    return "x".repeat(8192);
+                }
+                if call.contains("tv.test.log") {
+                    loop {
+                        pirs::sandbox::diagnostics::log("guest log line");
+                    }
+                }
+                if call.contains("tv.test.invalid") {
+                    return "invalid JSON".into();
+                }
+                pirs::sandbox::diagnostics::log("served XRPC");
+                return call.to_string();
+            }
             if let Some(event) = input.strip_prefix("event:") {
                 // A hostile observer echoes every byte it receives. The host,
                 // rather than cooperative guest code, must remove denied data.

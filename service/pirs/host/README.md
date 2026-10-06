@@ -97,3 +97,7 @@ quota is checked, but its source remains bounded by the guest memory ceiling.
 
 [The qualification record](../../../docs/qualification/plugin-host.md) states
 what was run and the remaining integration boundaries.
+
+Authenticated XRPC uses a separate [HTTP supervisor](../../../docs/spec/xrpc-service.md)
+and an installed `xrpc.serve` grant. Run its disposable PDS proxy qualification
+with `pnpm check:xrpc` and `pnpm qualify:xrpc` from `service/`.

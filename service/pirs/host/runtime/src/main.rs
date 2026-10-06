@@ -329,7 +329,7 @@ impl Host {
 
     fn call(&self, mut request: Request) -> Response {
         if let Some(manifest) = &self.manifest {
-            match manifest.event_input(&request.input) {
+            match manifest.input(&request.input) {
                 Ok(Some(input)) => request.input = input,
                 Ok(None) => {
                     return Response {
@@ -446,7 +446,7 @@ fn serve(host: Host) -> Result<()> {
     let mut output = std::io::stdout().lock();
     serde_json::to_writer(
         &mut output,
-        &json!({ "ready": true, "interface": "pirs:sandbox@0.1.0", "limits": host.limits, "epoch_interval_ms": 5, "installationId": host.installation_id }),
+        &json!({ "ready": true, "interface": "pirs:sandbox@0.1.0", "limits": host.limits, "epoch_interval_ms": 5, "installationId": host.installation_id, "xrpcNsids": host.manifest.as_ref().map(|m| m.xrpc_nsids()).unwrap_or_default() }),
     )?;
     writeln!(output)?;
     output.flush()?;

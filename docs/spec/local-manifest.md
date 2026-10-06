@@ -26,7 +26,7 @@ policy management and account grants remain separate work.
 The installer accepts local component and JSON files. Running the installer
 approves the exact declarations in that file. It does not negotiate account
 consent or expose a policy API. The manifest ID is a lowercase ASCII slug of
-1 to 128 letters, digits or hyphens. This host supports minimum spec level 0.
+1 to 128 letters, digits or hyphens. This host supports level 0 observers and level 1 XRPC services. Level 1 requires an `xrpc.serve` grant and hook.
 Unknown fields, duplicate hooks/capabilities, unknown event types and unknown
 capability categories or operations fail installation. Collection constraints
 must be nonempty, unique NSIDs, or exactly `["*"]` for explicit unrestricted
@@ -45,7 +45,8 @@ interfaces, operations and kinds fail.
 Wasmtime checks the linked WIT signatures and required export before any
 Store or guest instance exists, both at installation and runtime startup.
 
-The shared `category.operation` vocabulary reserves `xrpc.serve`, `http.serve`,
+The `xrpc.serve` grant has an exact NSID list, described in [service proxying](xrpc-service.md).
+The shared `category.operation` vocabulary reserves `http.serve`,
 `records.read`, `records.write`, `blobs.read`, `record.validate`, `record.unique`, `account.create` and
 `auth.session`. This runtime rejects them as unsupported. Future issues can
 add implementations, import mappings and typed constraints without granting
@@ -84,8 +85,10 @@ service/pirs/host/target/release/pirs-host \
   --installation /absolute/path/local-installs/INSTALLATION_ID
 ```
 
-Installed mode accepts only `event:` envelopes through the existing `run`
-contract. Raw sandbox calls require the explicit `--qualification-only` flag
+Installed mode accepts `event:` subscription envelopes and trusted-supervisor
+`xrpc:` envelopes through the existing `run` contract. The HTTP supervisor
+verifies service auth before writing an XRPC envelope. The Rust runtime
+independently checks the installed NSID grant before guest allocation. Raw sandbox calls require the explicit `--qualification-only` flag
 with `--plugin`. That mode is for isolated sandbox tests. The shipping event
 consumer accepts only an installation and rejects raw-mode readiness.
 
