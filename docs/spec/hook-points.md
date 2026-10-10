@@ -231,6 +231,15 @@ deadline and body-byte budgets before Store creation; CLI options may only
 tighten those budgets. JSON ABI overhead is measured separately. A hard socket
 lifetime covers incomplete headers as well as stalled bodies. Local parser,
 installed HTTP and direct-native denial/recovery regressions passed on
-2026-10-06. Exact-head browser qualification must click the links supplied by
-the installed component and verify the session counter remains at its baseline.
+2026-10-06. On 2026-10-10, browser conformance on source `c60e8d5` clicked the
+installed component's ordinary, `_top`, new-window and encoded anchor elements
+and inert form button. The page stayed on its plugin origin, no new tab opened,
+and the disposable session counter remained at one total and one authenticated
+baseline request. The marker remained `script did not run`, cookie inspection
+threw the opaque-sandbox `SecurityError`, and the details control expanded while
+headings, lists, emphasis and tables retained their semantics. The five HTTP
+tests, HTTP type check, PDS smoke and two cleanup tests also passed. The
+[qualification record](../qualification/plugin-http.md) and
+[browser evidence](../qualification/plugin-http.browser.json) retain the source,
+artifact identity and observations. The new HTTP CI step has not yet run hosted.
 Public ingress, a real OAuth session and script-enabled HTML remain unqualified.

@@ -1,0 +1,187 @@
+{
+  "sourceCommit": "c60e8d5a87cfcd85bfacc35ec3f363d73f8471c7",
+  "capturedAt": "2026-10-10T19:58:06Z",
+  "installationId": "37b975b352a2340a16c8098989c363ac0239ce5e330c4390195c670d7d1d08d9",
+  "hostSha256": "f103c87bb23bf0ec3393f3bc22e8b7b2b3cea9eaff5907340bfb7285c4ca6272",
+  "componentSha256": "9efe700573fbe82ece2ad54e1ceca7380c60d464e5b7c5f77edb2ca26e07a12e",
+  "mode": "conformance",
+  "baseline": {
+    "sessionCalls": 1,
+    "authenticatedCalls": 1
+  },
+  "final": {
+    "sessionCalls": 1,
+    "authenticatedCalls": 1
+  },
+  "dom": {
+    "url": "http://127.0.0.2:43142/hostile",
+    "marker": "script did not run",
+    "cookie": {
+      "readable": false,
+      "error": "SecurityError",
+      "message": "Failed to read the 'cookie' property from 'Document': The document is sandboxed and lacks the 'allow-same-origin' flag."
+    },
+    "anchors": [
+      {
+        "id": "ordinary",
+        "text": "Try ordinary session link",
+        "attributes": [
+          [
+            "id",
+            "ordinary"
+          ]
+        ]
+      },
+      {
+        "id": "top",
+        "text": "Try top session link",
+        "attributes": [
+          [
+            "id",
+            "top"
+          ]
+        ]
+      },
+      {
+        "id": "blank",
+        "text": "Try new window session link",
+        "attributes": [
+          [
+            "id",
+            "blank"
+          ]
+        ]
+      },
+      {
+        "id": "encoded",
+        "text": "Try encoded session link",
+        "attributes": [
+          [
+            "id",
+            "encoded"
+          ]
+        ]
+      }
+    ],
+    "activeTags": 0,
+    "detailsOpen": false,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.8037.92 Safari/537.36"
+  },
+  "finalDom": {
+    "url": "http://127.0.0.2:43142/hostile",
+    "marker": "script did not run",
+    "detailsOpen": true,
+    "heading": "Useful static content",
+    "list": "Installed HTML remains formatted",
+    "emphasis": "Installed HTML",
+    "table": "Static tableNameGuest",
+    "guestUrlAttributes": 0,
+    "buttonType": "button"
+  },
+  "actions": [
+    {
+      "id": "39674959-c82d-4bde-a557-fb293e971237",
+      "action": "navigate",
+      "status": "succeeded",
+      "startedAt": "2026-10-10T19:57:48.630Z",
+      "completedAt": "2026-10-10T19:57:48.638Z"
+    },
+    {
+      "id": "8bb0aa5b-d232-4446-9582-cf78d823bd25",
+      "action": "click",
+      "status": "succeeded",
+      "startedAt": "2026-10-10T19:57:57.368Z",
+      "completedAt": "2026-10-10T19:57:57.438Z"
+    },
+    {
+      "id": "05818d34-89a2-447e-b8de-6aa3b2de63ef",
+      "action": "click",
+      "status": "succeeded",
+      "startedAt": "2026-10-10T19:58:05.526Z",
+      "completedAt": "2026-10-10T19:58:05.579Z"
+    },
+    {
+      "id": "8e3af98d-6e05-45bf-b4b1-09e8641977fe",
+      "action": "click",
+      "status": "succeeded",
+      "startedAt": "2026-10-10T19:58:05.638Z",
+      "completedAt": "2026-10-10T19:58:05.695Z"
+    },
+    {
+      "id": "fc48376f-e7ce-46f3-8670-6ec2f4b9ecce",
+      "action": "click",
+      "status": "succeeded",
+      "startedAt": "2026-10-10T19:58:05.758Z",
+      "completedAt": "2026-10-10T19:58:05.811Z"
+    },
+    {
+      "id": "0fae026b-597e-4e76-9ef3-16f8f0069689",
+      "action": "click",
+      "status": "succeeded",
+      "startedAt": "2026-10-10T19:58:05.878Z",
+      "completedAt": "2026-10-10T19:58:05.928Z"
+    },
+    {
+      "id": "8a63d8f0-d2f3-4829-97a7-6180f1af8dab",
+      "action": "click",
+      "status": "succeeded",
+      "startedAt": "2026-10-10T19:58:05.988Z",
+      "completedAt": "2026-10-10T19:58:06.045Z"
+    },
+    {
+      "id": "2a6cd1a7-0309-4b1c-bb64-d2d9fcd6fbf0",
+      "action": "click",
+      "status": "succeeded",
+      "startedAt": "2026-10-10T19:58:06.074Z",
+      "completedAt": "2026-10-10T19:58:06.129Z"
+    }
+  ],
+  "network": [
+    {
+      "url": "http://127.0.0.1:43141/",
+      "method": "GET",
+      "status": 200,
+      "failed": false,
+      "timestamp": "2026-10-10T19:57:48.634Z"
+    },
+    {
+      "url": "http://127.0.0.1:43141/session",
+      "method": "GET",
+      "status": 200,
+      "failed": false,
+      "timestamp": "2026-10-10T19:57:48.640Z"
+    },
+    {
+      "url": "http://127.0.0.2:43142/hostile",
+      "method": "GET",
+      "status": 200,
+      "failed": false,
+      "timestamp": "2026-10-10T19:57:57.435Z"
+    }
+  ],
+  "accessibilityTree": "- generic [ref=t3-b90cb56b-1b-e1] [box=8,21,1264,450]:\n  - heading \"Hostile installed plugin\" [level=1] [ref=t3-b90cb56b-1b-e2] [box=8,21,1264,37]\n  - paragraph [ref=t3-b90cb56b-1b-e3] [box=8,80,1264,19]: script did not run\n  - heading \"Useful static content\" [level=2] [ref=t3-b90cb56b-1b-e4] [box=8,118,1264,28]\n  - list [ref=t3-b90cb56b-1b-e5] [box=8,166,1264,19]:\n    - listitem [ref=t3-b90cb56b-1b-e6] [box=48,166,1224,19]:\n      - strong [ref=t3-b90cb56b-1b-e7] [box=48,166,112,18]: Installed HTML\n      - text: remains formatted\n  - table \"Static table\" [ref=t3-b90cb56b-1b-e8] [box=8,200,87,43]:\n    - caption [ref=t3-b90cb56b-1b-e9] [box=8,200,87,19]: Static table\n    - rowgroup [ref=t3-b90cb56b-1b-e10] [box=10,221,83,21]:\n      - row \"Name Guest\" [ref=t3-b90cb56b-1b-e11] [box=10,221,83,21]:\n        - rowheader \"Name\" [ref=t3-b90cb56b-1b-e12] [box=10,221,42,21]\n        - cell \"Guest\" [ref=t3-b90cb56b-1b-e13] [box=54,221,39,21]\n  - group [ref=t3-b90cb56b-1b-e14] [box=8,243,1264,53]:\n    - generic \"Expand static details\" [active] [ref=t3-b90cb56b-1b-e15] [box=8,243,1264,19]\n    - paragraph [ref=t3-b90cb56b-1b-e21] [box=8,278,1264,19]: Useful disclosure content\n  - paragraph [ref=t3-b90cb56b-1b-e16] [box=8,312,1264,19]: Try ordinary session link\n  - paragraph [ref=t3-b90cb56b-1b-e17] [box=8,347,1264,19]: Try top session link\n  - paragraph [ref=t3-b90cb56b-1b-e18] [box=8,381,1264,19]: Try new window session link\n  - paragraph [ref=t3-b90cb56b-1b-e19] [box=8,416,1264,19]: Try encoded session link\n  - button \"Try session form\" [ref=t3-b90cb56b-1b-e20] [box=8,450,114,22]",
+  "clickedGuestElements": [
+    "#ordinary",
+    "#top",
+    "#blank",
+    "#encoded",
+    "button: Try session form",
+    "summary: Expand static details"
+  ],
+  "result": "PASS",
+  "manualObservation": {
+    "source": "owner report in thread",
+    "result": "All controls behave as expected",
+    "canaryReadback": {
+      "sessionCalls": 1,
+      "authenticatedCalls": 1
+    }
+  },
+  "cleanup": {
+    "signal": "SIGTERM",
+    "fixtureExited": true,
+    "runtimeExited": true,
+    "listenersClosed": true,
+    "temporaryInstallationRemoved": true
+  }
+}

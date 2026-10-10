@@ -6,6 +6,7 @@ on:
       - service/pirs/host/**
       - service/pirs/events/**
       - service/pirs/xrpc/**
+      - service/pirs/http/**
       - service/pirs/bridge.ts
       - service/index.ts
       - service/package.json
@@ -17,6 +18,8 @@ on:
       - docs/spec/kv-storage.md
       - docs/spec/xrpc-service.md
       - docs/qualification/xrpc-service.md
+      - docs/qualification/plugin-http.md
+      - docs/decisions/0002-plugin-http-origin.md
       - docs/qualification/kv-storage.md
       - .gitea/workflows/host-sandbox.yaml
   pull_request:
@@ -24,6 +27,7 @@ on:
       - service/pirs/host/**
       - service/pirs/events/**
       - service/pirs/xrpc/**
+      - service/pirs/http/**
       - service/pirs/bridge.ts
       - service/index.ts
       - service/package.json
@@ -35,6 +39,8 @@ on:
       - docs/spec/kv-storage.md
       - docs/spec/xrpc-service.md
       - docs/qualification/xrpc-service.md
+      - docs/qualification/plugin-http.md
+      - docs/decisions/0002-plugin-http-origin.md
       - docs/qualification/kv-storage.md
       - .gitea/workflows/host-sandbox.yaml
 
@@ -88,6 +94,11 @@ jobs:
         run: |
           pnpm check:xrpc
           pnpm qualify:xrpc
+      - name: Qualify installed plugin HTTP isolation and budgets
+        working-directory: service
+        run: |
+          pnpm exec tsc -p pirs/http/tsconfig.json
+          node --test pirs/http/*.test.ts
       - name: Qualify installed consumer filtering and cursor integrity
         working-directory: service
         run: node --test pirs/events/manifest.test.ts pirs/events/kv.test.ts
