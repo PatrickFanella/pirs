@@ -62,3 +62,9 @@ world public-read-fixture {
   import blobs-read;
   export run: func(input: string) -> string;
 }
+
+world static-site {
+  import records-read;
+  import blobs-read;
+  export run: func(input: string) -> string;
+}

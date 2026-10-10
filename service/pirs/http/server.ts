@@ -8,7 +8,7 @@ import { staticHtml } from './html.ts'
 export const POLICY = "sandbox; default-src 'none'; script-src 'none'; connect-src 'none'; img-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; style-src 'unsafe-inline'"
 const occupied = new Set<string>()
 type Grant = { routes: string[]; requestBytes: number; responseBytes: number; deadlineMs: number }
-export type Options = { host: string; installation: string; stateDir?: string; pluginAddress: string; pdsOrigin: string }
+export type Options = { host: string; installation: string; stateDir?: string; publicPds?: string; pluginAddress: string; pdsOrigin: string }
 function send(res: ServerResponse, status: number, body: string, type = 'text/plain') {
   if (!res.destroyed && !res.headersSent) res.writeHead(status, {
     'content-type': `${type}; charset=utf-8`, 'content-security-policy': POLICY,
