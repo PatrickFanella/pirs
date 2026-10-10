@@ -44,6 +44,12 @@ M1 has not passed its exit demonstration.
 
 Plugins answer XRPC methods and HTTP routes and read public records and blobs. Exit demo: a static site hosting plugin.
 
+The [local static site demonstration](qualification/static-site.md) ran on
+2026-10-10: a real disposable account published records/blobs, and an installed
+component served a committed page update without restarting the PDS or host.
+Its browser evidence covers #14's scriptless local HTML isolation. Hosted CI
+for the new site step and public hosting remain unqualified.
+
 | Issue | Priority | Blocked by |
 | --- | --- | --- |
 | [#13](https://git.subcult.tv/subculture-collective/pirs/issues/13) Serve plugin XRPC methods through service proxying | P0 | [#9](https://git.subcult.tv/subculture-collective/pirs/issues/9) |

@@ -243,3 +243,19 @@ tests, HTTP type check, PDS smoke and two cleanup tests also passed. The
 [browser evidence](../qualification/plugin-http.browser.json) retain the source,
 artifact identity and observations. The new HTTP CI step has not yet run hosted.
 Public ingress, a real OAuth session and script-enabled HTML remain unqualified.
+
+Repository-backed static site, 2026-10-10: source `22bc91a` installs a component
+with only events, public record/blob reads and HTTP serving grants. A disposable
+local account publishes an HTML index and plain-text about page. The installed
+guest recognizes a real site commit, the event consumer advances its durable
+cursor, and the same HTTP host serves the replacement blob without restarting.
+The browser loads both versions at the same isolated URL and expands static
+details; cookie access remains denied. Native, installed-site, HTTP and smoke
+checks pass locally. Missing/deleted pages, disallowed content types, invalid
+UTF-8 and oversized sources fail closed. This composes the existing level 0/1
+hooks and public auxiliary reads, adding no new deciding hook. The
+[site qualification](../qualification/static-site.md) records the clean-checkout
+procedure and [browser evidence](../qualification/static-site.browser.json).
+There is no cache, browser push refresh, binary asset serving or public ingress
+qualification; reads retain the accepted HTTP observation semantics. Hosted CI
+for the new site step remains pending.
