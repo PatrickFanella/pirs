@@ -168,5 +168,20 @@
     "button: Try session form",
     "summary: Expand static details"
   ],
-  "result": "PASS"
+  "result": "PASS",
+  "manualObservation": {
+    "source": "owner report in thread",
+    "result": "All controls behave as expected",
+    "canaryReadback": {
+      "sessionCalls": 1,
+      "authenticatedCalls": 1
+    }
+  },
+  "cleanup": {
+    "signal": "SIGTERM",
+    "fixtureExited": true,
+    "runtimeExited": true,
+    "listenersClosed": true,
+    "temporaryInstallationRemoved": true
+  }
 }

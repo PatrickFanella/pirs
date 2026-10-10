@@ -84,3 +84,7 @@ HTTP type check and these five tests. Hosted execution of that new step remains
 pending. This evidence qualifies the local static HTML contract only. Public
 ingress, a real PDS/OAuth session, script-enabled HTML and other browser engines
 remain unqualified.
+
+The owner subsequently reported that all controls behaved as expected during
+the optional manual Preview check. The canary readback still showed one total
+and one authenticated session call. SIGTERM then stopped the disposable fixture.
