@@ -30,9 +30,24 @@ pnpm --dir service smoke
 
 The caller supplies disposable Postgres and Redis via `DB_POSTGRES_URL` and
 `REDIS_HOST`. The script installs the exact upstream lock, builds upstream,
-installs the test browser and runs every upstream PDS test. One worker and
+installs the test browser and runs every upstream PDS test. The pinned root
+build forces unlimited parallel prebuild and UI tasks. The wrapper runs the
+same tooling, workspace prebuild, TypeScript and UI phases explicitly, with
+one workspace task at a time. One worker and
 worker recycling limit retained Jest memory; a heap exhaustion still fails
 the gate. Browser dependency installation requires a disposable Debian runner.
+For root callers, a temporary launcher adds `--no-sandbox` to the pinned
+Chrome executable and is removed on script exit. Non-root callers retain the
+usual browser sandbox. Hosted jobs use the runners' default Docker bridge.
+`ci-services.mjs` discovers the disposable services' bridge IP addresses through
+the existing runner Docker socket, using run-and-track service labels. It
+checks image, health, network and TCP connectivity before writing the
+connection variables to `GITHUB_ENV`. The installed runner leaves service-port
+contexts empty, starts steps before service health is ready and overrides a
+workflow's host-network option. The helper waits up to 60 seconds per service
+for healthy status and rejects stopped or unhealthy services. No service
+ports are published on the host.
+The service containers and their data remain disposable.
 
 `pnpm pack` resolves workspace dependency keys in varying order. `normalize.mjs`
 sorts package metadata keys and archive entries and fixes archive ownership

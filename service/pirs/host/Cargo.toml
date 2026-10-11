@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["runtime", "fixtures", "webhook"]
+members = ["runtime", "fixtures", "webhook", "static-site"]
 
 [profile.release]
 opt-level = "s"

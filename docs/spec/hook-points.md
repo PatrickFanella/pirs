@@ -163,6 +163,101 @@ installed-manifest cursor/restart harness passed on merged #9 source. No
 adapter is installed by default, and no deciding plugin hook gains support.
 [The patch qualification](../qualification/pds-patches.md) records exact pins,
 full-suite status and the unavailable natural next-release rebase gate.
+Hosted stock and patched jobs on October 10 reached Kvant and Kuznya but
+failed during upstream code generation before tests started. Kvant recorded
+a job-container OOM kill. The wrapper now serializes the same workspace build
+phases; pinned-pnpm phase checks, Bash syntax and ShellCheck pass. A repaired
+hosted full-suite pass is still pending, and no hook gains evidence from this
+wrapper change.
+The follow-up hosted stock and patched builds completed, then failed before
+Jest during Chrome system dependency installation. The workflow now refreshes
+the Debian image's APT indexes first. Full hosted test evidence remains pending.
+The next hosted attempt reached Jest but failed root Chrome launch and
+Postgres service DNS. The wrapper now uses a disposable root-only Chrome
+launcher, and the workflow uses dynamically published service ports on
+loopback from a host-network job container. A WIT event qualification replay
+assertion also raced its
+stdout receipt after cursor persistence; the harness now waits for that
+receipt. The local event qualification and four bridge checks pass. These
+changes do not provide a full hosted suite pass.
+Disposable container checks passed Postgres/Redis connectivity and a pinned
+Puppeteer 23.11.1 browser launch with the temporary launcher. Event type
+checking, ShellCheck, workflow parsing and Pirs smoke also passed.
+The hosted stock suite then passed 45 suites and 385 tests, but eight suites
+failed because the runner expanded service-port contexts to empty strings.
+The workflow now discovers ports through read-only Docker API calls scoped to
+run-and-track service labels. A full hosted pass remains pending.
+The next patched attempt resolved published ports but still failed: the
+runner's merged configuration overrode host networking with the default
+bridge. The workflow now keeps that bridge and publishes no ports; its helper
+resolves labelled service bridge addresses and checks TCP connectivity before
+exporting connection variables. Disposable default-bridge helper, Postgres
+query and Redis checks passed, as did Pirs smoke. Full hosted suite evidence
+remains pending.
+Hosted service preflight then raced Postgres startup: the runner started
+steps while health was still `starting`. The helper now waits up to 60
+seconds per service for health while rejecting stopped or unhealthy services.
+The next preflight exposed false readiness from Postgres's temporary Unix-only
+initialization server. An explicit TCP health probe now excludes that server;
+a delayed initialization fixture reproduced the old failure and passed the
+corrected probe with the real endpoint helper. Full hosted results remain pending.
+Hosted upstream stock qualification then passed all 53 suites, 451 tests and
+31 snapshots with one upstream skip. Pirs's following frozen install exposed
+stale stock and patched lock snapshots missing parse5. Both snapshots now
+match the shipping parser graph without changing existing resolutions; frozen
+install, parser import and Pirs smoke passed locally for both selections.
+The complete hosted matrix remains pending.
+Hosted qualification subsequently passed at
+`7638852ebcb78858d9d78ef5cd6263924f572860`, with all eight PR check contexts
+successful. Stock upstream passed 53 suites and 451 tests; patched passed
+54 suites and 454 tests, both with 31 snapshots and one upstream skip. Both
+tracks completed Pirs and installed-manifest event checks. The WIT host job
+also passed the installed static-site checks. The qualification records link
+the exact jobs. This adds hosted evidence for the existing hooks; it does not
+qualify production hosting, a natural next-release rebase or spec levels 1/2.
+The documentation revision `11875b1` subsequently hit the KV harness's
+15-second installation timeout in both WIT jobs on Kuznya. A two-CPU local
+container installed the fixture in 0.048 seconds; Kuznya showed substantial
+I/O pressure when inspected after those failures. Storage stalls are a likely
+cause, but the job logs do not identify the blocked operation. The harness now
+allows 60 seconds for durable installation/operator commands and reports commands
+taking at least five seconds; the guest's 500 ms execution deadline is unchanged.
+All 20 KV qualification checks passed locally and on Kuznya with disposable
+state. Hosted qualification of this harness revision remains pending.
+Both WIT jobs subsequently passed at `364703a`. The patched PR track passed
+all upstream suites but then timed out waiting for event cursor 114. A disposable
+qualification copy adding 120 ms to each consumer filesystem sync reproduced
+that exact failure under the old 15-second backlog wait. Backlog waits now allow
+60 seconds, fail immediately on consumer exit and report the last observed cursor
+and stderr on failure. The same delayed replay reached cursor 114 in 27.097 seconds
+with the revised harness. Runtime call deadlines and PDS write latency assertions
+are unchanged. The full delayed-sync qualification, normal event qualification,
+event type check and PDS smoke passed locally. Hosted checks for this event
+harness revision remain pending.
+The stock push job at `e32d4d2` passed all 53 upstream suites, 451 tests and
+31 snapshots, then PDS smoke. Its separate cleanup test observed a signalled
+subprocess (`null` exit code); the old test did not distinguish its 30-second
+kill timer from other signals. A disposable copy delaying smoke startup by
+35 seconds reproduced the same assertion with the old timer and passed both
+cleanup paths in 36.9 seconds with a 90-second lifecycle allowance. The cleanup
+test now reports the exit signal and whether its timer fired. Normal cleanup
+tests and PDS smoke also passed locally. The hosted delay's exact cause remains
+unconfirmed, and hosted checks for this cleanup harness revision are pending.
+At `f33db26`, the stock push job and its single retry each failed one upstream
+OAuth browser test, at different selector/navigation waits; both passed the
+other 52 suites and all 31 snapshots. The patched tracks and stock PR track
+passed. Kuznya still showed I/O pressure with little CPU pressure. CI now gives
+Chrome a private profile/scratch directory on a 512 MiB tmpfs, using the pinned
+Puppeteer configuration and a Chrome-only `TMPDIR`. PDS databases and durable
+state retain their ordinary filesystem. A fresh two-CPU, 4 GiB container passed
+pinned Chrome 131 launch, profile and child-environment checks, navigation,
+cookie persistence and profile cleanup. This is a bounded attempt to reduce
+browser storage contention; the hosted OAuth failure's cause is not confirmed.
+The smoke retry produced `code=1`, `signal=null`, `timedOut=false` and an HTTP
+timeout, excluding its lifecycle kill timer. Smoke errors now identify the
+request path without logging request bodies or credentials. Normal PDS smoke
+and both cleanup tests passed locally; ShellCheck, shell syntax, workflow YAML
+and diff checks passed. Hosted checks for these changes remain pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.
@@ -243,3 +338,19 @@ tests, HTTP type check, PDS smoke and two cleanup tests also passed. The
 [browser evidence](../qualification/plugin-http.browser.json) retain the source,
 artifact identity and observations. The new HTTP CI step has not yet run hosted.
 Public ingress, a real OAuth session and script-enabled HTML remain unqualified.
+
+Repository-backed static site, 2026-10-10: source `22bc91a` installs a component
+with only events, public record/blob reads and HTTP serving grants. A disposable
+local account publishes an HTML index and plain-text about page. The installed
+guest recognizes a real site commit, the event consumer advances its durable
+cursor, and the same HTTP host serves the replacement blob without restarting.
+The browser loads both versions at the same isolated URL and expands static
+details; cookie access remains denied. Native, installed-site, HTTP and smoke
+checks pass locally. Missing/deleted pages, disallowed content types, invalid
+UTF-8 and oversized sources fail closed. This composes the existing level 0/1
+hooks and public auxiliary reads, adding no new deciding hook. The
+[site qualification](../qualification/static-site.md) records the clean-checkout
+procedure and [browser evidence](../qualification/static-site.browser.json).
+There is no cache, browser push refresh, binary asset serving or public ingress
+qualification; reads retain the accepted HTTP observation semantics. Hosted CI
+for the new site step remains pending.

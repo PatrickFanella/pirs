@@ -68,6 +68,146 @@ and passed. Workers use an 8 GB heap and recycle at 512 MB. No runtime acceptanc
 is waived. The new hosted stock/patched matrix is configured but has not yet
 passed on this integration revision.
 
+## Hosted build failure, October 10, 2026
+
+Revision `80b024281fd84c9c41531fbdc069f787feeb0c06` reached both online CI
+runners. Runs [14201](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14201)
+on Kuznya and [14202](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14202)
+on Kvant failed in stock and patched upstream builds before Jest started.
+Code generators were killed with exit 137. Kvant's kernel log identifies an
+out-of-memory kill in the exact stock job container at 01:06:29 UTC on October
+11. The pinned upstream root prebuild forces unlimited workspace parallelism.
+
+The wrapper now runs the same tooling, workspace prebuild, TypeScript and UI
+phases explicitly, with one workspace task at a time. A disposable workspace
+check using pinned pnpm 11.11.0 verified phase order, absence of overlapping
+workspace tasks and exclusion of the root's parallel lifecycle hooks. Bash
+syntax and ShellCheck pass. These are wrapper checks; the repaired full hosted
+build and test matrix remain unverified. The full Jest suite, source-tree
+check and normalized package comparison remain required.
+
+Follow-up revision `d5115f2f063e12e693e0a4e87f353450dc921a5c` completed the
+serialized stock and patched builds, including UI bundles, in hosted run
+[14205](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14205).
+Both jobs then failed before Jest while Puppeteer installed Chrome system
+dependencies: the Debian image's APT indexes were absent, so required packages
+had no installable candidates. The workflow now refreshes APT indexes before
+calling the build wrapper. In a fresh disposable `node:24-bookworm` container,
+the missing browser libraries installed successfully after `apt-get update`.
+Workflow YAML parsing and command ordering checks pass. This verifies package
+availability, not browser execution or Jest. Full hosted test results remain
+pending.
+
+Patched job [26094](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14238/jobs/26094)
+at `1442601f19107af765bcb1a8361c65d7e9ce942e` reported healthy Postgres but
+received TCP connection refusal during preflight. The pinned image starts a
+temporary Unix-only server during initialization; `pg_isready` without a host
+accepts that server. The workflow now probes `127.0.0.1` explicitly. A delayed
+initialization fixture reproduced the old probe's false readiness while the
+TCP probe correctly rejected it. The real helper then waited through
+initialization, connected and exported both endpoints. Test containers were
+removed; workflow parsing, diff checks and Pirs smoke passed. Full hosted
+qualification remains pending.
+
+Revision `57f388254b26db1f66197bdc018f0767972df9f7` reached Jest in hosted
+run [14211](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14211).
+Both tracks failed browser setup because Chrome refused root without
+`--no-sandbox`; proxied tests also failed resolving `postgres` on Docker's
+default bridge. The wrapper now supplies a temporary executable launcher for
+root callers that adds the container flag to the pinned Chrome executable and
+removes itself on exit. Non-root callers keep the usual sandbox. Upstream
+test source and packaged code are unchanged.
+
+The workflow publishes disposable Postgres and Redis on dynamically assigned
+ports, discovers their ports from Docker in a job container on the host network
+and waits for service health. A disposable test showed that published ports
+were unreachable through the host gateway on this host. Loopback access from
+the host network avoids that path and service DNS on the default bridge.
+The complete stock and patched suites remain required.
+
+A fresh disposable `node:24-bookworm` container on the host network queried
+Postgres 14.4 and received Redis 7.0's `PONG` through random published ports.
+Pinned Puppeteer 23.11.1 launched Chrome through the extracted root launcher,
+loaded a data page and verified its title. The launcher and all three test
+containers were removed. Workflow YAML, Bash syntax and ShellCheck pass;
+Pirs smoke also passes. Hosted full-suite results remain pending.
+
+Hosted stock job
+[26063](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14221/jobs/26063)
+at revision `ae769abba7999bd1c42d4e5605718cfe4dc8bb96` passed 45 suites and
+385 tests, including browser coverage. Eight suites failed (66 tests); proxied
+tests reported connection refusal at `127.0.0.1:5432`. The runner had expanded
+both `job.services.*.ports` expressions to empty strings, so these results do
+not qualify the complete suite.
+
+The workflow now labels each disposable service with the run ID and matrix
+track. A read-only Docker API helper finds exactly one correctly imaged,
+healthy service for each label, validates its actual published port and writes
+the two connection variables to the runner environment file. Missing or
+ambiguous services fail before any variables are written. This avoids the
+installed runner's unsupported port context; full hosted results remain
+pending.
+Disposable Docker checks verified exact random-port export and rejected a
+foreign job label and duplicate Redis services without writing connection
+variables. JavaScript syntax, workflow parsing, diff checks and Pirs smoke
+passed. Test containers were removed.
+
+At revision `020bec7bb6077e2e0a26e61bcec1a8a9c7a5a175`, patched job
+[26066](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14224/jobs/26066)
+resolved the actual published ports, then failed connecting through loopback:
+46 suites and 388 tests passed, eight suites and 66 tests failed. The runner
+parsed `--network host` but its merged container configuration restored
+`NetworkMode:bridge`. The earlier local host-network check therefore did not
+reproduce the runner's effective network.
+
+The workflow now retains the default bridge and publishes no service ports.
+The helper resolves each labelled service's bridge IPv4 address, validates its
+image, health and bridge network, then checks TCP connectivity from the job
+before writing either connection variable. A fresh default-bridge Node
+container ran this helper against disposable Postgres 14.4 and Redis 7.0;
+separate default-bridge clients also passed a real SQL query and Redis `PONG`.
+All test containers were removed. JavaScript syntax, diff checks and Pirs smoke
+pass. Full hosted suite qualification remains pending.
+
+Stock job [26087](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14232/jobs/26087)
+at revision `895a848a172d7fc290b375b6e677440dd35d1a1b` failed the service
+preflight while Postgres health was still `starting`. The installed runner
+does not wait for service health before starting steps. The helper now waits
+up to 60 seconds per service for `healthy`, rejecting stopped or unhealthy
+services and preserving the connectivity checks before environment export.
+A disposable default-bridge check started both services with deliberately
+delayed health probes. The helper observed `starting`, waited for `healthy`,
+connected and exported both endpoints. JavaScript syntax, diff checks and
+Pirs smoke pass. The test containers were removed; hosted results remain
+pending.
+
+Stock job [26103](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14244/jobs/26103)
+at `7a677cc45e057d6f54762a3ad78080b8425fd82d` passed the complete upstream
+suite: 53 suites, 451 tests, one upstream skip and 31 snapshots in 306.642
+seconds. The following Pirs install failed because the selected frozen stock
+lock omitted `parse5@8.0.1`, already required by the HTTP sandbox. Both frozen
+track locks now include the shipping lock's exact parse5/entities graph;
+all existing package resolutions are unchanged.
+
+In a disposable copy of the service, both stock and patched selections passed
+`pnpm install --frozen-lockfile`, parse5 import and Pirs smoke using Node
+24.18.0 and pnpm 10.34.1. The temporary copy and generated state were removed.
+This records hosted upstream stock evidence and local consumer-lock evidence;
+the complete hosted matrix remains pending.
+
+Hosted qualification passed at
+`7638852ebcb78858d9d78ef5cd6263924f572860`. All eight PR check contexts
+reported success, including both push and pull-request stock/patched jobs.
+The [stock push job](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14250/jobs/26111)
+passed 53 suites, 451 tests and 31 snapshots; the
+[patched push job](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14250/jobs/26110)
+passed 54 suites, 454 tests and 31 snapshots. Each retained one upstream skip.
+Both jobs also passed package selection, the patched normalized-archive
+comparison where applicable, Pirs smoke/cleanup/bridge checks, event type
+checking and installed-manifest event qualification. The full hosted matrix
+is qualified for that source revision. The natural next-release rehearsal
+gate for #22 remains open.
+
 ## Release gate and maintenance procedure
 
 Live upstream tag discovery on October 6 still showed 0.5.37 as the latest PDS

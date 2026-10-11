@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import subprocess
 import tempfile
+import time
 
 ROOT = Path(__file__).resolve().parent
 HOST = ROOT / "target/release/pirs-host"
@@ -11,7 +12,13 @@ GUEST = ROOT / "target/kv.wasm"
 checks = []
 
 def command(*args, success=True):
-    result = subprocess.run([str(HOST), *map(str, args)], capture_output=True, text=True, timeout=15)
+    # Installation and operator commands sync durable files and directories.
+    # Allow for shared-runner storage stalls separately from the guest deadline.
+    started = time.monotonic()
+    result = subprocess.run([str(HOST), *map(str, args)], capture_output=True, text=True, timeout=60)
+    elapsed = time.monotonic() - started
+    if elapsed >= 5:
+        print(json.dumps({"slowCommand": list(map(str, args)), "elapsedSeconds": round(elapsed, 3)}), flush=True)
     assert (result.returncode == 0) == success, result.stderr
     return result
 

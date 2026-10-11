@@ -4,8 +4,10 @@ on:
   pull_request:
 jobs:
   qualify:
-    runs-on: dozor
-    container: node:24-bookworm
+    runs-on: kvant
+    container:
+      image: node:24-bookworm
+      options: --shm-size=512m
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -14,22 +16,30 @@ jobs:
     services:
       postgres:
         image: postgres:14.4-alpine
+        options: --label=pirs.ci.job=${{ github.run_id }}-${{ matrix.package }} --label=pirs.ci.service=postgres --health-cmd="pg_isready -h 127.0.0.1 -U pg" --health-interval=2s --health-timeout=5s --health-retries=30
         env:
           POSTGRES_USER: pg
           POSTGRES_PASSWORD: password
       redis:
         image: redis:7.0-alpine
+        options: --label=pirs.ci.job=${{ github.run_id }}-${{ matrix.package }} --label=pirs.ci.service=redis --health-cmd="redis-cli ping" --health-interval=2s --health-timeout=5s --health-retries=30
     env:
-      REDIS_HOST: redis:6379
       CARGO_BUILD_JOBS: 2
-      DB_POSTGRES_URL: postgresql://pg:password@postgres:5432/postgres
+      PIRS_BROWSER_TMP_ROOT: /dev/shm
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Resolve and check disposable service endpoints
+        env:
+          PIRS_CI_JOB: ${{ github.run_id }}-${{ matrix.package }}
+        run: node service/pirs/pds-patches/ci-services.mjs
       - name: Build and run full upstream PDS tests
         run: |
           corepack enable
+          # The Debian image removes APT indexes; Puppeteer installs Chrome's
+          # system dependencies below but does not refresh those indexes.
+          apt-get update
           git clone https://github.com/bluesky-social/atproto.git /tmp/atproto
           git -C /tmp/atproto checkout a7c8604d876a200a1e4fa4aec83d4189ac4f1c12
           bash service/pirs/pds-patches/build.sh '${{ matrix.package }}' /tmp/atproto

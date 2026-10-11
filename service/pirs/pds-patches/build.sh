@@ -22,10 +22,45 @@ if [[ "$track" == patched ]]; then
 fi
 cd "$checkout"
 PUPPETEER_SKIP_DOWNLOAD=true pnpm install --frozen-lockfile
-pnpm build
+# The pinned root build's pre/post hooks force unlimited workspace parallelism.
+# Run those same phases explicitly so bounded CI containers do not OOM during
+# code generation. Recursive runs exclude the root and retain dependency order.
+pnpm --config.enable-pre-post-scripts=false run build:tooling --force
+pnpm --recursive --workspace-concurrency=1 run prebuild
+pnpm --config.enable-pre-post-scripts=false run build:ts
+pnpm --recursive --workspace-concurrency=1 run build:ui
 # Full upstream suite, including proxied tests and browser tests. The caller
 # supplies disposable Redis/Postgres via REDIS_HOST and DB_POSTGRES_URL.
 (cd packages/pds && pnpm exec puppeteer browsers install chrome --install-deps)
+# Chrome refuses root even in a disposable job container. Keep the pinned
+# executable and upstream launch calls; only this temporary wrapper adds the
+# container-only flag. Non-root callers retain Chrome's normal sandbox.
+browser_wrapper=''
+browser_temporary=''
+trap 'if [[ -n "$browser_wrapper" ]]; then rm -f "$browser_wrapper"; fi; if [[ -n "$browser_temporary" ]]; then rm -rf "$browser_temporary"; fi' EXIT
+# Only browser scratch data uses memory-backed storage. PDS databases and
+# durable qualification state retain the caller's ordinary filesystem.
+if [[ -n "${PIRS_BROWSER_TMP_ROOT:-}" ]]; then
+  if [[ "$(stat -f -c %T "$PIRS_BROWSER_TMP_ROOT")" != tmpfs ]]; then
+    echo 'browser temporary root must be tmpfs' >&2; exit 1
+  fi
+  browser_temporary=$(mktemp -d "$PIRS_BROWSER_TMP_ROOT/pirs-browser.XXXXXX")
+  export PUPPETEER_TMP_DIR="$browser_temporary"
+  echo "Browser temporary profiles: $browser_temporary"
+fi
+if [[ "$(id -u)" == 0 ]]; then
+  browser=$(cd packages/pds && pnpm exec node -e 'process.stdout.write(require("puppeteer").executablePath())')
+  browser_wrapper=$(mktemp /tmp/pirs-test-chrome.XXXXXX)
+  # Puppeteer's Chrome defaults redirect shared-memory scratch files to TMPDIR.
+  # Set it for Chrome alone so PDS durability checks remain disk-backed.
+  if [[ -n "$browser_temporary" ]]; then
+    printf '#!/usr/bin/env bash\nexport TMPDIR=%q\nexec %q --no-sandbox "$@"\n' "$browser_temporary" "$browser" > "$browser_wrapper"
+  else
+    printf '#!/usr/bin/env bash\nexec %q --no-sandbox "$@"\n' "$browser" > "$browser_wrapper"
+  fi
+  chmod 700 "$browser_wrapper"
+  export PUPPETEER_EXECUTABLE_PATH="$browser_wrapper"
+fi
 (cd packages/pds && LOG_ENABLED=false NODE_OPTIONS="--experimental-vm-modules --max-old-space-size=8192" pnpm exec jest --maxWorkers=1 --workerIdleMemoryLimit=512MB)
 mkdir -p "$root/service/pirs/pds-patches/build/$track"
 (cd packages/pds && pnpm pack --pack-destination "$root/service/pirs/pds-patches/build/$track")

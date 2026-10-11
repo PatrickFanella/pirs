@@ -7,6 +7,7 @@ on:
       - service/pirs/events/**
       - service/pirs/xrpc/**
       - service/pirs/http/**
+      - service/pirs/static-site/**
       - service/pirs/bridge.ts
       - service/index.ts
       - service/package.json
@@ -19,6 +20,7 @@ on:
       - docs/spec/xrpc-service.md
       - docs/qualification/xrpc-service.md
       - docs/qualification/plugin-http.md
+      - docs/qualification/static-site.md
       - docs/decisions/0002-plugin-http-origin.md
       - docs/qualification/kv-storage.md
       - .gitea/workflows/host-sandbox.yaml
@@ -28,6 +30,7 @@ on:
       - service/pirs/events/**
       - service/pirs/xrpc/**
       - service/pirs/http/**
+      - service/pirs/static-site/**
       - service/pirs/bridge.ts
       - service/index.ts
       - service/package.json
@@ -40,13 +43,14 @@ on:
       - docs/spec/xrpc-service.md
       - docs/qualification/xrpc-service.md
       - docs/qualification/plugin-http.md
+      - docs/qualification/static-site.md
       - docs/decisions/0002-plugin-http-origin.md
       - docs/qualification/kv-storage.md
       - .gitea/workflows/host-sandbox.yaml
 
 jobs:
   qualify:
-    runs-on: dozor
+    runs-on: kvant
     container: rust:1.95.0-bookworm
     timeout-minutes: 20
     env:
@@ -79,7 +83,7 @@ jobs:
       - name: Qualify durable plugin state and operator commands
         working-directory: service/pirs/host
         run: |
-          cargo test -p pirs-plugin-host --locked
+          cargo test -p pirs-plugin-host -p pirs-static-site --locked
           python3 qualify-kv.py
       - name: Install event qualification dependencies
         working-directory: service
@@ -99,6 +103,11 @@ jobs:
         run: |
           pnpm exec tsc -p pirs/http/tsconfig.json
           node --test pirs/http/*.test.ts
+      - name: Qualify repository-backed static site and live commits
+        working-directory: service
+        run: |
+          pnpm exec tsc -p pirs/static-site/tsconfig.json
+          node --test pirs/static-site/site.test.ts
       - name: Qualify installed consumer filtering and cursor integrity
         working-directory: service
         run: node --test pirs/events/manifest.test.ts pirs/events/kv.test.ts

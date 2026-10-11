@@ -41,8 +41,13 @@ let failure: unknown = null
 let checked = false
 let fixture: Awaited<ReturnType<typeof startPlcFixture>> | undefined
 
+async function request(path: string, options: RequestInit) {
+  try { return await fetch(`${base}${path}`, options) }
+  catch (cause) { throw new Error(`smoke request failed: ${path}`, { cause }) }
+}
+
 async function xrpc(method: string, body: unknown, token?: string) {
-  const res = await fetch(`${base}/xrpc/${method}`, {
+  const res = await request(`/xrpc/${method}`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
@@ -60,7 +65,7 @@ async function xrpc(method: string, body: unknown, token?: string) {
 }
 
 async function status() {
-  const res = await fetch(`${base}/_pirs/status`, { signal: AbortSignal.timeout(5_000) })
+  const res = await request('/_pirs/status', { signal: AbortSignal.timeout(5_000) })
   if (!res.ok) throw new Error(`status route returned ${res.status}`)
   return (await res.json()) as {
     events: { listening: boolean; lastSeq: number | null; counts: Record<string, number> }
@@ -68,7 +73,7 @@ async function status() {
 }
 
 async function check(pds: PDS) {
-  const health = await fetch(`${base}/xrpc/_health`, { signal: AbortSignal.timeout(5_000) })
+  const health = await request('/xrpc/_health', { signal: AbortSignal.timeout(5_000) })
   if (!health.ok) throw new Error(`PDS health returned ${health.status}`)
 
   const before = await status()

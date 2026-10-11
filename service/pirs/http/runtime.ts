@@ -9,9 +9,10 @@ export class Runtime {
   private waiter?: { resolve: (value: unknown) => void; reject: (error: Error) => void }
   private failure?: Error
 
-  constructor(options: { host: string; installation: string; stateDir?: string; deadlineMs: number; responseBytes: number }) {
+  constructor(options: { host: string; installation: string; stateDir?: string; publicPds?: string; deadlineMs: number; responseBytes: number }) {
     this.child = spawn(options.host, ['--installation', options.installation,
       ...(options.stateDir ? ['--state-dir', options.stateDir] : []),
+      ...(options.publicPds ? ['--public-pds', options.publicPds] : []),
       '--parent-pid', String(process.pid), '--input-bytes', '65536', '--deadline-ms', String(options.deadlineMs), '--response-bytes', String(options.responseBytes)],
       { env: {}, stdio: 'pipe' })
     this.child.stdout!.on('data', (chunk: Buffer) => {

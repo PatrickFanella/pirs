@@ -1,0 +1,96 @@
+{
+  "sourceCommit": "22bc91a",
+  "mode": "conformance",
+  "result": "PASS",
+  "capturedAt": "2026-10-10T20:31:10Z",
+  "did": "did:plc:evjyh6nddczr3soknurws6rx",
+  "installationId": "321e3cfdbe1c13e2cd6397b04268333a279f33526bb59e2b9dedba5494a7df02",
+  "hostSha256": "f103c87bb23bf0ec3393f3bc22e8b7b2b3cea9eaff5907340bfb7285c4ca6272",
+  "componentSha256": "1ae275dec01faa8e4892d76f356d15338248e6f4a5c23f310d590ca0435953bb",
+  "capabilities": [
+    "events.subscribe",
+    "records.read",
+    "blobs.read",
+    "http.serve"
+  ],
+  "imports": [
+    "pirs:sandbox/blobs-read@0.1.0.get",
+    "pirs:sandbox/records-read@0.1.0.get"
+  ],
+  "pidsBefore": {
+    "pds": 195215,
+    "http": 195309,
+    "consumer": 195318,
+    "eventHost": 195330
+  },
+  "pidsAfter": {
+    "pds": 195215,
+    "http": 195309,
+    "consumer": 195318,
+    "eventHost": 195330
+  },
+  "updatedRevision": "3mxkdfys72c2g",
+  "durableCursor": {
+    "version": 2,
+    "stream": "fd3125f2-1bd7-4d74-b6b0-a1ef1ac5f918",
+    "seq": 7,
+    "installationId": "321e3cfdbe1c13e2cd6397b04268333a279f33526bb59e2b9dedba5494a7df02"
+  },
+  "before": {
+    "url": "http://127.0.0.2:43152/",
+    "text": "A site from a repository\n\nVersion one\n\nPublic records and blobs\nHow this page is served",
+    "network": [
+      {
+        "url": "http://127.0.0.2:43152/",
+        "method": "GET",
+        "status": 200,
+        "failed": false,
+        "timestamp": "2026-10-10T20:30:57.771Z"
+      }
+    ],
+    "tree": "- generic [active] [ref=t3-b90cb56b-1j-e1] [box=8,21,1264,146]:\n  - heading \"A site from a repository\" [level=1] [ref=t3-b90cb56b-1j-e2] [box=8,21,1264,37]\n  - paragraph [ref=t3-b90cb56b-1j-e3] [box=8,80,1264,19]: Version one\n  - list [ref=t3-b90cb56b-1j-e4] [box=8,114,1264,19]:\n    - listitem [ref=t3-b90cb56b-1j-e5] [box=48,114,1224,19]:\n      - strong [ref=t3-b90cb56b-1j-e6] [box=48,114,169,18]: Public records and blobs\n  - group [ref=t3-b90cb56b-1j-e7] [box=8,149,1264,19]:\n    - generic \"How this page is served\" [ref=t3-b90cb56b-1j-e8] [box=8,149,1264,19]"
+  },
+  "after": {
+    "url": "http://127.0.0.2:43152/",
+    "text": "A site from a repository\n\nVersion two — updated by a commit\n\nPublic records and blobs\nHow this page is served",
+    "network": [
+      {
+        "url": "http://127.0.0.2:43152/",
+        "method": "GET",
+        "status": 200,
+        "failed": false,
+        "timestamp": "2026-10-10T20:30:57.771Z"
+      },
+      {
+        "url": "http://127.0.0.2:43152/",
+        "method": "GET",
+        "status": 200,
+        "failed": false,
+        "timestamp": "2026-10-10T20:31:10.858Z"
+      }
+    ],
+    "tree": "- generic [active] [ref=t3-b90cb56b-1m-e1] [box=8,21,1264,146]:\n  - heading \"A site from a repository\" [level=1] [ref=t3-b90cb56b-1m-e2] [box=8,21,1264,37]\n  - paragraph [ref=t3-b90cb56b-1m-e3] [box=8,80,1264,19]: Version two — updated by a commit\n  - list [ref=t3-b90cb56b-1m-e4] [box=8,114,1264,19]:\n    - listitem [ref=t3-b90cb56b-1m-e5] [box=48,114,1224,19]:\n      - strong [ref=t3-b90cb56b-1m-e6] [box=48,114,169,18]: Public records and blobs\n  - group [ref=t3-b90cb56b-1m-e7] [box=8,149,1264,19]:\n    - generic \"How this page is served\" [ref=t3-b90cb56b-1m-e8] [box=8,149,1264,19]"
+  },
+  "dom": {
+    "url": "http://127.0.0.2:43152/",
+    "version": "Version two — updated by a commit",
+    "detailsOpen": true,
+    "cookie": {
+      "readable": false,
+      "error": "SecurityError"
+    },
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.8037.92 Safari/537.36"
+  },
+  "cleanup": {
+    "allDemoProcessesExited": true,
+    "temporaryDataAndInstallationRemoved": true
+  },
+  "limitations": [
+    "local disposable account and PLC fixture",
+    "no public hostname or TLS",
+    "page changes visible on next request, no browser push refresh",
+    "only fixed index/about pages, UTF-8 text/html and text/plain",
+    "sampled HTTP visibility semantics from issue #15",
+    "hosted CI pending"
+  ]
+}
