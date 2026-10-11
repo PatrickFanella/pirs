@@ -45,12 +45,16 @@ for (const rejectWrite of [false, true]) {
       let output = ''
       child.stdout.on('data', (chunk) => { output += chunk })
       child.stderr.on('data', (chunk) => { output += chunk })
-      const timer = setTimeout(() => child.kill('SIGKILL'), 30_000)
+      // This includes PDS startup, account/record writes and durable cleanup,
+      // rather than a single API call. Keep a bound for shared-runner I/O stalls.
+      let timedOut = false
+      const timer = setTimeout(() => { timedOut = true; child.kill('SIGKILL') }, 90_000)
       const code = await new Promise<number | null>((resolve, reject) => {
         child.on('error', reject)
         child.on('close', resolve)
       }).finally(() => clearTimeout(timer))
-      assert.equal(code, rejectWrite ? 1 : 0, output)
+      assert.equal(code, rejectWrite ? 1 : 0,
+        `smoke exit: code=${code}, signal=${child.signalCode}, timedOut=${timedOut}\n${output}`)
       assert.match(output, rejectWrite
         ? /com\.atproto\.repo\.createRecord returned 400/
         : /counts: \{ commit: 2, sync: 1, identity: 1, account: 1 \}/)

@@ -234,6 +234,15 @@ with the revised harness. Runtime call deadlines and PDS write latency assertion
 are unchanged. The full delayed-sync qualification, normal event qualification,
 event type check and PDS smoke passed locally. Hosted checks for this event
 harness revision remain pending.
+The stock push job at `e32d4d2` passed all 53 upstream suites, 451 tests and
+31 snapshots, then PDS smoke. Its separate cleanup test observed a signalled
+subprocess (`null` exit code); the old test did not distinguish its 30-second
+kill timer from other signals. A disposable copy delaying smoke startup by
+35 seconds reproduced the same assertion with the old timer and passed both
+cleanup paths in 36.9 seconds with a 90-second lifecycle allowance. The cleanup
+test now reports the exit signal and whether its timer fired. Normal cleanup
+tests and PDS smoke also passed locally. The hosted delay's exact cause remains
+unconfirmed, and hosted checks for this cleanup harness revision are pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.
