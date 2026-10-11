@@ -2,6 +2,7 @@ name: WIT host sandbox
 
 on:
   push:
+    branches: [main]
     paths:
       - service/pirs/host/**
       - service/pirs/events/**
@@ -47,6 +48,7 @@ on:
       - docs/decisions/0002-plugin-http-origin.md
       - docs/qualification/kv-storage.md
       - .gitea/workflows/host-sandbox.yaml
+  workflow_dispatch:
 
 jobs:
   qualify:
