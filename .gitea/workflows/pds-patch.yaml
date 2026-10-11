@@ -1,7 +1,10 @@
 name: PDS patch qualification
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+
 jobs:
   qualify:
     runs-on: kvant

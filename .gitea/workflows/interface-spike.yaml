@@ -2,6 +2,7 @@ name: Plugin interface spike
 
 on:
   push:
+    branches: [main]
     paths:
       - service/pirs/interface-spike/**
       - docs/decisions/**
@@ -11,6 +12,7 @@ on:
       - service/pirs/interface-spike/**
       - docs/decisions/**
       - .gitea/workflows/interface-spike.yaml
+  workflow_dispatch:
 
 jobs:
   compare:
