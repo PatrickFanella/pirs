@@ -14,7 +14,7 @@ jobs:
     services:
       postgres:
         image: postgres:14.4-alpine
-        options: --label=pirs.ci.job=${{ github.run_id }}-${{ matrix.package }} --label=pirs.ci.service=postgres --health-cmd="pg_isready -U pg" --health-interval=2s --health-timeout=5s --health-retries=30
+        options: --label=pirs.ci.job=${{ github.run_id }}-${{ matrix.package }} --label=pirs.ci.service=postgres --health-cmd="pg_isready -h 127.0.0.1 -U pg" --health-interval=2s --health-timeout=5s --health-retries=30
         env:
           POSTGRES_USER: pg
           POSTGRES_PASSWORD: password

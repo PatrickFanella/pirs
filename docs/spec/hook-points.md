@@ -197,6 +197,10 @@ remains pending.
 Hosted service preflight then raced Postgres startup: the runner started
 steps while health was still `starting`. The helper now waits up to 60
 seconds per service for health while rejecting stopped or unhealthy services.
+The next preflight exposed false readiness from Postgres's temporary Unix-only
+initialization server. An explicit TCP health probe now excludes that server;
+a delayed initialization fixture reproduced the old failure and passed the
+corrected probe with the real endpoint helper. Full hosted results remain pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

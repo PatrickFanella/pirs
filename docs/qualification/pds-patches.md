@@ -98,6 +98,17 @@ Workflow YAML parsing and command ordering checks pass. This verifies package
 availability, not browser execution or Jest. Full hosted test results remain
 pending.
 
+Patched job [26094](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14238/jobs/26094)
+at `1442601f19107af765bcb1a8361c65d7e9ce942e` reported healthy Postgres but
+received TCP connection refusal during preflight. The pinned image starts a
+temporary Unix-only server during initialization; `pg_isready` without a host
+accepts that server. The workflow now probes `127.0.0.1` explicitly. A delayed
+initialization fixture reproduced the old probe's false readiness while the
+TCP probe correctly rejected it. The real helper then waited through
+initialization, connected and exported both endpoints. Test containers were
+removed; workflow parsing, diff checks and Pirs smoke passed. Full hosted
+qualification remains pending.
+
 Revision `57f388254b26db1f66197bdc018f0767972df9f7` reached Jest in hosted
 run [14211](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14211).
 Both tracks failed browser setup because Chrome refused root without
