@@ -201,6 +201,12 @@ The next preflight exposed false readiness from Postgres's temporary Unix-only
 initialization server. An explicit TCP health probe now excludes that server;
 a delayed initialization fixture reproduced the old failure and passed the
 corrected probe with the real endpoint helper. Full hosted results remain pending.
+Hosted upstream stock qualification then passed all 53 suites, 451 tests and
+31 snapshots with one upstream skip. Pirs's following frozen install exposed
+stale stock and patched lock snapshots missing parse5. Both snapshots now
+match the shipping parser graph without changing existing resolutions; frozen
+install, parser import and Pirs smoke passed locally for both selections.
+The complete hosted matrix remains pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

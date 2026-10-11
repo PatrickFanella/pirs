@@ -181,6 +181,20 @@ connected and exported both endpoints. JavaScript syntax, diff checks and
 Pirs smoke pass. The test containers were removed; hosted results remain
 pending.
 
+Stock job [26103](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14244/jobs/26103)
+at `7a677cc45e057d6f54762a3ad78080b8425fd82d` passed the complete upstream
+suite: 53 suites, 451 tests, one upstream skip and 31 snapshots in 306.642
+seconds. The following Pirs install failed because the selected frozen stock
+lock omitted `parse5@8.0.1`, already required by the HTTP sandbox. Both frozen
+track locks now include the shipping lock's exact parse5/entities graph;
+all existing package resolutions are unchanged.
+
+In a disposable copy of the service, both stock and patched selections passed
+`pnpm install --frozen-lockfile`, parse5 import and Pirs smoke using Node
+24.18.0 and pnpm 10.34.1. The temporary copy and generated state were removed.
+This records hosted upstream stock evidence and local consumer-lock evidence;
+the complete hosted matrix remains pending.
+
 ## Release gate and maintenance procedure
 
 Live upstream tag discovery on October 6 still showed 0.5.37 as the latest PDS
