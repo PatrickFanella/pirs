@@ -194,6 +194,9 @@ resolves labelled service bridge addresses and checks TCP connectivity before
 exporting connection variables. Disposable default-bridge helper, Postgres
 query and Redis checks passed, as did Pirs smoke. Full hosted suite evidence
 remains pending.
+Hosted service preflight then raced Postgres startup: the runner started
+steps while health was still `starting`. The helper now waits up to 60
+seconds per service for health while rejecting stopped or unhealthy services.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

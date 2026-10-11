@@ -40,8 +40,17 @@ for (const [name, image, privatePort] of [
   assert.equal(matches.length, 1, `expected exactly one ${name} service for ${job}`)
   const container = matches[0]
   assert.equal(container.Image, image, `unexpected ${name} image`)
-  const inspected = await docker(`/containers/${container.Id}/json`)
-  assert.equal(inspected.State.Health?.Status, 'healthy', `${name} must be healthy`)
+  const deadline = Date.now() + 60_000
+  let inspected
+  while (true) {
+    inspected = await docker(`/containers/${container.Id}/json`)
+    assert.equal(inspected.State.Running, true, `${name} service stopped`)
+    const health = inspected.State.Health?.Status
+    if (health === 'healthy') break
+    assert.equal(health, 'starting', `${name} service is not healthy`)
+    assert.ok(Date.now() < deadline, `${name} readiness timed out after 60 seconds`)
+    await new Promise((resolve) => setTimeout(resolve, 500))
+  }
   assert.equal(inspected.HostConfig.NetworkMode, 'bridge', `${name} must use the runner bridge`)
   const address = inspected.NetworkSettings.Networks.bridge?.IPAddress
   assert.equal(isIP(address ?? ''), 4, `missing ${name} bridge IPv4 address`)

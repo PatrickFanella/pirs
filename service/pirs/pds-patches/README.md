@@ -43,7 +43,9 @@ usual browser sandbox. Hosted jobs use the runners' default Docker bridge.
 the existing runner Docker socket, using run-and-track service labels. It
 checks image, health, network and TCP connectivity before writing the
 connection variables to `GITHUB_ENV`. The installed runner leaves service-port
-contexts empty and overrides a workflow's host-network option. No service
+contexts empty, starts steps before service health is ready and overrides a
+workflow's host-network option. The helper waits up to 60 seconds per service
+for healthy status and rejects stopped or unhealthy services. No service
 ports are published on the host.
 The service containers and their data remain disposable.
 

@@ -158,6 +158,18 @@ separate default-bridge clients also passed a real SQL query and Redis `PONG`.
 All test containers were removed. JavaScript syntax, diff checks and Pirs smoke
 pass. Full hosted suite qualification remains pending.
 
+Stock job [26087](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14232/jobs/26087)
+at revision `895a848a172d7fc290b375b6e677440dd35d1a1b` failed the service
+preflight while Postgres health was still `starting`. The installed runner
+does not wait for service health before starting steps. The helper now waits
+up to 60 seconds per service for `healthy`, rejecting stopped or unhealthy
+services and preserving the connectivity checks before environment export.
+A disposable default-bridge check started both services with deliberately
+delayed health probes. The helper observed `starting`, waited for `healthy`,
+connected and exported both endpoints. JavaScript syntax, diff checks and
+Pirs smoke pass. The test containers were removed; hosted results remain
+pending.
+
 ## Release gate and maintenance procedure
 
 Live upstream tag discovery on October 6 still showed 0.5.37 as the latest PDS
