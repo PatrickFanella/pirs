@@ -183,6 +183,10 @@ changes do not provide a full hosted suite pass.
 Disposable container checks passed Postgres/Redis connectivity and a pinned
 Puppeteer 23.11.1 browser launch with the temporary launcher. Event type
 checking, ShellCheck, workflow parsing and Pirs smoke also passed.
+The hosted stock suite then passed 45 suites and 385 tests, but eight suites
+failed because the runner expanded service-port contexts to empty strings.
+The workflow now discovers ports through read-only Docker API calls scoped to
+run-and-track service labels. A full hosted pass remains pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

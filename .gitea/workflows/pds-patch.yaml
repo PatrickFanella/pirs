@@ -18,7 +18,7 @@ jobs:
         image: postgres:14.4-alpine
         ports:
           - 5432
-        options: --health-cmd="pg_isready -U pg" --health-interval=2s --health-timeout=5s --health-retries=30
+        options: --label=pirs.ci.job=${{ github.run_id }}-${{ matrix.package }} --label=pirs.ci.service=postgres --health-cmd="pg_isready -U pg" --health-interval=2s --health-timeout=5s --health-retries=30
         env:
           POSTGRES_USER: pg
           POSTGRES_PASSWORD: password
@@ -26,19 +26,18 @@ jobs:
         image: redis:7.0-alpine
         ports:
           - 6379
-        options: --health-cmd="redis-cli ping" --health-interval=2s --health-timeout=5s --health-retries=30
+        options: --label=pirs.ci.job=${{ github.run_id }}-${{ matrix.package }} --label=pirs.ci.service=redis --health-cmd="redis-cli ping" --health-interval=2s --health-timeout=5s --health-retries=30
     env:
       CARGO_BUILD_JOBS: 2
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Build and run full upstream PDS tests
+      - name: Resolve disposable service ports
         env:
-          # Use random published service ports from the job's host network.
-          # The runners' default bridge provides no service DNS.
-          REDIS_HOST: 127.0.0.1:${{ job.services.redis.ports[6379] }}
-          DB_POSTGRES_URL: postgresql://pg:password@127.0.0.1:${{ job.services.postgres.ports[5432] }}/postgres
+          PIRS_CI_JOB: ${{ github.run_id }}-${{ matrix.package }}
+        run: node service/pirs/pds-patches/ci-services.mjs
+      - name: Build and run full upstream PDS tests
         run: |
           corepack enable
           # The Debian image removes APT indexes; Puppeteer installs Chrome's

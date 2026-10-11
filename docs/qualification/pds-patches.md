@@ -108,7 +108,7 @@ removes itself on exit. Non-root callers keep the usual sandbox. Upstream
 test source and packaged code are unchanged.
 
 The workflow publishes disposable Postgres and Redis on dynamically assigned
-ports, uses the service port context from a job container on the host network
+ports, discovers their ports from Docker in a job container on the host network
 and waits for service health. A disposable test showed that published ports
 were unreachable through the host gateway on this host. Loopback access from
 the host network avoids that path and service DNS on the default bridge.
@@ -120,6 +120,26 @@ Pinned Puppeteer 23.11.1 launched Chrome through the extracted root launcher,
 loaded a data page and verified its title. The launcher and all three test
 containers were removed. Workflow YAML, Bash syntax and ShellCheck pass;
 Pirs smoke also passes. Hosted full-suite results remain pending.
+
+Hosted stock job
+[26063](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14221/jobs/26063)
+at revision `ae769abba7999bd1c42d4e5605718cfe4dc8bb96` passed 45 suites and
+385 tests, including browser coverage. Eight suites failed (66 tests); proxied
+tests reported connection refusal at `127.0.0.1:5432`. The runner had expanded
+both `job.services.*.ports` expressions to empty strings, so these results do
+not qualify the complete suite.
+
+The workflow now labels each disposable service with the run ID and matrix
+track. A read-only Docker API helper finds exactly one correctly imaged,
+healthy service for each label, validates its actual published port and writes
+the two connection variables to the runner environment file. Missing or
+ambiguous services fail before any variables are written. This avoids the
+installed runner's unsupported port context; full hosted results remain
+pending.
+Disposable Docker checks verified exact random-port export and rejected a
+foreign job label and duplicate Redis services without writing connection
+variables. JavaScript syntax, workflow parsing, diff checks and Pirs smoke
+passed. Test containers were removed.
 
 ## Release gate and maintenance procedure
 

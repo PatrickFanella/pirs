@@ -40,7 +40,11 @@ For root callers, a temporary launcher adds `--no-sandbox` to the pinned
 Chrome executable and is removed on script exit. Non-root callers retain the
 usual browser sandbox. Hosted jobs use a host-network container and random
 published Postgres/Redis ports because the runners' default bridge has no
-service DNS. The service containers and their data remain disposable.
+service DNS. `ci-services.mjs` discovers these ports through the existing
+runner Docker socket, using run-and-track service labels. It checks image,
+health and unique port assignment before writing the connection variables
+to `GITHUB_ENV`; the installed runner leaves service-port contexts empty.
+The service containers and their data remain disposable.
 
 `pnpm pack` resolves workspace dependency keys in varying order. `normalize.mjs`
 sorts package metadata keys and archive entries and fixes archive ownership
