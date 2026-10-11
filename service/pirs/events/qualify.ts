@@ -236,6 +236,10 @@ try {
   await waitFor(() => runtimeGone(runtimePids.at(-1)!), 'boundary crash kills runtime')
   consumer = await startConsumer()
   await caughtUp()
+  // Cursor persistence precedes stdout acknowledgement. Wait for the replay
+  // receipt as well; a fast cursor read can otherwise outrun the pipe listener.
+  await waitFor(() => received.some((event) => event.delivered === replayedSeq && event.logs.includes(`seq:${replayedSeq}`)),
+    `replayed guest receipt ${replayedSeq}`)
   assert.ok(received.some((event) => event.delivered === replayedSeq && event.logs.includes(`seq:${replayedSeq}`)))
 
   // Kill/restart the PDS while the consumer remains running. New persisted

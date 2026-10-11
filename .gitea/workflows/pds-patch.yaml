@@ -5,7 +5,9 @@ on:
 jobs:
   qualify:
     runs-on: kvant
-    container: node:24-bookworm
+    container:
+      image: node:24-bookworm
+      options: --network host
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -14,20 +16,29 @@ jobs:
     services:
       postgres:
         image: postgres:14.4-alpine
+        ports:
+          - 5432
+        options: --health-cmd="pg_isready -U pg" --health-interval=2s --health-timeout=5s --health-retries=30
         env:
           POSTGRES_USER: pg
           POSTGRES_PASSWORD: password
       redis:
         image: redis:7.0-alpine
+        ports:
+          - 6379
+        options: --health-cmd="redis-cli ping" --health-interval=2s --health-timeout=5s --health-retries=30
     env:
-      REDIS_HOST: redis:6379
       CARGO_BUILD_JOBS: 2
-      DB_POSTGRES_URL: postgresql://pg:password@postgres:5432/postgres
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - name: Build and run full upstream PDS tests
+        env:
+          # Use random published service ports from the job's host network.
+          # The runners' default bridge provides no service DNS.
+          REDIS_HOST: 127.0.0.1:${{ job.services.redis.ports[6379] }}
+          DB_POSTGRES_URL: postgresql://pg:password@127.0.0.1:${{ job.services.postgres.ports[5432] }}/postgres
         run: |
           corepack enable
           # The Debian image removes APT indexes; Puppeteer installs Chrome's

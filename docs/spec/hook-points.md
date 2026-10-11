@@ -172,6 +172,17 @@ wrapper change.
 The follow-up hosted stock and patched builds completed, then failed before
 Jest during Chrome system dependency installation. The workflow now refreshes
 the Debian image's APT indexes first. Full hosted test evidence remains pending.
+The next hosted attempt reached Jest but failed root Chrome launch and
+Postgres service DNS. The wrapper now uses a disposable root-only Chrome
+launcher, and the workflow uses dynamically published service ports on
+loopback from a host-network job container. A WIT event qualification replay
+assertion also raced its
+stdout receipt after cursor persistence; the harness now waits for that
+receipt. The local event qualification and four bridge checks pass. These
+changes do not provide a full hosted suite pass.
+Disposable container checks passed Postgres/Redis connectivity and a pinned
+Puppeteer 23.11.1 browser launch with the temporary launcher. Event type
+checking, ShellCheck, workflow parsing and Pirs smoke also passed.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

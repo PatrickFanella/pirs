@@ -98,6 +98,29 @@ Workflow YAML parsing and command ordering checks pass. This verifies package
 availability, not browser execution or Jest. Full hosted test results remain
 pending.
 
+Revision `57f388254b26db1f66197bdc018f0767972df9f7` reached Jest in hosted
+run [14211](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14211).
+Both tracks failed browser setup because Chrome refused root without
+`--no-sandbox`; proxied tests also failed resolving `postgres` on Docker's
+default bridge. The wrapper now supplies a temporary executable launcher for
+root callers that adds the container flag to the pinned Chrome executable and
+removes itself on exit. Non-root callers keep the usual sandbox. Upstream
+test source and packaged code are unchanged.
+
+The workflow publishes disposable Postgres and Redis on dynamically assigned
+ports, uses the service port context from a job container on the host network
+and waits for service health. A disposable test showed that published ports
+were unreachable through the host gateway on this host. Loopback access from
+the host network avoids that path and service DNS on the default bridge.
+The complete stock and patched suites remain required.
+
+A fresh disposable `node:24-bookworm` container on the host network queried
+Postgres 14.4 and received Redis 7.0's `PONG` through random published ports.
+Pinned Puppeteer 23.11.1 launched Chrome through the extracted root launcher,
+loaded a data page and verified its title. The launcher and all three test
+containers were removed. Workflow YAML, Bash syntax and ShellCheck pass;
+Pirs smoke also passes. Hosted full-suite results remain pending.
+
 ## Release gate and maintenance procedure
 
 Live upstream tag discovery on October 6 still showed 0.5.37 as the latest PDS

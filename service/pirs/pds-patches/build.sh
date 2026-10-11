@@ -32,6 +32,18 @@ pnpm --recursive --workspace-concurrency=1 run build:ui
 # Full upstream suite, including proxied tests and browser tests. The caller
 # supplies disposable Redis/Postgres via REDIS_HOST and DB_POSTGRES_URL.
 (cd packages/pds && pnpm exec puppeteer browsers install chrome --install-deps)
+# Chrome refuses root even in a disposable job container. Keep the pinned
+# executable and upstream launch calls; only this temporary wrapper adds the
+# container-only flag. Non-root callers retain Chrome's normal sandbox.
+browser_wrapper=''
+trap 'if [[ -n "$browser_wrapper" ]]; then rm -f "$browser_wrapper"; fi' EXIT
+if [[ "$(id -u)" == 0 ]]; then
+  browser=$(cd packages/pds && pnpm exec node -e 'process.stdout.write(require("puppeteer").executablePath())')
+  browser_wrapper=$(mktemp /tmp/pirs-test-chrome.XXXXXX)
+  printf '#!/usr/bin/env bash\nexec %q --no-sandbox "$@"\n' "$browser" > "$browser_wrapper"
+  chmod 700 "$browser_wrapper"
+  export PUPPETEER_EXECUTABLE_PATH="$browser_wrapper"
+fi
 (cd packages/pds && LOG_ENABLED=false NODE_OPTIONS="--experimental-vm-modules --max-old-space-size=8192" pnpm exec jest --maxWorkers=1 --workerIdleMemoryLimit=512MB)
 mkdir -p "$root/service/pirs/pds-patches/build/$track"
 (cd packages/pds && pnpm pack --pack-destination "$root/service/pirs/pds-patches/build/$track")

@@ -36,6 +36,11 @@ same tooling, workspace prebuild, TypeScript and UI phases explicitly, with
 one workspace task at a time. One worker and
 worker recycling limit retained Jest memory; a heap exhaustion still fails
 the gate. Browser dependency installation requires a disposable Debian runner.
+For root callers, a temporary launcher adds `--no-sandbox` to the pinned
+Chrome executable and is removed on script exit. Non-root callers retain the
+usual browser sandbox. Hosted jobs use a host-network container and random
+published Postgres/Redis ports because the runners' default bridge has no
+service DNS. The service containers and their data remain disposable.
 
 `pnpm pack` resolves workspace dependency keys in varying order. `normalize.mjs`
 sorts package metadata keys and archive entries and fixes archive ownership
