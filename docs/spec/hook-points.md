@@ -169,6 +169,9 @@ a job-container OOM kill. The wrapper now serializes the same workspace build
 phases; pinned-pnpm phase checks, Bash syntax and ShellCheck pass. A repaired
 hosted full-suite pass is still pending, and no hook gains evidence from this
 wrapper change.
+The follow-up hosted stock and patched builds completed, then failed before
+Jest during Chrome system dependency installation. The workflow now refreshes
+the Debian image's APT indexes first. Full hosted test evidence remains pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

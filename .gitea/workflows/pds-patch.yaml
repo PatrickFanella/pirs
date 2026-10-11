@@ -30,6 +30,9 @@ jobs:
       - name: Build and run full upstream PDS tests
         run: |
           corepack enable
+          # The Debian image removes APT indexes; Puppeteer installs Chrome's
+          # system dependencies below but does not refresh those indexes.
+          apt-get update
           git clone https://github.com/bluesky-social/atproto.git /tmp/atproto
           git -C /tmp/atproto checkout a7c8604d876a200a1e4fa4aec83d4189ac4f1c12
           bash service/pirs/pds-patches/build.sh '${{ matrix.package }}' /tmp/atproto

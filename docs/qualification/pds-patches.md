@@ -86,6 +86,18 @@ syntax and ShellCheck pass. These are wrapper checks; the repaired full hosted
 build and test matrix remain unverified. The full Jest suite, source-tree
 check and normalized package comparison remain required.
 
+Follow-up revision `d5115f2f063e12e693e0a4e87f353450dc921a5c` completed the
+serialized stock and patched builds, including UI bundles, in hosted run
+[14205](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14205).
+Both jobs then failed before Jest while Puppeteer installed Chrome system
+dependencies: the Debian image's APT indexes were absent, so required packages
+had no installable candidates. The workflow now refreshes APT indexes before
+calling the build wrapper. In a fresh disposable `node:24-bookworm` container,
+the missing browser libraries installed successfully after `apt-get update`.
+Workflow YAML parsing and command ordering checks pass. This verifies package
+availability, not browser execution or Jest. Full hosted test results remain
+pending.
+
 ## Release gate and maintenance procedure
 
 Live upstream tag discovery on October 6 still showed 0.5.37 as the latest PDS
