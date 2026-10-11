@@ -224,6 +224,16 @@ allows 60 seconds for durable installation/operator commands and reports command
 taking at least five seconds; the guest's 500 ms execution deadline is unchanged.
 All 20 KV qualification checks passed locally and on Kuznya with disposable
 state. Hosted qualification of this harness revision remains pending.
+Both WIT jobs subsequently passed at `364703a`. The patched PR track passed
+all upstream suites but then timed out waiting for event cursor 114. A disposable
+qualification copy adding 120 ms to each consumer filesystem sync reproduced
+that exact failure under the old 15-second backlog wait. Backlog waits now allow
+60 seconds, fail immediately on consumer exit and report the last observed cursor
+and stderr on failure. The same delayed replay reached cursor 114 in 27.097 seconds
+with the revised harness. Runtime call deadlines and PDS write latency assertions
+are unchanged. The full delayed-sync qualification, normal event qualification,
+event type check and PDS smoke passed locally. Hosted checks for this event
+harness revision remain pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

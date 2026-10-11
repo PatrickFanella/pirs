@@ -135,9 +135,30 @@ async function lastSeq() {
   }
 }
 
-async function caughtUp() {
+async function waitForCursor(consumer: ReturnType<typeof child>, path: string, latest: number) {
+  const started = performance.now()
+  let observed: number | undefined
+  try {
+    // Backlog replay syncs a file and directory for every event. Its wall-clock
+    // allowance is separate from the runtime's unchanged per-call deadline.
+    await waitFor(async () => {
+      if (consumer.process.exitCode !== null || consumer.process.signalCode !== null) {
+        throw new Error(`consumer exited: code=${consumer.process.exitCode}, signal=${consumer.process.signalCode}`)
+      }
+      try { observed = JSON.parse(await readFile(path, 'utf8')).seq }
+      catch (error) { if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error }
+      return observed === latest
+    }, `durable cursor ${latest}`, 60_000)
+  } catch (error) {
+    throw new Error(`cursor replay failed: target=${latest}, observed=${observed}, stderr=${consumer.error()}`, { cause: error })
+  }
+  const elapsed = performance.now() - started
+  if (elapsed >= 5000) console.log(JSON.stringify({ replayTarget: latest, elapsed_ms: Math.round(elapsed) }))
+}
+
+async function caughtUp(consumer: ReturnType<typeof child>) {
   const latest = await lastSeq()
-  await waitFor(async () => JSON.parse(await readFile(cursor, 'utf8')).seq === latest, `durable cursor ${latest}`)
+  await waitForCursor(consumer, cursor, latest)
   return latest
 }
 
@@ -193,9 +214,9 @@ try {
   pds = await startPds()
   assert.equal((await fetchPage(socket, persisted.seq)).stream, persisted.stream)
   consumer = await startConsumer()
-  await caughtUp()
+  await caughtUp(consumer)
   const runningLatency = latency(await writes(40, 'host-running'))
-  await caughtUp()
+  await caughtUp(consumer)
   assert.ok(stoppedLatency.p95_ms <= runningLatency.p95_ms * 5 + 20, 'stopped-host latency regression')
 
   const runtimeCrashCursor = JSON.parse(await readFile(cursor, 'utf8')).seq
@@ -205,7 +226,7 @@ try {
   assert.equal(consumer.process.exitCode, 1)
   assert.equal(JSON.parse(await readFile(cursor, 'utf8')).seq, runtimeCrashCursor)
   consumer = await startConsumer()
-  await caughtUp()
+  await caughtUp(consumer)
   await stop(consumer.process, 'SIGTERM')
 
   // Fault injection is confined to this child process. The real consumer has
@@ -235,7 +256,7 @@ try {
   await stop(boundaryConsumer.process, 'SIGKILL')
   await waitFor(() => runtimeGone(runtimePids.at(-1)!), 'boundary crash kills runtime')
   consumer = await startConsumer()
-  await caughtUp()
+  await caughtUp(consumer)
   // Cursor persistence precedes stdout acknowledgement. Wait for the replay
   // receipt as well; a fast cursor read can otherwise outrun the pipe listener.
   await waitFor(() => received.some((event) => event.delivered === replayedSeq && event.logs.includes(`seq:${replayedSeq}`)),
@@ -248,7 +269,7 @@ try {
   await new Promise((resolve) => setTimeout(resolve, 150))
   pds = await startPds()
   await writes(10, 'pds-restarted')
-  const finalSeq = await caughtUp()
+  const finalSeq = await caughtUp(consumer)
   await waitFor(() => received.at(-1)?.delivered === finalSeq, 'last operator receipt')
   assert.equal(finalSeq, 166)
   const sequences = received.map((event) => event.delivered)
@@ -293,10 +314,7 @@ try {
     ['--socket', socket, '--cursor', scopedCursor, '--host', host, '--installation', scopedInstallation.installed])
   await waitFor(() => scoped.output().includes('"ready":true'), 'scoped observer ready')
   runtimePids.push(JSON.parse(scoped.output().trim().split('\n')[0]).runtimePid)
-  await waitFor(async () => {
-    try { return JSON.parse(await readFile(scopedCursor, 'utf8')).seq === finalSeq }
-    catch (error) { if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return false; throw error }
-  }, 'scoped replay caught up')
+  await waitForCursor(scoped, scopedCursor, finalSeq)
   await xrpc('com.atproto.repo.createRecord', { repo: account.did, collection: 'org.test.denied',
     record: { $type: 'org.test.denied', secret: 'DENIED-COLLECTION' } }, account.accessJwt)
   await xrpc('com.atproto.repo.applyWrites', { repo: account.did, writes: [
