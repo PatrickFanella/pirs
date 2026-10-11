@@ -215,6 +215,15 @@ tracks completed Pirs and installed-manifest event checks. The WIT host job
 also passed the installed static-site checks. The qualification records link
 the exact jobs. This adds hosted evidence for the existing hooks; it does not
 qualify production hosting, a natural next-release rebase or spec levels 1/2.
+The documentation revision `11875b1` subsequently hit the KV harness's
+15-second installation timeout in both WIT jobs on Kuznya. A two-CPU local
+container installed the fixture in 0.048 seconds; Kuznya showed substantial
+I/O pressure when inspected after those failures. Storage stalls are a likely
+cause, but the job logs do not identify the blocked operation. The harness now
+allows 60 seconds for durable installation/operator commands and reports commands
+taking at least five seconds; the guest's 500 ms execution deadline is unchanged.
+All 20 KV qualification checks passed locally and on Kuznya with disposable
+state. Hosted qualification of this harness revision remains pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.
