@@ -30,7 +30,10 @@ pnpm --dir service smoke
 
 The caller supplies disposable Postgres and Redis via `DB_POSTGRES_URL` and
 `REDIS_HOST`. The script installs the exact upstream lock, builds upstream,
-installs the test browser and runs every upstream PDS test. One worker and
+installs the test browser and runs every upstream PDS test. The pinned root
+build forces unlimited parallel prebuild and UI tasks. The wrapper runs the
+same tooling, workspace prebuild, TypeScript and UI phases explicitly, with
+one workspace task at a time. One worker and
 worker recycling limit retained Jest memory; a heap exhaustion still fails
 the gate. Browser dependency installation requires a disposable Debian runner.
 

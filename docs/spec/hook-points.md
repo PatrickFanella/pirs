@@ -163,6 +163,12 @@ installed-manifest cursor/restart harness passed on merged #9 source. No
 adapter is installed by default, and no deciding plugin hook gains support.
 [The patch qualification](../qualification/pds-patches.md) records exact pins,
 full-suite status and the unavailable natural next-release rebase gate.
+Hosted stock and patched jobs on October 10 reached Kvant and Kuznya but
+failed during upstream code generation before tests started. Kvant recorded
+a job-container OOM kill. The wrapper now serializes the same workspace build
+phases; pinned-pnpm phase checks, Bash syntax and ShellCheck pass. A repaired
+hosted full-suite pass is still pending, and no hook gains evidence from this
+wrapper change.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

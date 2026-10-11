@@ -22,7 +22,13 @@ if [[ "$track" == patched ]]; then
 fi
 cd "$checkout"
 PUPPETEER_SKIP_DOWNLOAD=true pnpm install --frozen-lockfile
-pnpm build
+# The pinned root build's pre/post hooks force unlimited workspace parallelism.
+# Run those same phases explicitly so bounded CI containers do not OOM during
+# code generation. Recursive runs exclude the root and retain dependency order.
+pnpm --config.enable-pre-post-scripts=false run build:tooling --force
+pnpm --recursive --workspace-concurrency=1 run prebuild
+pnpm --config.enable-pre-post-scripts=false run build:ts
+pnpm --recursive --workspace-concurrency=1 run build:ui
 # Full upstream suite, including proxied tests and browser tests. The caller
 # supplies disposable Redis/Postgres via REDIS_HOST and DB_POSTGRES_URL.
 (cd packages/pds && pnpm exec puppeteer browsers install chrome --install-deps)

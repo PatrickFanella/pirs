@@ -68,6 +68,24 @@ and passed. Workers use an 8 GB heap and recycle at 512 MB. No runtime acceptanc
 is waived. The new hosted stock/patched matrix is configured but has not yet
 passed on this integration revision.
 
+## Hosted build failure, October 10, 2026
+
+Revision `80b024281fd84c9c41531fbdc069f787feeb0c06` reached both online CI
+runners. Runs [14201](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14201)
+on Kuznya and [14202](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14202)
+on Kvant failed in stock and patched upstream builds before Jest started.
+Code generators were killed with exit 137. Kvant's kernel log identifies an
+out-of-memory kill in the exact stock job container at 01:06:29 UTC on October
+11. The pinned upstream root prebuild forces unlimited workspace parallelism.
+
+The wrapper now runs the same tooling, workspace prebuild, TypeScript and UI
+phases explicitly, with one workspace task at a time. A disposable workspace
+check using pinned pnpm 11.11.0 verified phase order, absence of overlapping
+workspace tasks and exclusion of the root's parallel lifecycle hooks. Bash
+syntax and ShellCheck pass. These are wrapper checks; the repaired full hosted
+build and test matrix remain unverified. The full Jest suite, source-tree
+check and normalized package comparison remain required.
+
 ## Release gate and maintenance procedure
 
 Live upstream tag discovery on October 6 still showed 0.5.37 as the latest PDS
