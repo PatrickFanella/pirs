@@ -4,7 +4,7 @@ on:
   pull_request:
 jobs:
   qualify:
-    runs-on: dozor
+    runs-on: kvant
     container: node:24-bookworm
     timeout-minutes: 60
     strategy:

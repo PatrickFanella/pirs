@@ -50,7 +50,7 @@ on:
 
 jobs:
   qualify:
-    runs-on: dozor
+    runs-on: kvant
     container: rust:1.95.0-bookworm
     timeout-minutes: 20
     env:
