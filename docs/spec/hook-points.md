@@ -207,6 +207,14 @@ stale stock and patched lock snapshots missing parse5. Both snapshots now
 match the shipping parser graph without changing existing resolutions; frozen
 install, parser import and Pirs smoke passed locally for both selections.
 The complete hosted matrix remains pending.
+Hosted qualification subsequently passed at
+`7638852ebcb78858d9d78ef5cd6263924f572860`, with all eight PR check contexts
+successful. Stock upstream passed 53 suites and 451 tests; patched passed
+54 suites and 454 tests, both with 31 snapshots and one upstream skip. Both
+tracks completed Pirs and installed-manifest event checks. The WIT host job
+also passed the installed static-site checks. The qualification records link
+the exact jobs. This adds hosted evidence for the existing hooks; it does not
+qualify production hosting, a natural next-release rebase or spec levels 1/2.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

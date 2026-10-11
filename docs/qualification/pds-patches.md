@@ -195,6 +195,19 @@ In a disposable copy of the service, both stock and patched selections passed
 This records hosted upstream stock evidence and local consumer-lock evidence;
 the complete hosted matrix remains pending.
 
+Hosted qualification passed at
+`7638852ebcb78858d9d78ef5cd6263924f572860`. All eight PR check contexts
+reported success, including both push and pull-request stock/patched jobs.
+The [stock push job](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14250/jobs/26111)
+passed 53 suites, 451 tests and 31 snapshots; the
+[patched push job](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14250/jobs/26110)
+passed 54 suites, 454 tests and 31 snapshots. Each retained one upstream skip.
+Both jobs also passed package selection, the patched normalized-archive
+comparison where applicable, Pirs smoke/cleanup/bridge checks, event type
+checking and installed-manifest event qualification. The full hosted matrix
+is qualified for that source revision. The natural next-release rehearsal
+gate for #22 remains open.
+
 ## Release gate and maintenance procedure
 
 Live upstream tag discovery on October 6 still showed 0.5.37 as the latest PDS

@@ -106,7 +106,11 @@ before/after page observations. The browser demo was also stopped and its
 temporary data removed.
 
 The host workflow now runs native site tests and the installed site test, and
-watches site source and this qualification record. Hosted CI remains pending.
+watches site source and this qualification record. Hosted qualification passed
+at `7638852ebcb78858d9d78ef5cd6263924f572860`: the
+[WIT host job](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14251/jobs/26112)
+ran the native and installed site checks, and all eight PR check contexts
+reported success. This documentation update records that tested source.
 This is a local M2 exit demonstration, not a production hosting qualification.
 Public DNS/TLS, real PLC identities, script-enabled sites, arbitrary routes,
 binary assets and other browser engines remain outside this run.
