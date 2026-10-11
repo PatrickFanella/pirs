@@ -36,11 +36,28 @@ pnpm --recursive --workspace-concurrency=1 run build:ui
 # executable and upstream launch calls; only this temporary wrapper adds the
 # container-only flag. Non-root callers retain Chrome's normal sandbox.
 browser_wrapper=''
-trap 'if [[ -n "$browser_wrapper" ]]; then rm -f "$browser_wrapper"; fi' EXIT
+browser_temporary=''
+trap 'if [[ -n "$browser_wrapper" ]]; then rm -f "$browser_wrapper"; fi; if [[ -n "$browser_temporary" ]]; then rm -rf "$browser_temporary"; fi' EXIT
+# Only browser scratch data uses memory-backed storage. PDS databases and
+# durable qualification state retain the caller's ordinary filesystem.
+if [[ -n "${PIRS_BROWSER_TMP_ROOT:-}" ]]; then
+  if [[ "$(stat -f -c %T "$PIRS_BROWSER_TMP_ROOT")" != tmpfs ]]; then
+    echo 'browser temporary root must be tmpfs' >&2; exit 1
+  fi
+  browser_temporary=$(mktemp -d "$PIRS_BROWSER_TMP_ROOT/pirs-browser.XXXXXX")
+  export PUPPETEER_TMP_DIR="$browser_temporary"
+  echo "Browser temporary profiles: $browser_temporary"
+fi
 if [[ "$(id -u)" == 0 ]]; then
   browser=$(cd packages/pds && pnpm exec node -e 'process.stdout.write(require("puppeteer").executablePath())')
   browser_wrapper=$(mktemp /tmp/pirs-test-chrome.XXXXXX)
-  printf '#!/usr/bin/env bash\nexec %q --no-sandbox "$@"\n' "$browser" > "$browser_wrapper"
+  # Puppeteer's Chrome defaults redirect shared-memory scratch files to TMPDIR.
+  # Set it for Chrome alone so PDS durability checks remain disk-backed.
+  if [[ -n "$browser_temporary" ]]; then
+    printf '#!/usr/bin/env bash\nexport TMPDIR=%q\nexec %q --no-sandbox "$@"\n' "$browser_temporary" "$browser" > "$browser_wrapper"
+  else
+    printf '#!/usr/bin/env bash\nexec %q --no-sandbox "$@"\n' "$browser" > "$browser_wrapper"
+  fi
   chmod 700 "$browser_wrapper"
   export PUPPETEER_EXECUTABLE_PATH="$browser_wrapper"
 fi

@@ -243,6 +243,21 @@ cleanup paths in 36.9 seconds with a 90-second lifecycle allowance. The cleanup
 test now reports the exit signal and whether its timer fired. Normal cleanup
 tests and PDS smoke also passed locally. The hosted delay's exact cause remains
 unconfirmed, and hosted checks for this cleanup harness revision are pending.
+At `f33db26`, the stock push job and its single retry each failed one upstream
+OAuth browser test, at different selector/navigation waits; both passed the
+other 52 suites and all 31 snapshots. The patched tracks and stock PR track
+passed. Kuznya still showed I/O pressure with little CPU pressure. CI now gives
+Chrome a private profile/scratch directory on a 512 MiB tmpfs, using the pinned
+Puppeteer configuration and a Chrome-only `TMPDIR`. PDS databases and durable
+state retain their ordinary filesystem. A fresh two-CPU, 4 GiB container passed
+pinned Chrome 131 launch, profile and child-environment checks, navigation,
+cookie persistence and profile cleanup. This is a bounded attempt to reduce
+browser storage contention; the hosted OAuth failure's cause is not confirmed.
+The smoke retry produced `code=1`, `signal=null`, `timedOut=false` and an HTTP
+timeout, excluding its lifecycle kill timer. Smoke errors now identify the
+request path without logging request bodies or credentials. Normal PDS smoke
+and both cleanup tests passed locally; ShellCheck, shell syntax, workflow YAML
+and diff checks passed. Hosted checks for these changes remain pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

@@ -5,7 +5,9 @@ on:
 jobs:
   qualify:
     runs-on: kvant
-    container: node:24-bookworm
+    container:
+      image: node:24-bookworm
+      options: --shm-size=512m
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -23,6 +25,7 @@ jobs:
         options: --label=pirs.ci.job=${{ github.run_id }}-${{ matrix.package }} --label=pirs.ci.service=redis --health-cmd="redis-cli ping" --health-interval=2s --health-timeout=5s --health-retries=30
     env:
       CARGO_BUILD_JOBS: 2
+      PIRS_BROWSER_TMP_ROOT: /dev/shm
     steps:
       - uses: actions/checkout@v4
         with:
