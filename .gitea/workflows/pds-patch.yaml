@@ -5,9 +5,7 @@ on:
 jobs:
   qualify:
     runs-on: kvant
-    container:
-      image: node:24-bookworm
-      options: --network host
+    container: node:24-bookworm
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -16,16 +14,12 @@ jobs:
     services:
       postgres:
         image: postgres:14.4-alpine
-        ports:
-          - 5432
         options: --label=pirs.ci.job=${{ github.run_id }}-${{ matrix.package }} --label=pirs.ci.service=postgres --health-cmd="pg_isready -U pg" --health-interval=2s --health-timeout=5s --health-retries=30
         env:
           POSTGRES_USER: pg
           POSTGRES_PASSWORD: password
       redis:
         image: redis:7.0-alpine
-        ports:
-          - 6379
         options: --label=pirs.ci.job=${{ github.run_id }}-${{ matrix.package }} --label=pirs.ci.service=redis --health-cmd="redis-cli ping" --health-interval=2s --health-timeout=5s --health-retries=30
     env:
       CARGO_BUILD_JOBS: 2
@@ -33,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Resolve disposable service ports
+      - name: Resolve and check disposable service endpoints
         env:
           PIRS_CI_JOB: ${{ github.run_id }}-${{ matrix.package }}
         run: node service/pirs/pds-patches/ci-services.mjs

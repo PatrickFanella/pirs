@@ -187,6 +187,13 @@ The hosted stock suite then passed 45 suites and 385 tests, but eight suites
 failed because the runner expanded service-port contexts to empty strings.
 The workflow now discovers ports through read-only Docker API calls scoped to
 run-and-track service labels. A full hosted pass remains pending.
+The next patched attempt resolved published ports but still failed: the
+runner's merged configuration overrode host networking with the default
+bridge. The workflow now keeps that bridge and publishes no ports; its helper
+resolves labelled service bridge addresses and checks TCP connectivity before
+exporting connection variables. Disposable default-bridge helper, Postgres
+query and Redis checks passed, as did Pirs smoke. Full hosted suite evidence
+remains pending.
 
 Quota-bound KV state, 2026-10-06: verified installed WIT components used
 `kv.read` and `kv.write` in the separate host against disposable private state.

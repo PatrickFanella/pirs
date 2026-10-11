@@ -141,6 +141,23 @@ foreign job label and duplicate Redis services without writing connection
 variables. JavaScript syntax, workflow parsing, diff checks and Pirs smoke
 passed. Test containers were removed.
 
+At revision `020bec7bb6077e2e0a26e61bcec1a8a9c7a5a175`, patched job
+[26066](https://git.subcult.tv/subculture-collective/pirs/actions/runs/14224/jobs/26066)
+resolved the actual published ports, then failed connecting through loopback:
+46 suites and 388 tests passed, eight suites and 66 tests failed. The runner
+parsed `--network host` but its merged container configuration restored
+`NetworkMode:bridge`. The earlier local host-network check therefore did not
+reproduce the runner's effective network.
+
+The workflow now retains the default bridge and publishes no service ports.
+The helper resolves each labelled service's bridge IPv4 address, validates its
+image, health and bridge network, then checks TCP connectivity from the job
+before writing either connection variable. A fresh default-bridge Node
+container ran this helper against disposable Postgres 14.4 and Redis 7.0;
+separate default-bridge clients also passed a real SQL query and Redis `PONG`.
+All test containers were removed. JavaScript syntax, diff checks and Pirs smoke
+pass. Full hosted suite qualification remains pending.
+
 ## Release gate and maintenance procedure
 
 Live upstream tag discovery on October 6 still showed 0.5.37 as the latest PDS

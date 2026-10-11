@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict'
 import { appendFile } from 'node:fs/promises'
 import { request } from 'node:http'
+import { connect, isIP } from 'node:net'
 
 const job = process.env.PIRS_CI_JOB
 assert.match(job ?? '', /^\d+-(stock|patched)$/)
@@ -30,7 +31,7 @@ function docker(path) {
 
 const filters = encodeURIComponent(JSON.stringify({ label: [`pirs.ci.job=${job}`] }))
 const containers = await docker(`/containers/json?filters=${filters}`)
-const ports = {}
+const endpoints = {}
 for (const [name, image, privatePort] of [
   ['postgres', 'postgres:14.4-alpine', 5432],
   ['redis', 'redis:7.0-alpine', 6379],
@@ -39,15 +40,20 @@ for (const [name, image, privatePort] of [
   assert.equal(matches.length, 1, `expected exactly one ${name} service for ${job}`)
   const container = matches[0]
   assert.equal(container.Image, image, `unexpected ${name} image`)
-  const published = container.Ports.filter((p) => p.PrivatePort === privatePort && p.Type === 'tcp' && p.PublicPort)
-  const assigned = [...new Set(published.map((p) => p.PublicPort))]
-  assert.equal(assigned.length, 1, `missing or ambiguous ${name} published port`)
-  assert.ok(Number.isInteger(assigned[0]) && assigned[0] > 0 && assigned[0] <= 65535)
   const inspected = await docker(`/containers/${container.Id}/json`)
   assert.equal(inspected.State.Health?.Status, 'healthy', `${name} must be healthy`)
-  ports[name] = assigned[0]
+  assert.equal(inspected.HostConfig.NetworkMode, 'bridge', `${name} must use the runner bridge`)
+  const address = inspected.NetworkSettings.Networks.bridge?.IPAddress
+  assert.equal(isIP(address ?? ''), 4, `missing ${name} bridge IPv4 address`)
+  await new Promise((resolve, reject) => {
+    const socket = connect({ host: address, port: privatePort, timeout: 5000 })
+    socket.once('connect', () => { socket.destroy(); resolve() })
+    socket.once('error', reject)
+    socket.once('timeout', () => socket.destroy(new Error(`${name} endpoint unreachable from job`)))
+  })
+  endpoints[name] = `${address}:${privatePort}`
 }
 await appendFile(process.env.GITHUB_ENV,
-  `DB_POSTGRES_URL=postgresql://pg:password@127.0.0.1:${ports.postgres}/postgres\n` +
-  `REDIS_HOST=127.0.0.1:${ports.redis}\n`)
-console.log(`Resolved healthy disposable service ports for ${job}`)
+  `DB_POSTGRES_URL=postgresql://pg:password@${endpoints.postgres}/postgres\n` +
+  `REDIS_HOST=${endpoints.redis}\n`)
+console.log(`Resolved and connected to healthy disposable services for ${job}`)
