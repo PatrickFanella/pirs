@@ -50,6 +50,9 @@ on:
       - .gitea/workflows/host-sandbox.yaml
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   qualify:
     runs-on: kvant

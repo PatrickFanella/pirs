@@ -14,6 +14,9 @@ on:
       - .gitea/workflows/interface-spike.yaml
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   compare:
     runs-on: kvant
