@@ -1,5 +1,12 @@
 # Pirs
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/lockup.svg">
+  <img src="docs/brand/mark-mono-light.svg" alt="Pirs logo. A pier seen from the side: one long plank over three pilings, with one orange hook-point dot on the plank and thin blue construction lines." height="80">
+</picture>
+
+A [SUBCULT](https://subcult.tv) project.
+
 Pirs is an experiment in making an AT Protocol PDS extensible. It has two parts: a draft specification of the hook points a PDS offers to plugins, and a PDS distribution that implements them.
 
 It is experimental software. A separate Wasmtime host runs WIT sandbox components with enforced call limits. An opt-in private bridge delivers retained PDS events with a resumable cursor; its disposable restart qualification has passed locally. Prichal's managed hosting stays on the unmodified upstream image; Pirs becomes an option there only if it qualifies.
