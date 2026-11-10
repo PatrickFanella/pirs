@@ -121,12 +121,15 @@ jobs:
       run: |
         apt-get update
         apt-get install -y --no-install-recommends python3 ca-certificates curl
-        curl --fail --location --output /tmp/pirs-spike-go.tar.gz https://go.dev/dl/go1.27.1.linux-amd64.tar.gz
+        curl --fail --location --retry 3 --retry-all-errors --output /tmp/pirs-spike-go.tar.gz https://go.dev/dl/go1.27.1.linux-amd64.tar.gz
         echo '63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445  /tmp/pirs-spike-go.tar.gz' | sha256sum --check
         tar -C /usr/local -xzf /tmp/pirs-spike-go.tar.gz
     - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       with:
         persist-credentials: false
+    - name: Trust the checkout inside the root container
+      # The hosted workspace belongs to the runner user, so git (and Go's VCS stamping) refuses it as root.
+      run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
     - name: Restore the Cargo registry
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
