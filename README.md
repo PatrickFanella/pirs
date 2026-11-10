@@ -5,32 +5,47 @@
   <img src="docs/brand/mark-mono-light.svg" alt="Pirs logo. A pier seen from the side: one long plank over three pilings, with one orange hook-point dot on the plank and thin blue construction lines." height="80">
 </picture>
 
-A [SUBCULT](https://subcult.tv) project.
+Pirs is an experiment in making an AT Protocol personal data server (PDS)
+extensible. It has two parts: a draft specification of the hook points a PDS
+offers to plugins, and a fork of the Bluesky PDS distribution that implements
+them.
 
-Pirs is an experiment in making an AT Protocol PDS extensible. It has two parts: a draft specification of the hook points a PDS offers to plugins, and a PDS distribution that implements them.
+It is experimental research software and not for production use. The
+specification is a working draft and nothing in it is stable.
 
-It is experimental software. A separate Wasmtime host runs WIT sandbox components with enforced call limits. An opt-in private bridge delivers retained PDS events with a resumable cursor; its disposable restart qualification has passed locally. Prichal's managed hosting stays on the unmodified upstream image; Pirs becomes an option there only if it qualifies.
+## Features
 
-## What is here
+- **Hook-point specification.** [docs/spec/hook-points.md](docs/spec/hook-points.md)
+  defines four levels (observe, serve, act, decide), the hooks at each level and
+  a capability vocabulary, written so other PDS implementations could adopt it.
+- **Sandboxed plugin host.** A separate Rust process runs plugins as WIT
+  (WebAssembly component) modules with Wasmtime. Plugins never run inside the
+  PDS and never receive signing keys. The host enforces memory, deadline,
+  response and log limits and recovers after a plugin traps or loops.
+- **Manifests.** A plugin's manifest is checked against the component's imports
+  at install, and each capability is checked again on every call.
+- **Event delivery.** An opt-in bridge delivers retained PDS events (commits and
+  account events) to the host with a resumable cursor.
+- **Outbound requests** only to hosts the manifest allows. Private, loopback,
+  link-local and metadata addresses are refused, and only ports 80 and 443 are
+  allowed.
+- **XRPC methods** served by plugins through authenticated service proxying.
+- **HTTP routes** served by plugins on a separate origin from the PDS.
+- **Public reads** of records and blobs from plugins.
+- **Key-value storage** per plugin, with a quota.
+- **Reference plugins:** a static site plugin that serves pages from records in
+  one account's public repository, and a commit webhook plugin.
+- **Status endpoint.** The bridge adds `GET /_pirs/status` to the PDS and counts
+  sequencer events.
 
-- [docs/roadmap.md](docs/roadmap.md): milestones, issues and the order of work.
-- [docs/spec/hook-points.md](docs/spec/hook-points.md): draft 0 of the hook-point spec, with levels, hooks, a capability vocabulary and open questions.
-- `service/pirs/bridge.ts`: the code that attaches to the PDS. It adds `GET /_pirs/status`, counts sequencer events and optionally starts private range delivery.
-- `service/pirs/smoke.ts`: boots a throwaway PDS and local PLC fixture, creates an account and writes a record through the public API, and checks that the bridge receives their events.
-- [service/pirs/host](service/pirs/host/README.md): a separate WIT host with hostile fixtures that check deadlines, memory, response/log limits and recovery.
-- [service/pirs/events](service/pirs/events/README.md): private event transport, durable consumer cursor and process restart qualification.
+The PDS itself is the upstream Bluesky distribution with one hook
+(`PdsHooks.xrpcMiddleware`) added through a pinned patch package in
+`service/pirs/pds-patches/`. The patched `@atproto/pds` source lives in the
+[pirs-atproto](https://github.com/subculture-collective/pirs-atproto) fork.
 
-Everything else is the upstream Bluesky PDS distribution, kept so that upstream changes can be merged. Its original README is [UPSTREAM-README.md](UPSTREAM-README.md).
+## Quick start
 
-## Design in brief
-
-Plugins run in a separate host process, not inside the PDS, and never receive signing keys. The PDS and the host talk through mechanisms atproto already has (the event stream, service proxying) wherever those are enough, so that other PDS implementations can adopt the same contract. Hooks that reject or rewrite a request need a change to the PDS and are specified separately as level 3.
-
-The host uses Wasmtime in its own process. Its current WIT world provides a bounded diagnostic log and one call receiving event JSON. Manifest grants and application capabilities belong to later roadmap issues.
-
-## Run the check
-
-Requires Node 22 or later and pnpm.
+The smoke check needs Node.js 22 or later and pnpm.
 
 ```sh
 cd service
@@ -39,28 +54,84 @@ pnpm smoke
 node --test pirs/smoke.test.ts
 ```
 
-The smoke check uses a temporary data directory and generated secrets. Its PLC fixture binds to loopback and stores one validated identity in memory; it creates no public identity. The PDS listens on `127.0.0.1:2597`; set `PIRS_SMOKE_PORT` to change the port. The cleanup tests check successful completion and a rejected record write after account creation. [Qualification evidence](docs/qualification/local-account-events.md) records the proof boundary.
+`pnpm smoke` boots a throwaway PDS and a local PLC fixture with a temporary data
+directory and generated secrets, creates an account, writes a record, and
+checks that the bridge receives the events. The PDS listens on
+`127.0.0.1:2597`; set `PIRS_SMOKE_PORT` to change it.
 
-## Local container check
+Other checks in `service/`:
 
-After committing the intended source, run `bash service/pirs/container-smoke.sh`
-from the repository root. It builds a committed snapshot with the upstream
-Dockerfile, starts the PDS on loopback with generated secrets and disposable
-data, checks health and bridge status, and tears down the container and network.
-It prints the exact retained data-volume name and its removal command.
-[The qualification record](docs/qualification/container.md) contains image
-digests and the limits of this local check.
+```sh
+pnpm check:events && pnpm qualify:events   # event delivery and cursor restart
+pnpm check:xrpc && pnpm qualify:xrpc       # plugin XRPC methods
+```
+
+The plugin host needs Rust 1.95, Python 3.11 or later and Linux. See
+[service/pirs/host/README.md](service/pirs/host/README.md) for the build and
+its test scripts.
+
+To build and boot the container image locally, commit your changes and run
+`bash service/pirs/container-smoke.sh` from the repository root. It builds the
+committed snapshot with the Dockerfile, starts the PDS on loopback with
+generated secrets, checks health and bridge status, and removes the container.
+
+## Configuration
+
+The PDS uses the upstream `PDS_*` environment variables; `sample.env` lists
+them. The smoke check generates its own values. Plugin limits (memory,
+deadline, response, log and input size) are flags on the host process; see the
+host README.
+
+## Deploy
+
+Pirs is not ready to deploy. The `Dockerfile` builds a PDS image from
+`service/` the same way upstream does. `installer.sh`, `compose.yaml`,
+`sample.env`, `pdsadmin/` and [PUBLISH.md](PUBLISH.md) come from the upstream
+distribution and install the unmodified upstream image.
+
+## Project layout
+
+- `docs/spec/`: hook-point specification and capability specs
+- `docs/decisions/`: design decisions, including the choice of WIT components
+- `docs/roadmap.md`: milestones by hook level
+- `service/pirs/bridge.ts`: the code that attaches to the PDS
+- `service/pirs/host/`: Rust plugin host, fixtures and reference plugins
+- `service/pirs/events/`: event transport and durable consumer cursor
+- `service/pirs/xrpc/`, `http/`, `public-read/`, `static-site/`: plugin
+  serving and reads
+- `service/pirs/pds-patches/`: the pinned patched PDS package
+- everything else: the upstream Bluesky PDS distribution
+  ([UPSTREAM-README.md](UPSTREAM-README.md))
 
 ## Tracking upstream
 
-The `upstream` remote is `https://github.com/bluesky-social/pds.git`. Pirs code lives in `service/pirs/` and `docs/`, with small changes to `service/index.ts` and `service/package.json`, to keep merges small.
+Pirs code lives in `service/pirs/` and `docs/`, with small changes to
+`service/index.ts` and `service/package.json`, so upstream merges stay small.
 
 ```sh
+git remote add upstream https://github.com/bluesky-social/pds.git
 git fetch upstream
 git merge upstream/main
 cd service && pnpm install --frozen-lockfile && pnpm smoke
 ```
 
-## Licence
+See [docs/upstream-merge.md](docs/upstream-merge.md) for the merge procedure.
 
-Upstream code is dual-licensed MIT and Apache-2.0; see [LICENSE.txt](LICENSE.txt). Pirs additions are offered under the same terms.
+## Contributing
+
+Report bugs and request features in [GitHub issues](https://github.com/subculture-collective/pirs/issues).
+Ask questions and share ideas in [GitHub Discussions](https://github.com/subculture-collective/pirs/discussions).
+
+Send code as a pull request on GitHub against `main`. On every pull request, CI
+builds the stock and patched PDS packages, runs the smoke and event checks
+against each, builds the plugin host and reruns the plugin interface
+measurements.
+
+## License
+
+Upstream code is dual-licensed under MIT and Apache-2.0; see
+[LICENSE.txt](LICENSE.txt), [LICENSE-MIT.txt](LICENSE-MIT.txt) and
+[LICENSE-APACHE.txt](LICENSE-APACHE.txt). Pirs additions are offered under the
+same terms.
+
+Built by [SUBCULT](https://subcult.tv).
