@@ -1,0 +1,168 @@
+name: Mirror CI
+run-name: Mirror CI ${{ github.sha }}
+'on':
+  push:
+    branches-ignore:
+    - main
+  workflow_dispatch: null
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pds-patch:
+    name: PDS patch qualification (${{ matrix.package }})
+    if: github.repository == 'subculture-collective/pirs'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    container:
+      image: node:24-bookworm
+      options: --shm-size=512m
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+        - stock
+        - patched
+    services:
+      postgres:
+        image: postgres:14.4-alpine
+        options: --health-cmd="pg_isready -h 127.0.0.1 -U pg" --health-interval=2s --health-timeout=5s --health-retries=30
+        env:
+          POSTGRES_USER: pg
+          POSTGRES_PASSWORD: password
+      redis:
+        image: redis:7.0-alpine
+        options: --health-cmd="redis-cli ping" --health-interval=2s --health-timeout=5s --health-retries=30
+    env:
+      CARGO_BUILD_JOBS: 4
+      PIRS_BROWSER_TMP_ROOT: /dev/shm
+      # Job containers reach service containers by service name on the job network.
+      DB_POSTGRES_URL: postgresql://pg:password@postgres:5432/postgres
+      REDIS_HOST: redis:6379
+      npm_config_store_dir: /github/home/pnpm-store
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      with:
+        persist-credentials: false
+    - name: Check disposable service endpoints
+      run: |
+        node --input-type=module <<'JS'
+        import { connect } from 'node:net'
+        for (const [host, port] of [['postgres', 5432], ['redis', 6379]]) {
+          await new Promise((resolve, reject) => {
+            const socket = connect({ host, port, timeout: 5000 })
+            socket.once('connect', () => { socket.destroy(); resolve() })
+            socket.once('error', reject)
+            socket.once('timeout', () => socket.destroy(new Error(`${host} endpoint unreachable from job`)))
+          })
+        }
+        console.log('Connected to healthy disposable Postgres and Redis services')
+        JS
+    - name: Restore the pnpm store
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
+        path: /github/home/pnpm-store
+        key: pirs-pnpm-store-v1-${{ matrix.package }}-${{ hashFiles('service/pirs/pds-patches/pins.json', 'service/pirs/pds-patches/*-lock.yaml', 'service/pnpm-lock.yaml') }}
+    - name: Restore the Cargo registry
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
+        path: |
+          /github/home/.cargo/registry/index
+          /github/home/.cargo/registry/cache
+          /github/home/.cargo/git/db
+        key: pirs-cargo-registry-v1-host-${{ hashFiles('service/pirs/host/Cargo.lock') }}
+    - name: Build and run full upstream PDS tests
+      run: |
+        corepack enable
+        # The Debian image removes APT indexes; Puppeteer installs Chrome's
+        # system dependencies below but does not refresh those indexes.
+        apt-get update
+        git clone https://github.com/bluesky-social/atproto.git /tmp/atproto
+        git -C /tmp/atproto checkout a7c8604d876a200a1e4fa4aec83d4189ac4f1c12
+        bash service/pirs/pds-patches/build.sh '${{ matrix.package }}' /tmp/atproto
+    - name: Select qualified package
+      run: |
+        if [ '${{ matrix.package }}' = patched ]; then
+          cmp service/pirs/pds-patches/build/patched/atproto-pds-0.5.37.tgz service/pirs/pds-patches/atproto-pds-0.5.37-pirs-7357a80.tgz
+        fi
+        node service/pirs/pds-patches/select.mjs '${{ matrix.package }}'
+    - name: Pirs smoke and existing bridge checks
+      working-directory: service
+      run: |
+        pnpm install --frozen-lockfile
+        pnpm smoke
+        node --test pirs/smoke.test.ts pirs/events/bridge.test.ts
+        pnpm check:events
+    - name: Build installed manifest host and qualify delivery
+      run: |
+        apt-get update
+        apt-get install -y --no-install-recommends build-essential curl python3
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.95.0
+        export PATH="$HOME/.cargo/bin:$PATH"
+        rustup target add wasm32-wasip2
+        cd service/pirs/host
+        python3 build.py
+        cd ../..
+        node --test pirs/events/manifest.test.ts
+        pnpm qualify:events
+  interface-spike:
+    name: Plugin interface spike
+    if: github.repository == 'subculture-collective/pirs'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    container: rust:1.95.0-bookworm
+    env:
+      CARGO_BUILD_JOBS: 4
+      GOMAXPROCS: 2
+    steps:
+    - name: Install Python and pinned Go toolchain
+      run: |
+        apt-get update
+        apt-get install -y --no-install-recommends python3 ca-certificates curl
+        curl --fail --location --output /tmp/pirs-spike-go.tar.gz https://go.dev/dl/go1.27.1.linux-amd64.tar.gz
+        echo '63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445  /tmp/pirs-spike-go.tar.gz' | sha256sum --check
+        tar -C /usr/local -xzf /tmp/pirs-spike-go.tar.gz
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      with:
+        persist-credentials: false
+    - name: Restore the Cargo registry
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
+        path: |
+          /usr/local/cargo/registry/index
+          /usr/local/cargo/registry/cache
+          /usr/local/cargo/git/db
+        key: pirs-cargo-registry-v1-spike-${{ hashFiles('service/pirs/interface-spike/Cargo.lock') }}
+    - name: Build and validate all four guests
+      working-directory: service/pirs/interface-spike
+      run: |
+        export PATH="/usr/local/go/bin:$PATH"
+        python3 build.py --bootstrap
+    - name: Verify calls and enumerate imports before instantiation
+      working-directory: service/pirs/interface-spike
+      run: |
+        export PATH="/usr/local/go/bin:$PATH"
+        python3 measure.py
+  mirror-gate:
+    name: Mirror CI gate
+    if: always() && github.repository == 'subculture-collective/pirs'
+    needs:
+    - pds-patch
+    - interface-spike
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+    - name: Require every verification job
+      env:
+        RESULTS: ${{ toJSON(needs) }}
+      run: |
+        python3 - <<'PY'
+        import json, os
+        results = json.loads(os.environ["RESULTS"])
+        expected = {'pds-patch', 'interface-spike'}
+        assert set(results) == expected, results
+        for name, result in results.items():
+            assert result["result"] == "success", name + " did not pass"
+        PY

@@ -2,7 +2,12 @@ name: PDS patch qualification
 on:
   push:
     branches: [main]
-  pull_request:
+    paths-ignore:
+      # Documentation, brand assets and GitHub-only files cannot change these checks.
+      - docs/**
+      - '**/*.md'
+      - assets/**
+      - .github/**
   workflow_dispatch:
 
 permissions:

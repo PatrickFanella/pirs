@@ -7,11 +7,6 @@ on:
       - service/pirs/interface-spike/**
       - docs/decisions/**
       - .gitea/workflows/interface-spike.yaml
-  pull_request:
-    paths:
-      - service/pirs/interface-spike/**
-      - docs/decisions/**
-      - .gitea/workflows/interface-spike.yaml
   workflow_dispatch:
 
 permissions:

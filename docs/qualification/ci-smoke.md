@@ -62,3 +62,20 @@ distribution, production service, or any additional hook.
 To stop Pirs jobs, disable repository Actions with the repository API. Do not
 remove `.gitea/workflows` while Actions remain enabled or enable the upstream
 publishing workflow. No image or deployment was produced by this work.
+
+## Pull-request checks on GitHub, November 10, 2026
+
+Pull requests no longer start the smoke, PDS patch or interface spike
+workflows on Gitea. `.github/workflows/mirror-ci.yml` runs those checks on the
+public GitHub copy for every non-`main` branch push, and a bridge on Kvant
+reports its `Mirror CI gate` job to Gitea as `GitHub CI / Mirror CI gate`. The
+smoke steps run in the patched PDS lane, which selects the same package and
+lockfile as `smoke.yaml`. Gitea ignores `.github/workflows` while
+`.gitea/workflows` exists, so it does not run that file.
+
+`host-sandbox.yaml` still runs on Gitea pull requests. Its sandbox tests check
+deadlines with 50 ms margins, which a shared hosted runner may miss. Pushes to
+`main` still run all four Gitea workflows under their existing path filters;
+smoke and PDS patch now also skip documentation-only pushes.
+
+No hosted GitHub result had been recorded when this section was written.
