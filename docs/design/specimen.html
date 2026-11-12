@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pirs design specimen</title>
+<link rel="icon" href="../brand/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Unbounded:wght@600;700&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--pirs-bg);color:var(--pirs-text);font:400 var(--pirs-size-body)/1.5 var(--pirs-font-body);-webkit-font-smoothing:antialiased}
+a{color:var(--pirs-accent-text);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--pirs-focus);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+code,.mono{font-family:var(--pirs-font-mono);font-size:.875em}
+.skip{position:absolute;left:16px;top:-60px;padding:8px 16px;background:var(--pirs-accent);color:var(--pirs-on-accent);border-radius:var(--pirs-radius-pill);z-index:10}
+.skip:focus{top:12px}
+.label{font:500 var(--pirs-size-caption)/1.3 var(--pirs-font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--pirs-text-muted)}
+.muted{color:var(--pirs-text-muted)}
+.small{font-size:var(--pirs-size-label);line-height:1.45}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* top bar */
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding:12px 24px;border-bottom:1px solid var(--pirs-border);background:var(--pirs-bg)}
+.brand{display:flex;align-items:center;gap:10px;color:var(--pirs-text);text-decoration:none}
+.brand svg{width:28px;height:28px}
+.wordmark{font:700 22px/1 var(--pirs-font-display);letter-spacing:-.04em}
+.host{font-family:var(--pirs-font-mono);font-size:var(--pirs-size-label);color:var(--pirs-text-muted)}
+.theme{margin-left:auto;display:flex;gap:4px;padding:4px;border:1px solid var(--pirs-border);border-radius:var(--pirs-radius-pill)}
+.theme button{min-height:36px;padding:0 14px;border:0;border-radius:var(--pirs-radius-pill);background:transparent;color:var(--pirs-text-muted);font:500 var(--pirs-size-label) var(--pirs-font-body);cursor:pointer}
+.theme button[aria-pressed="true"]{background:var(--pirs-raised);color:var(--pirs-text)}
+
+/* layout */
+.shell{max-width:1120px;margin:0 auto;padding:32px 24px 96px;display:flex;flex-wrap:wrap;gap:32px}
+.side{flex:1 1 200px;max-width:240px}
+.side ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.side a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:var(--pirs-radius-md);color:var(--pirs-text-muted);text-decoration:none;border-left:3px solid transparent}
+.side a:hover{background:var(--pirs-surface);color:var(--pirs-text)}
+.side a[aria-current="page"]{color:var(--pirs-text);font-weight:600;border-left-color:var(--pirs-accent);background:var(--pirs-surface)}
+main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:48px}
+@media (max-width:720px){
+  .shell{padding:24px 16px 64px;gap:24px}
+  .side{max-width:none;flex-basis:100%}
+  .side ul{flex-direction:row;overflow-x:auto;gap:4px}
+  .side a{border-left:0;border-bottom:3px solid transparent;border-radius:var(--pirs-radius-sm) var(--pirs-radius-sm) 0 0;white-space:nowrap}
+  .side a[aria-current="page"]{border-bottom-color:var(--pirs-accent)}
+  .topbar{padding:12px 16px}
+}
+.page-title{font:600 var(--pirs-size-page)/1.1 var(--pirs-font-display);letter-spacing:-.02em}
+section>h2{font:600 var(--pirs-size-title)/1.25 var(--pirs-font-body);margin-bottom:6px}
+section>.intro{color:var(--pirs-text-muted);max-width:68ch;margin-bottom:20px}
+.panel{background:var(--pirs-surface);border:1px solid var(--pirs-border);border-radius:var(--pirs-radius-lg);padding:24px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:var(--pirs-radius-pill);border:1px solid var(--pirs-border-strong);background:transparent;color:var(--pirs-text);font:600 var(--pirs-size-body)/1 var(--pirs-font-body);cursor:pointer;text-decoration:none;transition:background-color var(--pirs-duration-fast) var(--pirs-easing)}
+.btn:hover{background:var(--pirs-raised)}
+.btn-primary{background:var(--pirs-accent);border-color:var(--pirs-accent-edge);color:var(--pirs-on-accent)}
+.btn-primary:hover{background:color-mix(in srgb,var(--pirs-accent) 90%,#f5ece6)}
+.btn-primary:active{background:color-mix(in srgb,var(--pirs-accent) 90%,#1e1424)}
+.btn-quiet{border-color:transparent;color:var(--pirs-accent-text);padding:0 8px;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:4px}
+.btn-quiet:hover{background:transparent;text-decoration-color:currentColor}
+.btn-danger{border-color:var(--pirs-danger);color:var(--pirs-danger)}
+.btn-danger:hover{background:color-mix(in srgb,var(--pirs-danger) 12%,transparent)}
+.btn-icon{width:44px;padding:0;border-color:transparent;color:var(--pirs-text-muted)}
+.btn-icon:hover{color:var(--pirs-text)}
+.btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+.btn-sm{min-height:36px;padding:0 14px;font-size:var(--pirs-size-label)}
+.spinner{width:16px;height:16px;animation:spin 900ms linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{display:none}}
+
+/* fields */
+.field{display:flex;flex-direction:column;gap:6px;max-width:420px}
+.field label{font-weight:500;font-size:var(--pirs-size-label)}
+.input{min-height:44px;padding:0 12px;border:1px solid var(--pirs-border-strong);border-radius:var(--pirs-radius-sm);background:var(--pirs-raised);color:var(--pirs-text);font:inherit}
+.input.mono{font-family:var(--pirs-font-mono);font-size:var(--pirs-size-label)}
+.input[aria-invalid="true"]{border:2px solid var(--pirs-danger);padding:0 11px}
+.help{font-size:var(--pirs-size-label);color:var(--pirs-text-muted)}
+.error{font-size:var(--pirs-size-label);color:var(--pirs-danger)}
+.check{display:flex;align-items:center;gap:10px;min-height:44px}
+.check input{width:20px;height:20px;accent-color:var(--pirs-accent)}
+
+/* tags, pills */
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 6px;border:1px solid var(--pirs-border-strong);border-radius:var(--pirs-radius-pill);font:500 var(--pirs-size-caption)/1 var(--pirs-font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--pirs-text)}
+.tag svg{width:16px;height:16px}
+.status{display:inline-flex;align-items:center;gap:8px;font-size:var(--pirs-size-label);font-weight:500}
+.status::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor}
+.status.running{color:var(--pirs-success)}
+.status.stopped{color:var(--pirs-text-muted)}
+.status.stopped::before{background:transparent;border:2px solid currentColor;width:9px;height:9px}
+.status.installing{color:var(--pirs-info)}
+.status.trapped{color:var(--pirs-danger)}
+
+/* plugin rows */
+.plugins{list-style:none;margin:0;padding:0;border:1px solid var(--pirs-border);border-radius:var(--pirs-radius-lg);overflow:hidden;background:var(--pirs-surface)}
+.plugin{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;min-height:64px;padding:16px 20px;border-top:1px solid var(--pirs-border)}
+.plugin:first-child{border-top:0}
+.plugin .name{flex:1 1 220px;min-width:0}
+.plugin .name a{font-weight:600;color:var(--pirs-text)}
+.plugin .reason{flex-basis:100%;font-size:var(--pirs-size-label);color:var(--pirs-danger)}
+
+/* capabilities */
+.caps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.caps li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;padding:12px 0;border-top:1px solid var(--pirs-border)}
+.caps li:first-child{border-top:0}
+.caps .what{flex:1 1 240px}
+.caps .id{display:block;font-family:var(--pirs-font-mono);font-size:var(--pirs-size-caption);color:var(--pirs-text-muted)}
+
+/* notices */
+.notice{display:flex;gap:12px;padding:14px 16px;border-radius:var(--pirs-radius-md);border:1px solid;color:var(--pirs-text)}
+.notice svg{flex:none;width:20px;height:20px;margin-top:2px}
+.notice.info{background:color-mix(in srgb,var(--pirs-info) 12%,var(--pirs-surface));border-color:color-mix(in srgb,var(--pirs-info) 45%,transparent)}
+.notice.success{background:color-mix(in srgb,var(--pirs-success) 12%,var(--pirs-surface));border-color:color-mix(in srgb,var(--pirs-success) 45%,transparent)}
+.notice.warning{background:color-mix(in srgb,var(--pirs-warning) 12%,var(--pirs-surface));border-color:color-mix(in srgb,var(--pirs-warning) 45%,transparent)}
+.notice.danger{background:color-mix(in srgb,var(--pirs-danger) 12%,var(--pirs-surface));border-color:color-mix(in srgb,var(--pirs-danger) 45%,transparent)}
+.notice.info svg{color:var(--pirs-info)}.notice.success svg{color:var(--pirs-success)}.notice.warning svg{color:var(--pirs-warning)}.notice.danger svg{color:var(--pirs-danger)}
+
+/* identifiers */
+.ident{display:flex;align-items:center;gap:8px;max-width:100%;padding:6px 6px 6px 12px;background:var(--pirs-raised);border-radius:var(--pirs-radius-sm);font:400 var(--pirs-size-label)/1.4 var(--pirs-font-mono)}
+.ident span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* events */
+.table-wrap{overflow-x:auto;border:1px solid var(--pirs-border);border-radius:var(--pirs-radius-lg);background:var(--pirs-surface)}
+table{width:100%;border-collapse:collapse;font-size:var(--pirs-size-label)}
+th{font:500 var(--pirs-size-caption)/1.3 var(--pirs-font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--pirs-text-muted);text-align:left;padding:12px 16px;border-bottom:1px solid var(--pirs-border);white-space:nowrap}
+td{padding:12px 16px;border-top:1px solid var(--pirs-border);white-space:nowrap}
+tbody tr:first-child td{border-top:0}
+td.cursor{font-family:var(--pirs-font-mono);color:var(--pirs-accent-text);text-align:right}
+td.mono{font-family:var(--pirs-font-mono)}
+tr.new td{animation:fresh var(--pirs-duration-base) var(--pirs-easing) both;animation-duration:1.2s}
+@keyframes fresh{from{background:color-mix(in srgb,var(--pirs-accent) 16%,transparent)}to{background:transparent}}
+
+/* states */
+.empty{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.empty svg{width:48px;height:48px;color:var(--pirs-border-strong)}
+.skeleton{height:16px;border-radius:var(--pirs-radius-sm);background:var(--pirs-raised)}
+
+/* dialog */
+dialog{width:min(560px,calc(100vw - 32px));padding:0;border:1px solid var(--pirs-border);border-radius:var(--pirs-radius-lg);background:var(--pirs-surface);color:var(--pirs-text);box-shadow:0 24px 64px rgb(0 0 0 / .45)}
+dialog::backdrop{background:rgb(15 9 18 / .6)}
+.dialog-body{padding:28px;display:flex;flex-direction:column;gap:18px}
+.dialog-body h2{font:600 var(--pirs-size-title)/1.25 var(--pirs-font-body)}
+.dialog-body h2:focus{outline:none}
+.dialog-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px}
+
+/* foundations */
+.swatches{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.swatch{border:1px solid var(--pirs-border);border-radius:var(--pirs-radius-md);overflow:hidden;background:var(--pirs-surface)}
+.swatch i{display:block;height:56px;border-bottom:1px solid var(--pirs-border)}
+.swatch div{padding:8px 10px;font:400 var(--pirs-size-caption)/1.4 var(--pirs-font-mono)}
+.type-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 24px;padding:14px 0;border-top:1px solid var(--pirs-border)}
+.type-row .label{flex:0 0 140px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.64"><path d="M20.97 13.67A9.12 9.12 0 0 1 13.67 20.97"/><path d="M10.33 20.97A9.12 9.12 0 0 1 3.03 13.67"/><path d="M3.03 10.33A9.12 9.12 0 0 1 10.33 3.03"/><path d="M13.67 3.03A9.12 9.12 0 0 1 20.97 10.33"/></g><circle cx="12" cy="12" r="3.12" style="fill:var(--pirs-mark-core)"/></symbol>
+  <symbol id="mark-mono" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.64"><path d="M20.97 13.67A9.12 9.12 0 0 1 13.67 20.97"/><path d="M10.33 20.97A9.12 9.12 0 0 1 3.03 13.67"/><path d="M3.03 10.33A9.12 9.12 0 0 1 10.33 3.03"/><path d="M13.67 3.03A9.12 9.12 0 0 1 20.97 10.33"/></g><circle cx="12" cy="12" r="3.12" fill="currentColor"/></symbol>
+  <symbol id="lvl-1" viewBox="0 0 24 24"><g fill="none" stroke-width="2.5"><path style="stroke:var(--pirs-text)" d="M13.56 3.64A8.5 8.5 0 0 1 20.36 10.44"/><path style="stroke:var(--pirs-border)" d="M20.36 13.56A8.5 8.5 0 0 1 13.56 20.36"/><path style="stroke:var(--pirs-border)" d="M10.44 20.36A8.5 8.5 0 0 1 3.64 13.56"/><path style="stroke:var(--pirs-border)" d="M3.64 10.44A8.5 8.5 0 0 1 10.44 3.64"/></g><circle cx="12" cy="12" r="2.9" style="fill:var(--pirs-mark-core)"/></symbol>
+  <symbol id="lvl-2" viewBox="0 0 24 24"><g fill="none" stroke-width="2.5"><path style="stroke:var(--pirs-text)" d="M13.56 3.64A8.5 8.5 0 0 1 20.36 10.44"/><path style="stroke:var(--pirs-text)" d="M20.36 13.56A8.5 8.5 0 0 1 13.56 20.36"/><path style="stroke:var(--pirs-border)" d="M10.44 20.36A8.5 8.5 0 0 1 3.64 13.56"/><path style="stroke:var(--pirs-border)" d="M3.64 10.44A8.5 8.5 0 0 1 10.44 3.64"/></g><circle cx="12" cy="12" r="2.9" style="fill:var(--pirs-mark-core)"/></symbol>
+  <symbol id="lvl-3" viewBox="0 0 24 24"><g fill="none" stroke-width="2.5"><path style="stroke:var(--pirs-text)" d="M13.56 3.64A8.5 8.5 0 0 1 20.36 10.44"/><path style="stroke:var(--pirs-text)" d="M20.36 13.56A8.5 8.5 0 0 1 13.56 20.36"/><path style="stroke:var(--pirs-text)" d="M10.44 20.36A8.5 8.5 0 0 1 3.64 13.56"/><path style="stroke:var(--pirs-border)" d="M3.64 10.44A8.5 8.5 0 0 1 10.44 3.64"/></g><circle cx="12" cy="12" r="2.9" style="fill:var(--pirs-mark-core)"/></symbol>
+  <symbol id="lvl-4" viewBox="0 0 24 24"><g fill="none" stroke-width="2.5" style="stroke:var(--pirs-text)"><path d="M13.56 3.64A8.5 8.5 0 0 1 20.36 10.44"/><path d="M20.36 13.56A8.5 8.5 0 0 1 13.56 20.36"/><path d="M10.44 20.36A8.5 8.5 0 0 1 3.64 13.56"/><path d="M3.64 10.44A8.5 8.5 0 0 1 10.44 3.64"/></g><circle cx="12" cy="12" r="2.9" style="fill:var(--pirs-mark-core)"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></g></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></g></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5L21.5 20h-19z"/><path d="M12 10v4.5M12 17.5v.01"/></g></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></g></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></g></symbol>
+</svg>
+
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="#content" aria-label="Pirs, overview"><svg aria-hidden="true"><use href="#mark"/></svg><span class="wordmark">pirs</span></a>
+  <span class="host">pds.example.com</span>
+  <div class="theme" role="group" aria-label="Theme">
+    <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="side" aria-label="Sections">
+    <ul>
+      <li><a href="#overview" aria-current="page">Overview</a></li>
+      <li><a href="#plugins">Plugins</a></li>
+      <li><a href="#install">Install review</a></li>
+      <li><a href="#events">Events</a></li>
+      <li><a href="#forms">Forms and buttons</a></li>
+      <li><a href="#states">States</a></li>
+      <li><a href="#foundations">Foundations</a></li>
+    </ul>
+  </nav>
+
+  <main id="content" tabindex="-1">
+    <div class="stack">
+      <p class="label">Design specimen · sample data</p>
+      <h1 class="page-title" id="overview">Operator console</h1>
+      <p class="muted" style="max-width:68ch">The console is not built. This page shows how its parts look and behave under the rules in <a href="README.md">README.md</a>. Plugin names and capabilities follow the two reference plugins; events, hosts and counts are invented.</p>
+    </div>
+
+    <section aria-labelledby="h-health">
+      <h2 id="h-health">Host health</h2>
+      <p class="intro">Each card states its status in words. Numbers come from <code>GET /_pirs/status</code> in a real console.</p>
+      <div class="grid">
+        <div class="panel stack"><span class="label">PDS</span><span class="status running">Serving</span><span class="small muted">2 accounts · sample</span></div>
+        <div class="panel stack"><span class="label">Plugin host</span><span class="status running">Running</span><span class="small muted">2 plugins loaded</span></div>
+        <div class="panel stack"><span class="label">Event delivery</span><span class="status running">Delivering</span><span class="small muted">Cursor <span class="mono">1043</span></span></div>
+      </div>
+    </section>
+
+    <section id="plugins" aria-labelledby="h-plugins">
+      <h2 id="h-plugins">Plugins</h2>
+      <p class="intro">Level tags pair the glyph with the level name. The status word is always written out; a trapped plugin also says why.</p>
+      <ul class="plugins">
+        <li class="plugin">
+          <div class="name"><a href="#plugins">static-site</a><div class="small muted mono">static-site · spec level 1</div></div>
+          <span class="tag"><svg aria-hidden="true"><use href="#lvl-1"/></svg>Observe</span>
+          <span class="tag"><svg aria-hidden="true"><use href="#lvl-2"/></svg>Serve</span>
+          <span class="tag"><svg aria-hidden="true"><use href="#lvl-3"/></svg>Act</span>
+          <span class="status running">Running</span>
+          <button class="btn btn-icon" type="button" aria-label="Actions for static-site"><svg width="20" height="20" aria-hidden="true"><use href="#i-more"/></svg></button>
+        </li>
+        <li class="plugin">
+          <div class="name"><a href="#plugins">commit-webhook</a><div class="small muted mono">commit-webhook · spec level 0</div></div>
+          <span class="tag"><svg aria-hidden="true"><use href="#lvl-1"/></svg>Observe</span>
+          <span class="status trapped">Trapped</span>
+          <button class="btn btn-icon" type="button" aria-label="Actions for commit-webhook"><svg width="20" height="20" aria-hidden="true"><use href="#i-more"/></svg></button>
+          <p class="reason">Exceeded its call deadline three times. Delivery resumes from cursor <span class="mono">1040</span> after a restart.</p>
+        </li>
+        <li class="plugin">
+          <div class="name"><a href="#plugins">post-observer</a><div class="small muted mono">post-observer · spec level 0</div></div>
+          <span class="tag"><svg aria-hidden="true"><use href="#lvl-1"/></svg>Observe</span>
+          <span class="status stopped">Stopped</span>
+          <button class="btn btn-icon" type="button" aria-label="Actions for post-observer"><svg width="20" height="20" aria-hidden="true"><use href="#i-more"/></svg></button>
+        </li>
+      </ul>
+    </section>
+
+    <section id="install" aria-labelledby="h-install">
+      <h2 id="h-install">Install review</h2>
+      <p class="intro">Capabilities come before the button. The dialog opens with focus on its title; Escape cancels.</p>
+      <div class="row"><button class="btn btn-primary" type="button" id="open-install">Review commit-webhook</button></div>
+      <dialog id="install-dialog" aria-labelledby="dlg-title">
+        <form method="dialog" class="dialog-body">
+          <p class="label">Install review · sample</p>
+          <h2 id="dlg-title" tabindex="-1">Install commit-webhook?</h2>
+          <p class="muted small">It runs in the plugin host, not in the PDS, and never receives signing keys. Installing approves exactly these declarations.</p>
+          <div class="ident"><span title="sha256 4f0c2e9a71b38d55c0e6a1f2b7d94e3c8a6f5b1d2e3c4a5b6c7d8e9f0a1b2c3d">sha256 4f0c2e9a…a1b2c3d</span><button class="btn btn-icon" type="button" data-copy="4f0c2e9a71b38d55c0e6a1f2b7d94e3c8a6f5b1d2e3c4a5b6c7d8e9f0a1b2c3d" aria-label="Copy manifest hash"><svg width="18" height="18" aria-hidden="true"><use href="#i-copy"/></svg></button></div>
+          <ul class="caps">
+            <li><div class="what">Receives commit events in <code>app.bsky.feed.post</code><span class="id">events.subscribe</span></div><span class="tag"><svg aria-hidden="true"><use href="#lvl-1"/></svg>Observe</span></li>
+            <li><div class="what">Sends requests to <code>hooks.example.com</code><span class="id">network.request · ports 80 and 443</span></div></li>
+          </ul>
+          <div class="notice warning" role="status"><svg aria-hidden="true"><use href="#i-warn"/></svg><div><strong>Can send requests to 1 host.</strong> <span class="small">Post content in the subscribed collection leaves this server.</span></div></div>
+          <div class="dialog-actions"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="install">Install plugin</button></div>
+        </form>
+      </dialog>
+      <div class="panel" style="margin-top:20px">
+        <p class="label" style="margin-bottom:8px">static-site capabilities, inline</p>
+        <ul class="caps">
+          <li><div class="what">Receives commit events in <code>tv.pirs.site.page</code><span class="id">events.subscribe</span></div><span class="tag"><svg aria-hidden="true"><use href="#lvl-1"/></svg>Observe</span></li>
+          <li><div class="what">Serves <code>/</code> and <code>/about</code>: 128 B requests, 16 KiB responses, 1000 ms deadline<span class="id">http.serve</span></div><span class="tag"><svg aria-hidden="true"><use href="#lvl-2"/></svg>Serve</span></li>
+          <li><div class="what">Reads public records in <code>tv.pirs.site.page</code><span class="id">records.read</span></div><span class="tag"><svg aria-hidden="true"><use href="#lvl-3"/></svg>Act</span></li>
+          <li><div class="what">Reads public blobs owned by those records<span class="id">blobs.read</span></div><span class="tag"><svg aria-hidden="true"><use href="#lvl-3"/></svg>Act</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="events" aria-labelledby="h-events">
+      <h2 id="h-events">Events</h2>
+      <p class="intro">Cursors in amber mono. Repositories are shortened in the middle; the full DID is in the title and the copy button.</p>
+      <div class="row" style="margin-bottom:12px"><button class="btn btn-sm" type="button" id="pause" aria-pressed="false">Pause</button><span class="small muted" id="stream-status" role="status">Resumed from cursor <span class="mono">1040</span></span></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Event stream, sample">
+        <table>
+          <thead><tr><th scope="col" style="text-align:right">Cursor</th><th scope="col">Time</th><th scope="col">Type</th><th scope="col">Collection</th><th scope="col">Repository</th></tr></thead>
+          <tbody>
+            <tr class="new"><td class="cursor">1043</td><td>14:02:11</td><td>commit</td><td class="mono">tv.pirs.site.page</td><td class="mono" title="did:plc:7xq2kdm4ufz3wq6bc5n1sample">did:plc:7xq2…1sample</td></tr>
+            <tr><td class="cursor">1042</td><td>14:01:58</td><td>commit</td><td class="mono">app.bsky.feed.post</td><td class="mono" title="did:plc:7xq2kdm4ufz3wq6bc5n1sample">did:plc:7xq2…1sample</td></tr>
+            <tr><td class="cursor">1041</td><td>13:59:30</td><td>identity</td><td class="muted">—</td><td class="mono" title="did:plc:r3m8vbt0aa2l9kd4sample">did:plc:r3m8…d4sample</td></tr>
+            <tr><td class="cursor">1040</td><td>13:59:29</td><td>account</td><td class="muted">—</td><td class="mono" title="did:plc:r3m8vbt0aa2l9kd4sample">did:plc:r3m8…d4sample</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="forms" aria-labelledby="h-forms">
+      <h2 id="h-forms">Forms and buttons</h2>
+      <p class="intro">One primary action per view. Labels are a verb and an object.</p>
+      <div class="panel stack" style="gap:24px">
+        <div class="row">
+          <button class="btn btn-primary" type="button">Install plugin</button>
+          <button class="btn" type="button">Cancel</button>
+          <button class="btn btn-quiet" type="button">View manifest</button>
+          <button class="btn btn-danger" type="button">Stop static-site</button>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary" type="button" aria-busy="true"><svg class="spinner" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 1 9 9" fill="none" stroke="currentColor" stroke-width="3"/></svg>Installing…</button>
+          <button class="btn" type="button" aria-disabled="true" aria-describedby="why-disabled">Restart host</button>
+          <span class="small muted" id="why-disabled">Restart is unavailable while an install is running.</span>
+        </div>
+        <div class="field">
+          <label for="f-manifest">Manifest file</label>
+          <input class="input mono" id="f-manifest" value="/srv/pirs/plugins/commit-webhook.json" aria-describedby="f-manifest-help">
+          <span class="help" id="f-manifest-help">An absolute path on the host. The component file sits beside it.</span>
+        </div>
+        <div class="field">
+          <label for="f-host">Allowed host</label>
+          <input class="input mono" id="f-host" value="10.0.0.12" aria-invalid="true" aria-describedby="f-host-error">
+          <span class="error" id="f-host-error">Error: private addresses are refused. Use a public hostname.</span>
+        </div>
+        <label class="check"><input type="checkbox" checked> Start the plugin after installing</label>
+      </div>
+    </section>
+
+    <section id="states" aria-labelledby="h-states">
+      <h2 id="h-states">Notices and page states</h2>
+      <p class="intro">Notices are tinted surfaces with an icon and a bold first sentence. Page states say what is missing and what to do.</p>
+      <div class="stack">
+        <div class="notice info" role="status"><svg aria-hidden="true"><use href="#i-info"/></svg><div><strong>Draft spec.</strong> <span class="small">Hook points can change between releases.</span></div></div>
+        <div class="notice success" role="status"><svg aria-hidden="true"><use href="#i-check"/></svg><div><strong>static-site installed.</strong> <span class="small">It is serving <code>/</code> and <code>/about</code>.</span></div></div>
+        <div class="notice danger"><svg aria-hidden="true"><use href="#i-warn"/></svg><div><strong>Couldn't reach the plugin host.</strong> <span class="small">The PDS is still serving accounts. Check that pirs-host is running, then retry.</span> <button class="btn btn-quiet btn-sm" type="button">Retry</button></div></div>
+      </div>
+      <div class="grid" style="margin-top:16px">
+        <div class="panel empty">
+          <svg aria-hidden="true"><use href="#mark-mono"/></svg>
+          <p><strong>No plugins are installed.</strong></p>
+          <p class="small muted">Install one from a component and manifest file.</p>
+          <button class="btn btn-primary btn-sm" type="button">Install plugin</button>
+        </div>
+        <div class="panel stack" aria-busy="true" aria-label="Loading plugins">
+          <span class="label">Loading</span>
+          <div class="skeleton" style="width:70%"></div><div class="skeleton" style="width:90%"></div><div class="skeleton" style="width:55%"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="foundations" aria-labelledby="h-found">
+      <h2 id="h-found">Foundations</h2>
+      <p class="intro">Swatches show the current theme. Switch themes at the top of the page.</p>
+      <div class="swatches">
+        <div class="swatch"><i style="background:var(--pirs-bg)"></i><div>bg</div></div>
+        <div class="swatch"><i style="background:var(--pirs-surface)"></i><div>surface</div></div>
+        <div class="swatch"><i style="background:var(--pirs-raised)"></i><div>raised</div></div>
+        <div class="swatch"><i style="background:var(--pirs-border-strong)"></i><div>border-strong</div></div>
+        <div class="swatch"><i style="background:var(--pirs-text)"></i><div>text</div></div>
+        <div class="swatch"><i style="background:var(--pirs-text-muted)"></i><div>text-muted</div></div>
+        <div class="swatch"><i style="background:var(--pirs-accent)"></i><div>accent</div></div>
+        <div class="swatch"><i style="background:var(--pirs-accent-text)"></i><div>accent-text</div></div>
+        <div class="swatch"><i style="background:var(--pirs-danger)"></i><div>danger</div></div>
+        <div class="swatch"><i style="background:var(--pirs-warning)"></i><div>warning</div></div>
+        <div class="swatch"><i style="background:var(--pirs-success)"></i><div>success</div></div>
+        <div class="swatch"><i style="background:var(--pirs-info)"></i><div>info</div></div>
+      </div>
+      <div style="margin-top:24px">
+        <div class="type-row"><span class="label">Page title</span><span class="page-title">Operator console</span></div>
+        <div class="type-row"><span class="label">Section</span><span style="font:600 var(--pirs-size-title)/1.25 var(--pirs-font-body)">Plugins</span></div>
+        <div class="type-row"><span class="label">Body</span><span>Plugins run next to the server, not inside it.</span></div>
+        <div class="type-row"><span class="label">Small</span><span class="small muted">Delivery resumes from the last cursor.</span></div>
+        <div class="type-row"><span class="label">Label</span><span class="label">Spec level 1</span></div>
+        <div class="type-row"><span class="label">Identifier</span><span class="mono">did:plc:7xq2kdm4ufz3wq6bc5n1sample</span></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var buttons = document.querySelectorAll('[data-theme-choice]');
+  function apply(choice) {
+    if (choice === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', choice);
+    buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.themeChoice === choice)); });
+    try { localStorage.setItem('pirs-theme', choice); } catch (e) {}
+  }
+  buttons.forEach(function (b) { b.addEventListener('click', function () { apply(b.dataset.themeChoice); }); });
+  var saved = null;
+  try { saved = localStorage.getItem('pirs-theme'); } catch (e) {}
+  var hash = location.hash.match(/theme=(dark|light|system)/);
+  apply(hash ? hash[1] : (saved || 'system'));
+
+  var dialog = document.getElementById('install-dialog');
+  var opener = document.getElementById('open-install');
+  opener.addEventListener('click', function () {
+    dialog.showModal();
+    document.getElementById('dlg-title').focus();
+  });
+  dialog.addEventListener('close', function () { opener.focus(); });
+
+  var pause = document.getElementById('pause');
+  var status = document.getElementById('stream-status');
+  pause.addEventListener('click', function () {
+    var paused = pause.getAttribute('aria-pressed') !== 'true';
+    pause.setAttribute('aria-pressed', String(paused));
+    pause.textContent = paused ? 'Resume' : 'Pause';
+    status.innerHTML = paused ? 'Paused at cursor <span class="mono">1043</span>' : 'Resumed from cursor <span class="mono">1043</span>';
+  });
+
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var label = b.getAttribute('aria-label');
+      var done = function () { b.setAttribute('aria-label', 'Copied'); setTimeout(function () { b.setAttribute('aria-label', label); }, 2000); };
+      if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.copy).then(done, function () {}); else done();
+    });
+  });
+})();
+</script>
+</body>
+</html>

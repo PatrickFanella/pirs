@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/brand/lockup.svg">
-  <img src="docs/brand/mark-mono-light.svg" alt="Pirs logo. A pier seen from the side: one long plank over three pilings, with one orange hook-point dot on the plank and thin blue construction lines." height="80">
+  <img src="docs/brand/lockup-light.svg" alt="Pirs logo: a ring broken into four segments around an amber core, beside the lowercase word pirs." height="80">
 </picture>
 
 Pirs is an experiment in making an AT Protocol personal data server (PDS)
@@ -94,6 +94,9 @@ distribution and install the unmodified upstream image.
 - `docs/spec/`: hook-point specification and capability specs
 - `docs/decisions/`: design decisions, including the choice of WIT components
 - `docs/roadmap.md`: milestones by hook level
+- `docs/design/`: design system, tokens, component specimen and the PDS
+  account-screen appearance values
+- `docs/brand/`: logo, icons and backgrounds exported from SUBCULT Studio
 - `service/pirs/bridge.ts`: the code that attaches to the PDS
 - `service/pirs/host/`: Rust plugin host, fixtures and reference plugins
 - `service/pirs/events/`: event transport and durable consumer cursor

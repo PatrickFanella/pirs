@@ -1,0 +1,118 @@
+{
+  "source": "subculture-collective/subcult-tv studio/brands/pirs",
+  "studio_revision": "eec7a1363dfad680290a26db0b30e4bb2aa04e6c",
+  "studio_tree_clean": true,
+  "generator": "studio/brand-tools/pirs_socket_signal.py",
+  "files": [
+    {
+      "path": "docs/brand/mark.svg",
+      "studio_path": "studio/brands/pirs/logos/mark.svg",
+      "sha256": "7a09231c272e5a8c02a082347038dfd2dff26e567e1ebbd4584342976b5d1e0a"
+    },
+    {
+      "path": "docs/brand/mark-light.svg",
+      "studio_path": "studio/brands/pirs/logos/mark-light.svg",
+      "sha256": "7b15fce7f3ef0836c1b81e80c9c26ec604d875de9723d3a97811bee6d5a4ab41"
+    },
+    {
+      "path": "docs/brand/mark-small.svg",
+      "studio_path": "studio/brands/pirs/logos/mark-small.svg",
+      "sha256": "9c8c38ed648ce60c1d510d855419132e740d807fdbbd4cb938c399b5bfc15fb2"
+    },
+    {
+      "path": "docs/brand/mark-small-light.svg",
+      "studio_path": "studio/brands/pirs/logos/mark-small-light.svg",
+      "sha256": "87eae45958b6bbf9b7461259a7a4a2764fbae73b3b0face55fb19bc739eb481f"
+    },
+    {
+      "path": "docs/brand/mark-mono-dark.svg",
+      "studio_path": "studio/brands/pirs/logos/mark-mono-dark.svg",
+      "sha256": "d6fa271874917f624f5794f4c394c3f999e225d3060e6d08712b010a5236198b"
+    },
+    {
+      "path": "docs/brand/mark-mono-light.svg",
+      "studio_path": "studio/brands/pirs/logos/mark-mono-light.svg",
+      "sha256": "2b2f7220614b8b1ae361f68ca6ebf3259bd2dc79eea6845e81ef66caa3fb90c3"
+    },
+    {
+      "path": "docs/brand/lockup.svg",
+      "studio_path": "studio/brands/pirs/logos/lockup.svg",
+      "sha256": "09f040768a047d2f22d1e1546ac7148dfb102a1ba1780ccc0c68314ec9bb213d"
+    },
+    {
+      "path": "docs/brand/lockup-light.svg",
+      "studio_path": "studio/brands/pirs/logos/lockup-light.svg",
+      "sha256": "9e7dd07d646b4f32fcbb0371dda8336655249a1f4c4907deae72e1ecc13c6165"
+    },
+    {
+      "path": "docs/brand/favicon.svg",
+      "studio_path": "studio/brands/pirs/product/favicon.svg",
+      "sha256": "693fd7ffcbcf08a1695594ff709ac987a6dce4c032c2829cc1a2276f159cdefc"
+    },
+    {
+      "path": "docs/brand/icon-512.png",
+      "studio_path": "studio/brands/pirs/product/icon-512.png",
+      "sha256": "96ff35556fa751f5da4d273a285ffa642f7cc05da0718f7e97923bb3aa9456ee"
+    },
+    {
+      "path": "docs/brand/og.png",
+      "studio_path": "studio/brands/pirs/product/og.png",
+      "sha256": "8b8c790c453b86ff4155f4300f8d145dc0da8eca372c796ed3c3c6366e6b7ae0"
+    },
+    {
+      "path": "docs/brand/pds-background-dark.svg",
+      "studio_path": "studio/brands/pirs/product/pds-background-dark.svg",
+      "sha256": "501d41b31ad1d74bffe312544372d87383f1c4e74927fe707a9d2b23f7d1d5ae"
+    },
+    {
+      "path": "docs/brand/pds-background-light.svg",
+      "studio_path": "studio/brands/pirs/product/pds-background-light.svg",
+      "sha256": "cf51ba111b7ba65e128a8b3e812b8eb5286a82f71c52d0f9c8b34e9571fd1cb7"
+    },
+    {
+      "path": "docs/design/tokens.css",
+      "studio_path": "studio/brands/pirs/tokens.css",
+      "sha256": "cf41db1c44e82099e5a97dbd038e75f788e0ba820179db2e2dd4845a3e92d090"
+    },
+    {
+      "path": "docs/design/levels/observe.svg",
+      "studio_path": "studio/brands/pirs/logos/levels/observe.svg",
+      "sha256": "b12820fc445966c7ecc89040753b92d390f4b69a9957d29934d46203fdbc962d"
+    },
+    {
+      "path": "docs/design/levels/observe-light.svg",
+      "studio_path": "studio/brands/pirs/logos/levels/observe-light.svg",
+      "sha256": "b3f3e85cb4232c302f84727b0d0edac495e7c91a40a60cc2f33c9216dc0684b0"
+    },
+    {
+      "path": "docs/design/levels/serve.svg",
+      "studio_path": "studio/brands/pirs/logos/levels/serve.svg",
+      "sha256": "35763a263fe62869c7d30d337d7b06a5aa10211857838561737d3a17bcb4930d"
+    },
+    {
+      "path": "docs/design/levels/serve-light.svg",
+      "studio_path": "studio/brands/pirs/logos/levels/serve-light.svg",
+      "sha256": "6332a0a31497a5e039fa6bc5282db6751cf02609a139c73889e0b9cc92dace65"
+    },
+    {
+      "path": "docs/design/levels/act.svg",
+      "studio_path": "studio/brands/pirs/logos/levels/act.svg",
+      "sha256": "ad0987f5604b38913b7a0d74505e1a8cb66ffb35456c63c15e7df9ddda252800"
+    },
+    {
+      "path": "docs/design/levels/act-light.svg",
+      "studio_path": "studio/brands/pirs/logos/levels/act-light.svg",
+      "sha256": "3a63d03b86018991a5639e758fd47662b853e957b89ffa68e96af8c2ec65f697"
+    },
+    {
+      "path": "docs/design/levels/decide.svg",
+      "studio_path": "studio/brands/pirs/logos/levels/decide.svg",
+      "sha256": "e483129c9b566607e316e35085f5b8ba51abbe6e53db36e0c691eb39563fd2cb"
+    },
+    {
+      "path": "docs/design/levels/decide-light.svg",
+      "studio_path": "studio/brands/pirs/logos/levels/decide-light.svg",
+      "sha256": "0f359c9bc0d9a5324c8c3c0790dc5687b85a406ce1501bf542e5c6e0ef8e2ab0"
+    }
+  ]
+}

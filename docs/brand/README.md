@@ -2,22 +2,30 @@
 
 ## Pirs
 
-These files are unchanged copies from the Pirs site pack in SUBCULT Studio
-(`subculture-collective/subcult-tv`, `studio/brands/pirs/`) at revision
-`159489c`. The owner accepted the pack on October 13, 2026. The masters live in
-Studio. Do not edit these copies; change the pack in Studio and copy the new
-files here.
+Socket / Signal, selected by the owner on November 12, 2026. It replaces the
+Pier pack accepted on October 13, 2026.
 
-Text in the lockup is converted to paths, so no font is needed. The lockup is
-drawn in light colours for dark backgrounds. The README shows it when the
-reader's browser requests a dark colour scheme and otherwise shows the one-
-colour mark for light backgrounds. The pack has no lockup for light backgrounds.
+These files are copies from the Pirs pack in SUBCULT Studio
+(`subculture-collective/subcult-tv`, `studio/brands/pirs/`). The masters and
+the brand guide live in Studio. Do not edit these copies: change the generator
+there (`studio/brand-tools/pirs_socket_signal.py`) and export again.
+[`brand-export.json`](brand-export.json) records the Studio revision and the
+SHA-256 of every exported file, including the design tokens and level glyphs in
+[`../design/`](../design/).
 
-| File | Studio source | SHA-256 |
-| --- | --- | --- |
-| `lockup.svg` | `logos/lockup.svg` | `aa276bca7b4d014d60842f7eda0788e1635a3e48f1e706971dba1f86102350b0` |
-| `mark.svg` | `logos/mark.svg` | `4ac00db6335a429ee14eced96c120080f3295e30b49c30169a69c706f0a61b53` |
-| `mark-mono-light.svg` | `logos/mark-mono-light.svg` | `efdd886a3d814451efbfd98a234a547392db51c68ed802dab22631fab12753e2` |
+Interface rules are in [`../design/README.md`](../design/README.md).
+
+| File | Use |
+| --- | --- |
+| `mark.svg` | Shell ring, amber core. Dark grounds. Also the PDS logo. |
+| `mark-light.svg` | Night ring, deeper amber core. Light grounds. |
+| `mark-small.svg`, `mark-small-light.svg` | 32 px and below. |
+| `mark-mono-dark.svg`, `mark-mono-light.svg` | One colour. |
+| `lockup.svg`, `lockup-light.svg` | Mark and wordmark for dark and light grounds. Text is converted to paths. |
+| `favicon.svg` | Small mark on a dusk tile. |
+| `icon-512.png` | App icon. |
+| `og.png` | 1200×630 link preview. |
+| `pds-background-dark.svg`, `pds-background-light.svg` | Backgrounds for the PDS account screens. |
 
 These are brand assets used to identify this project; the repository's
 code license does not grant endorsement or trademark rights.
