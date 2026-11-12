@@ -1,6 +1,6 @@
 # Development instructions
 
-Pirs is a fork of the Bluesky PDS distribution (`upstream` remote) carrying an experimental plugin bridge and a hook-point spec. Apply unslop to prose.
+Pirs is a fork of the Bluesky PDS distribution (`upstream` remote) carrying an experimental plugin bridge and a hook-point spec. Apply write-plainly to prose.
 
 Keep Pirs code in `service/pirs/` and `docs/`. Change upstream files only where a hook requires it, and keep each such change small enough to survive `git merge upstream/main`. Do not edit `UPSTREAM-README.md`.
 
